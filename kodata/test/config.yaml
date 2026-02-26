@@ -1,0 +1,13 @@
+kube-controller-manager-arg:
+- "bind-address=0.0.0.0"
+kube-proxy-arg:
+- "metrics-bind-address=0.0.0.0"
+kube-scheduler-arg:
+- "bind-address=0.0.0.0"
+kube-apiserver-arg:
+- "default-watch-cache-size=1000"
+- "max-mutating-requests-inflight=800"
+- "max-requests-inflight=1200"
+- "watch-cache-sizes=node#100,pod#500,service#500"
+# 公开 etcd  metrics
+etcd-expose-metrics: true

@@ -1,0 +1,4 @@
+helm show values oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack > vm-k8s-stack-values.yaml
+
+
+helm install vmks oci://ghcr.io/victoriametrics/helm-charts/victoria-metrics-k8s-stack -f vm-k8s-stack-values.yaml -n default

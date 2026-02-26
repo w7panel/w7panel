@@ -1,0 +1,13 @@
+annotations:
+  title: 微擎面板
+  w7.cc/description: 微擎面板
+  w7.cc/icon: https://zpk.w7.cc/zip/icon/w7panel_offline
+  w7.cc/identifie: w7panel
+  w7.cc/title: 微擎面板
+  w7.cc/zpk-url: https://zpk.w7.cc/respo/info/w7panel_offline
+apiVersion: v2
+appVersion: 1.0.19
+description: A Helm chart for Kubernetes
+name: w7panel
+type: application
+version: 1.0.19

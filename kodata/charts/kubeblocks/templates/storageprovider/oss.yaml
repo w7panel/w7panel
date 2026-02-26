@@ -1,0 +1,101 @@
+apiVersion: dataprotection.kubeblocks.io/v1alpha1
+kind: StorageProvider
+metadata:
+  name: oss
+  labels:
+    {{- include "kubeblocks.labels" . | nindent 4 }}
+spec:
+  csiDriverName: ru.yandex.s3.csi
+  csiDriverSecretTemplate: |
+    accessKeyID: {{ `{{ index .Parameters "accessKeyId" }}` }}
+    secretAccessKey: {{ `{{ index .Parameters "secretAccessKey" }}` }}
+    {{ `{{- $region := index .Parameters "region" }}` }}
+    {{ `{{- $endpoint := index .Parameters "endpoint" }}` }}
+    {{ `{{- if not $endpoint }}` }}
+      {{ `{{- $endpoint = (printf "https://oss-%s.aliyuncs.com" $region) }}` }}
+    {{ `{{- end }}` }}
+    endpoint: {{ `{{ $endpoint }}` }}
+
+  storageClassTemplate: |
+    provisioner: ru.yandex.s3.csi
+    parameters:
+      mounter: geesefs
+      # you can set mount options here, for example limit memory cache size (recommended)
+      options: {{ `{{ printf "--memory-limit %s --read-ahead-large %s --dir-mode 0777 --file-mode 0666 %s --subdomain" .Parameters.geesefsMemoryLimit .Parameters.geesefsReadAheadLarge .Parameters.mountOptions }}` }}
+      bucket: {{ `{{ index .Parameters "bucket" }}` }}
+      csi.storage.k8s.io/provisioner-secret-name: {{ `{{ .CSIDriverSecretRef.Name }}` }}
+      csi.storage.k8s.io/provisioner-secret-namespace: {{ `{{ .CSIDriverSecretRef.Namespace }}` }}
+      csi.storage.k8s.io/controller-publish-secret-name: {{ `{{ .CSIDriverSecretRef.Name }}` }}
+      csi.storage.k8s.io/controller-publish-secret-namespace: {{ `{{ .CSIDriverSecretRef.Namespace }}` }}
+      csi.storage.k8s.io/node-stage-secret-name: {{ `{{ .CSIDriverSecretRef.Name }}` }}
+      csi.storage.k8s.io/node-stage-secret-namespace: {{ `{{ .CSIDriverSecretRef.Namespace }}` }}
+      csi.storage.k8s.io/node-publish-secret-name: {{ `{{ .CSIDriverSecretRef.Name }}` }}
+      csi.storage.k8s.io/node-publish-secret-namespace: {{ `{{ .CSIDriverSecretRef.Namespace }}` }}
+
+  datasafedConfigTemplate: |
+    [storage]
+    type = s3
+    provider = Alibaba
+    env_auth = false
+    access_key_id = {{ `{{ index .Parameters "accessKeyId" }}` }}
+    secret_access_key = {{ `{{ index .Parameters "secretAccessKey" }}` }}
+    {{ `{{- $region := index .Parameters "region" }}` }}
+    {{ `{{- $endpoint := index .Parameters "endpoint" }}` }}
+    {{ `{{- if not $endpoint }}` }}
+      {{ `{{- $endpoint = (printf "oss-%s.aliyuncs.com" $region) }}` }}
+    {{ `{{- end }}` }}
+    endpoint = {{ `{{ $endpoint }}` }}
+    root = {{ `{{ index .Parameters "bucket" }}` }}
+    no_check_certificate = {{ `{{ index .Parameters "insecure" }}` }}
+    no_check_bucket = {{ `{{ index .Parameters "noCheckBucket" }}` }}
+    use_already_exists = false
+    chunk_size = 50Mi
+
+  parametersSchema:
+    openAPIV3Schema:
+      type: "object"
+      properties:
+        region:
+          type: string
+          description: "OSS region, e.g. cn-hangzhou"
+        bucket:
+          type: string
+          description: "OSS bucket"
+        endpoint:
+          type: string
+          description: "OSS endpoint (optional)"
+        mountOptions:
+          type: string
+          description: "Extra mount options for geesefs"
+        geesefsMemoryLimit:
+          type: integer
+          default: 512
+          description: "The value of --memory-limit parameter for geesefs, in MB"
+        geesefsReadAheadLarge:
+          type: integer
+          default: 20480
+          description: "The value of --read-ahead-large parameter for geesefs, in KB"
+        accessKeyId:
+          type: string
+          description: "OSS access key"
+        secretAccessKey:
+          type: string
+          description: "OSS secret key"
+        insecure:
+          type: boolean
+          default: false
+          description: "Do not verify the server SSL certificate"
+        noCheckBucket:
+          type: boolean
+          default: false
+          description: "Do not check if the bucket exists, and do not try to create it"
+
+      required:
+        - bucket
+        - region
+        - accessKeyId
+        - secretAccessKey
+
+    credentialFields:
+      - accessKeyId
+      - secretAccessKey

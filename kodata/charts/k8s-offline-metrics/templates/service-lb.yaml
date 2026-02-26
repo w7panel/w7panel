@@ -1,0 +1,19 @@
+{{- if .Values.servicelb.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "k8s-offline-metrics.fullname" . }}-lb
+  labels:
+    {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+  # if loadBalancerClass 是否空
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.servicelb.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: vmsingle
+    managed-by: vm-operator
+{{- end }}

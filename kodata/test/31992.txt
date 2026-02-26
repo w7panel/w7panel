@@ -1,0 +1,21 @@
+# HELP Device_last_kernel_of_container Container device last kernel description
+# TYPE Device_last_kernel_of_container gauge
+Device_last_kernel_of_container{ctrname="gpu-cxeyttpu",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",vdeviceid="0",zone="vGPU"} 319186
+# HELP Device_memory_desc_of_container Container device meory description
+# TYPE Device_memory_desc_of_container counter
+Device_memory_desc_of_container{context="0",ctrname="gpu-cxeyttpu",data="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",module="0",offset="0",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",vdeviceid="0",zone="vGPU"} 0
+# HELP Device_utilization_desc_of_container Container device utilization description
+# TYPE Device_utilization_desc_of_container gauge
+Device_utilization_desc_of_container{ctrname="gpu-cxeyttpu",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",vdeviceid="0",zone="vGPU"} 0
+# HELP HostCoreUtilization GPU core utilization
+# TYPE HostCoreUtilization gauge
+HostCoreUtilization{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",zone="vGPU"} 0
+# HELP HostGPUMemoryUsage GPU device memory usage
+# TYPE HostGPUMemoryUsage gauge
+HostGPUMemoryUsage{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",zone="vGPU"} 2.87244288e+08
+# HELP vGPU_device_memory_limit_in_bytes vGPU device limit
+# TYPE vGPU_device_memory_limit_in_bytes gauge
+vGPU_device_memory_limit_in_bytes{ctrname="gpu-cxeyttpu",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",vdeviceid="0",zone="vGPU"} 3.145728e+08
+# HELP vGPU_device_memory_usage_in_bytes vGPU device usage
+# TYPE vGPU_device_memory_usage_in_bytes gauge
+vGPU_device_memory_usage_in_bytes{ctrname="gpu-cxeyttpu",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",vdeviceid="0",zone="vGPU"} 0

@@ -1,0 +1,66 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+    annotations:
+        meta.helm.sh/release-name: vmks
+        meta.helm.sh/release-namespace: default
+    creationTimestamp: '2025-03-14T05:57:01Z'
+    generation: 1
+    labels:
+        app.kubernetes.io/instance: vmks
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: victoria-metrics-k8s-stack
+        app.kubernetes.io/version: v1.113.0
+        helm.sh/chart: victoria-metrics-k8s-stack-0.39.0
+    name: vmks-victoria-metrics-k8s-stack-probes
+    namespace: default
+    resourceVersion: '1075018'
+    uid: 2e39bcc9-cdb1-4d39-a680-a70dc812738a
+spec:
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    honorLabels: true
+    honorTimestamps: false
+    interval: 30s
+    metricRelabelConfigs:
+        -
+            action: labeldrop
+            regex: (uid)
+        -
+            action: labeldrop
+            regex: (id|name)
+        -
+            action: drop
+            regex: >-
+                (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+            source_labels:
+                - __name__
+    path: /metrics/probes
+    relabelConfigs:
+        -
+            action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+        -
+            sourceLabels:
+                - __metrics_path__
+            targetLabel: metrics_path
+        -
+            replacement: kubelet
+            targetLabel: job
+    scheme: https
+    scrapeTimeout: 5s
+    selector: {}
+    tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecureSkipVerify: true
+status:
+    conditions:
+        -
+            lastTransitionTime: '2025-03-14T05:57:45Z'
+            lastUpdateTime: '2025-03-14T07:04:32Z'
+            observedGeneration: 1
+            reason: ConfigParsedAndApplied
+            status: 'True'
+            type: >-
+                vmks-victoria-metrics-k8s-stack.default.vmagent.victoriametrics.com/Applied
+    observedGeneration: 1
+    updateStatus: operational

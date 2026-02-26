@@ -1,0 +1,174 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: coredns
+    namespace: kube-system
+    uid: cc39348a-df0e-415b-b666-cba1bf757aa0
+    resourceVersion: '18898883'
+    generation: 1
+    creationTimestamp: '2025-09-16T07:05:08Z'
+    labels:
+        k8s-app: kube-dns
+        kubernetes.io/name: CoreDNS
+        objectset.rio.cattle.io/hash: bce283298811743a0386ab510f2f67ef74240c57
+    annotations:
+        deployment.kubernetes.io/revision: '1'
+        objectset.rio.cattle.io/applied: >-
+            H4sIAAAAAAAA/6xVQW/bOBP9Kx/mLMVW0jaugO/QjbPboq3XqJNeiqCgqZHFNcXhkiMnRqD/vhhJduw2TdrFniyTb4ZvHucN70F58xlDNOQgB+V9HG0ySGBtXAE5TNFb2tboGBKokVWhWEF+D8o5YsWGXJS/tPwLNUfkk2DoRCtmiyeGRkaSQPLDfbp1GNLVZg05rM/iwc4mS/733rji/2+KgtyzKZyqEXLQFLBw8afg0SstMetmiWncRsYa2gSsWqLtilpPYqq830H6vPIZHDJGyTYce0EBp7PFE8dWKlaQw1Lj6eTs9PVkkmXnL87U+GzySi1fZuPytHx1juX5i9MXY/3yXIh8V9ITpKNHLZQDbozc5VsTmcL2g6kNQz5OIKJFzRQEVCvW1YenymwlJQfFuNp2acla41bXvlCMfYq7a6c2yli1tAh51ibAWy/MPh1hZR1rb3dxBy30pNDtQVGaHCvjMETIv9yDCiv5gFSTKyGBEbIeDSqN5CZKYxFuEjC1WgmjoJyuMIxqE4LA0gG8+82zk+z0ZAxDxLyxdk7W6C3k8K6cEc8Dxt4C1mzQYYzzQMuuoFIZ2wS8qgLGimwB+VkCFbP/A1n2vWK591GFynIFCXgKDPlkPJFL0RV2d/z26mouUhln2Cg7Rau2C9Tkigj5q3ECHoOhYr+USXCjNcZ4cHKWAJsaqeEH4GN9JBR6KffKzjtWL8/26AEZiEmThRyup8LwmZCUtT8Ou7p4NOx1dhBYIwej4yOBNwkEVIX5V5JL5PZB8WyS/azi3wt++gt6B4zUBI1da1txYOxbv6YgLZWdjz8a6IB/Nxj7Xe0b2RqP627QDtAeKVZA3QTD2wtyjHddmcpaup0HszEWV3gZtbLdPIa8VDZiAlp5tTTWsOmpqKIQ28wur77+9m42/bq4/PT53cWlOKUI5GVPWQs3bS/6n85uPxHx78biMGhyDg22CWzINjV+pMYNfVTL53zQ/cCOcNB9rjSrtI+EhxN2OX+cY6SbyFQfpOr+p89kvJHmKVzcO3mKpWqsmNhRgYuDeXg80ilCDta45k7uyAdDnfBWxTjrCfRqpNo2kTGkOhg2WlmQawobo/GN1lLM7FvjMVkMu0fzyz2sUYhdDPHdQxe7EhIgL0jhB5d3RppENMKyRM2Qw4wWusKisVJ5n0aqSgNZPDmuR5wXyKbeKof/aeZaSf2Pp7yRaj1ZWm0XXq7mgpy8KGbXMt30X/zyq1Sru8Uab3vzDQe871gec6soctcvCdxW6K5dVGxiafrnCqY0I94XKmz7PtqPxdKsPiovRAxjfXRduxcm2U2a/YoI2YNmVOBbEiX2qIclOe6bodz+wCjD6HxgcxyX7r1BXtpK2b1HnzJLe9O2bftPAAAA//8kyNqv/AkAAA
+        objectset.rio.cattle.io/id: ''
+        objectset.rio.cattle.io/owner-gvk: k3s.cattle.io/v1, Kind=Addon
+        objectset.rio.cattle.io/owner-name: coredns
+        objectset.rio.cattle.io/owner-namespace: kube-system
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            k8s-app: kube-dns
+    template:
+        metadata:
+            creationTimestamp: null
+            labels:
+                k8s-app: kube-dns
+        spec:
+            volumes:
+                -
+                    name: config-volume
+                    configMap:
+                        name: coredns
+                        items:
+                            -
+                                key: Corefile
+                                path: Corefile
+                            -
+                                key: NodeHosts
+                                path: NodeHosts
+                        defaultMode: 420
+                -
+                    name: custom-config-volume
+                    configMap:
+                        name: coredns-custom
+                        defaultMode: 420
+                        optional: true
+            containers:
+                -
+                    name: coredns
+                    image: rancher/mirrored-coredns-coredns:1.12.0
+                    args:
+                        - '-conf'
+                        - /etc/coredns/Corefile
+                    ports:
+                        -
+                            name: dns
+                            containerPort: 53
+                            protocol: UDP
+                        -
+                            name: dns-tcp
+                            containerPort: 53
+                            protocol: TCP
+                        -
+                            name: metrics
+                            containerPort: 9153
+                            protocol: TCP
+                    resources:
+                        limits:
+                            memory: 170Mi
+                        requests:
+                            cpu: 100m
+                            memory: 70Mi
+                    volumeMounts:
+                        -
+                            name: config-volume
+                            readOnly: true
+                            mountPath: /etc/coredns
+                        -
+                            name: custom-config-volume
+                            readOnly: true
+                            mountPath: /etc/coredns/custom
+                    livenessProbe:
+                        httpGet:
+                            path: /health
+                            port: 8080
+                            scheme: HTTP
+                        initialDelaySeconds: 60
+                        timeoutSeconds: 1
+                        periodSeconds: 10
+                        successThreshold: 1
+                        failureThreshold: 3
+                    readinessProbe:
+                        httpGet:
+                            path: /ready
+                            port: 8181
+                            scheme: HTTP
+                        timeoutSeconds: 1
+                        periodSeconds: 2
+                        successThreshold: 1
+                        failureThreshold: 3
+                    terminationMessagePath: /dev/termination-log
+                    terminationMessagePolicy: File
+                    imagePullPolicy: IfNotPresent
+                    securityContext:
+                        capabilities:
+                            add:
+                                - NET_BIND_SERVICE
+                            drop:
+                                - all
+                        readOnlyRootFilesystem: true
+                        allowPrivilegeEscalation: false
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            dnsPolicy: Default
+            nodeSelector:
+                kubernetes.io/os: linux
+            serviceAccountName: coredns
+            serviceAccount: coredns
+            securityContext: {}
+            schedulerName: default-scheduler
+            tolerations:
+                -
+                    key: CriticalAddonsOnly
+                    operator: Exists
+                -
+                    key: node-role.kubernetes.io/control-plane
+                    operator: Exists
+                    effect: NoSchedule
+                -
+                    key: node-role.kubernetes.io/master
+                    operator: Exists
+                    effect: NoSchedule
+            priorityClassName: system-cluster-critical
+            topologySpreadConstraints:
+                -
+                    maxSkew: 1
+                    topologyKey: kubernetes.io/hostname
+                    whenUnsatisfiable: DoNotSchedule
+                    labelSelector:
+                        matchLabels:
+                            k8s-app: kube-dns
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: 1
+            maxSurge: 25%
+    revisionHistoryLimit: 0
+    progressDeadlineSeconds: 600
+status:
+    observedGeneration: 1
+    replicas: 1
+    updatedReplicas: 1
+    readyReplicas: 1
+    availableReplicas: 1
+    conditions:
+        -
+            type: Available
+            status: 'True'
+            lastUpdateTime: '2025-09-16T07:05:12Z'
+            lastTransitionTime: '2025-09-16T07:05:12Z'
+            reason: MinimumReplicasAvailable
+            message: Deployment has minimum availability.
+        -
+            type: Progressing
+            status: 'True'
+            lastUpdateTime: '2025-09-16T07:15:42Z'
+            lastTransitionTime: '2025-09-16T07:15:42Z'
+            reason: NewReplicaSetAvailable
+            message: ReplicaSet "coredns-ccb96694c" has successfully progressed.

@@ -1,0 +1,39 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-auto-svc
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+  discoveryRole: service
+  endpoints:
+    - relabelConfigs:
+        # Check if scrape is enabled
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+          action: keep
+          regex: "true"
+
+        # Set scrape path
+        - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+          action: replace
+          target_label: __metrics_path__
+          regex: (.+)
+        # Set port to address
+        - source_labels:
+            [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+          action: replace
+          regex: ([^:]+)(?::\d+)?;(\d+)
+          replacement: $1:$2
+          target_label: __address__
+        # Copy labels from pod labels
+        - action: labelmap
+          regex: __meta_kubernetes_service_label_(.+)
+        # Set pod name, container name, namespace and node name to labels
+        - source_labels: [__meta_kubernetes_namespace]
+          action: replace
+          target_label: namespace
+        - source_labels: [__meta_kubernetes_service_name]
+          action: replace
+          target_label: service
+  namespaceSelector:
+    any: true

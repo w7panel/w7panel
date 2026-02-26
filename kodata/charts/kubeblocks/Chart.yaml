@@ -1,0 +1,26 @@
+annotations:
+  artifacthub.io/changes: ""
+  artifacthub.io/links: ""
+  artifacthub.io/operator: "true"
+  artifacthub.io/prerelease: "true"
+apiVersion: v2
+appVersion: 1.0.1
+description: KubeBlocks Core Controller Operator.
+home: https://www.kubeblocks.io/
+icon: https://kubeblocks.io/img/logo.png
+keywords:
+- kubernetes
+- database
+- streaming
+- message queue
+- paas
+- platform
+kubeVersion: '>=1.20.0-0'
+maintainers:
+- name: ApeCloud
+  url: https://github.com/apecloud/kubeblocks/
+name: kubeblocks
+sources:
+- https://github.com/apecloud/kubeblocks/
+type: application
+version: 1.0.1

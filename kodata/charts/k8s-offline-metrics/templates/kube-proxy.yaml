@@ -1,0 +1,48 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-kube-proxy
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    honorLabels: true
+    honorTimestamps: false
+    interval: 60s
+    metricRelabelConfigs:
+        -
+            action: drop
+            regex: >-
+                (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+            source_labels:
+                - __name__
+    path: /metrics
+    port: "10249"
+    relabelConfigs:
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label.*
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_nvidia_com.*
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_feature_node.*
+        -
+            action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+        -
+            sourceLabels:
+                - __metrics_path__
+            targetLabel: metrics_path
+        -
+            replacement: kube-proxy
+            targetLabel: job
+    jobLabel: kube-proxy
+    scheme: http
+    scrapeTimeout: 5s
+    selector: {}
+    tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecureSkipVerify: true
+

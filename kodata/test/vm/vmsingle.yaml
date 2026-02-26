@@ -1,0 +1,31 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+    labels:
+        app: vmsingle
+    name: vmsingle
+    namespace: default
+spec:
+    extraArgs:
+        maxLabelsPerTimeseries: '300'
+        promscrape.dropOriginalLabels: 'true'
+        promscrape.streamParse: 'true'
+    image:
+        tag: v1.113.0
+    license: {}
+    port: '8429'
+    replicaCount: 1
+    retentionPeriod: '1'
+    removePvcAfterDelete: true
+    serviceAccountName: w7panel-offline
+    storage:
+        storageClassName: longhorn
+        accessModes:
+            - ReadWriteOnce
+        resources:
+            requests:
+                storage: 20Gi
+status:
+    observedGeneration: 1
+    singleStatus: expanding
+    updateStatus: expanding

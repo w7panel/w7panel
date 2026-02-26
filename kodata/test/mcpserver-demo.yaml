@@ -1,0 +1,11 @@
+apiVersion: mcpserver.w7.cc/v1alpha1
+kind: McpServer
+metadata:
+  annotations:
+    title: hello-test
+  name: mcpserver-test
+spec:
+  command: npx
+  args:
+    - -y
+    - "@modelcontextprotocol/server-everything"

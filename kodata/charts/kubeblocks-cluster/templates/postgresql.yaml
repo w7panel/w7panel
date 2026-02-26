@@ -1,0 +1,54 @@
+{{- if .Values.cluster.postgresql -}}
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+    name: {{ .Release.Name | trimSuffix "-" }}
+    annotations:
+      kubeblocks.io/version: "0.9.3"
+      w7panel.kubeblocks.io/port: "5432"
+      w7panel.kubeblocks.io/account-secret-name: {{ .Release.Name | trimSuffix "-" }}-postgresql-account-postgres
+      w7panel.kubeblocks.io/host: {{ .Release.Name | trimSuffix "-" }}-postgresql-postgresql
+      w7panel.kubeblocks.io/configmap-name: {{ .Release.Name | trimSuffix "-" }}-postgresql-postgresql-configuration
+      w7panel.kubeblocks.io/configmap-format: "properties"
+      w7panel.kubeblocks.io/configmap-key: postgresql.conf
+      w7panel.kubeblocks.io/constraints-name: {{ .Values.cluster.componentDef | replace "-" "" }}-cc
+      w7panel.kubeblocks.io/reconfigure-name: postgresql-configuration
+      w7panel.kubeblocks.io/reconfigure-component-name: postgresql
+
+    labels:
+       w7panel.kubeblocks.io/version: {{ .Values.cluster.componentDef | toString }}
+       w7panel.kubeblocks.io/name: postgresql
+spec:
+    # clusterDefinitionRef: {{ .Values.cluster.clusterDefinitionRef | quote }}
+    # clusterVersionRef: {{ .Values.cluster.clusterVersionRef | quote }}
+    # clusterDef: postgresql
+    componentSpecs:
+        -
+            componentDef: {{ .Values.cluster.componentDef | toString }}
+            # serviceVersion: {{ .Values.cluster.serviceVersion | quote }}
+            monitor: false
+            name: postgresql
+            replicas: {{ .Values.replicaCount | toString }}
+            resources:
+                limits:
+                    cpu: {{ .Values.cluster.cpu | quote }}
+                    memory: {{ .Values.cluster.memory | quote }}
+                requests:
+                    cpu: {{ .Values.cluster.cpu | quote }}
+                    memory: {{ .Values.cluster.memory | quote }}
+            # serviceAccountName: w7panel-offline
+            switchPolicy:
+                type: Noop
+            volumeClaimTemplates:
+                -
+                    name: data
+                    spec:
+                        accessModes:
+                            - {{ .Values.cluster.storageRWMode | quote }}
+                        resources:
+                            requests:
+                                storage: {{ .Values.cluster.storageSize | quote }}
+                        storageClassName: {{ .Values.cluster.storageClassName | quote }}
+    terminationPolicy: Delete
+{{- end }}  
+

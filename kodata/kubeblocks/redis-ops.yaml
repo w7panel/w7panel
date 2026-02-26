@@ -1,0 +1,17 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: OpsRequest
+metadata:
+  name: redis-configuring-demo
+spec:
+  clusterName: kubeblocks-redis-lptqisnr
+  reconfigure:
+    componentName: redis
+    configurations:
+      - keys:
+          - key: redis.conf
+            parameters:
+              - key: acllog-max-len
+                value: "256"
+        name: redis-replication-config
+  preConditionDeadlineSeconds: 0
+  type: Reconfiguring

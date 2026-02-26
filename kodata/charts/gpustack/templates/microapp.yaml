@@ -1,0 +1,102 @@
+apiVersion: microapp.w7.cc/v1alpha1
+kind: MicroApp
+metadata:
+  name: {{ include "gpustack.fullname" . }}
+  labels:
+    {{- include "gpustack.labels" . | nindent 4 }}
+    w7.cc/identifie: "gpustack-backend"
+spec:
+  frontendUrl: /ui/microapp/{{ .Release.Name }}/index.html
+#   releaseName: {{ .Release.Name }}
+  backendUrl: /k8s/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no
+  config:
+    props:
+      username: "admin"
+      password: {{ .Values.bootstrapPassword }}
+      backendUrl: "/k8s/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no"
+      workerToken: {{ .Release.Name }}
+      serverUrl: "http://{{ include "gpustack.fullname" . }}.{{ .Release.Namespace }}.svc"
+      group: {{ .Release.Name }}
+      pvcName: {{ include "gpustack.fullname" . }}
+      storageClass: {{ .Values.cluster.storageClassName | quote }}
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+  title: "gpustack"
+  bindings:
+    -
+        framework: vue2
+        is_default_register: 1
+        location: left
+        menu:
+            -
+                displayorder: 0
+                do: '#/dashboard'
+                icon: platform
+                is_default: 2
+                location: normal
+                title: 概览
+            -
+                displayorder: 0
+                do: '#/playground'
+                icon: platform
+                is_default: 1
+                location: normal
+                title: 试验场
+            -
+                displayorder: 0
+                do: '#/playground/chat'
+                is_default: 1
+                title: 对话
+            -
+                displayorder: 0
+                do: '#/playground/text-to-image'
+                is_default: 1
+                title: 图像
+            -
+                displayorder: 0
+                do: '#/playground/speech'
+                is_default: 1
+                title: 语音
+            -
+                displayorder: 0
+                do: '#/playground/embedding'
+                is_default: 1
+                title: 文本嵌入
+            -
+                displayorder: 0
+                do: '#/playground/rerank'
+                is_default: 1
+                title: 重排
+            -
+                displayorder: 0
+                do: '#/models/catalog'
+                icon: platform
+                is_default: 1
+                location: normal
+                title: 模型库
+            -
+                displayorder: 0
+                do: '#/models/list'
+                icon: platform
+                is_default: 1
+                location: normal
+                title: 模型部署
+            -
+                displayorder: 0
+                do: '#/resources'
+                icon: platform
+                is_default: 1
+                location: normal
+                title: 节点管理
+            -
+                displayorder: 0
+                do: '#/api-keys'
+                icon: platform
+                is_default: 1
+                location: normal
+                title: API 密钥
+        name: admin
+        status: 1
+        support: thirdparty_cd
+        title: admin
+#   logo: "logo.png"
+#   description: "MicroApp Sample Description"

@@ -1,0 +1,27 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+    labels:
+       app: hami-webui
+    name: hami-webui
+    namespace: default
+    resourceVersion: '1550344'
+    uid: d3d72248-db87-4c03-bc81-49a4da99772c
+spec:
+    endpoints:
+        -
+            # bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: metrics
+            scheme: http
+            # tlsConfig:
+            #     caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            #     serverName: kubernetes
+    jobLabel: component
+    namespaceSelector:
+        matchNames:
+            - kube-system
+    selector:
+        matchLabels:
+            app.kubernetes.io/component: hami-webui
+            app.kubernetes.io/instance: hamiui
+            app.kubernetes.io/name: hami-webui

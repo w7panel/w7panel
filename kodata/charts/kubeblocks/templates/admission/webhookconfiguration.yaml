@@ -1,0 +1,62 @@
+{{- if .Values.webhooks.conversionEnabled }}
+{{- $ca := genCA (printf "*.%s.svc" ( .Release.Namespace )) 36500 }}
+{{- $svcName := (printf "%s.%s.svc" (include "kubeblocks.svcName" .) ( .Release.Namespace )) -}}
+{{- $cert := genSignedCert $svcName nil (list $svcName (include "kubeblocks.svcName" .) (printf "%s.%s" (include "kubeblocks.svcName" .) ( .Release.Namespace ))) 36500 $ca -}}
+{{- if .Values.webhooks.createSelfSignedCert }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kubeblocks.fullname" . }}.{{ .Release.Namespace }}.svc.tls-ca
+  labels:
+    {{- include "kubeblocks.labels" . | nindent 4 }}
+  annotations:
+    self-signed-cert: "true"
+type: kubernetes.io/tls
+data:
+  tls.key: {{ $ca.Key | b64enc }}
+  tls.crt: {{ $ca.Cert | b64enc }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kubeblocks.fullname" . }}.{{ .Release.Namespace }}.svc.tls-pair
+  labels: {{ include "kubeblocks.labels" . | nindent 4 }}
+  annotations:
+    self-signed-cert: "true"
+type: kubernetes.io/tls
+data:
+  tls.key: {{ $cert.Key | b64enc }}
+  tls.crt: {{ $cert.Cert | b64enc }}
+{{- end }}
+{{- if .Values.webhooks.conversionEnabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kubeblocks.fullname" . }}.{{ .Release.Namespace }}.crd.conversion.webhook
+data:
+  conversion_webhook_patch.json: |
+    {
+      "spec": {
+        "conversion": {
+           "strategy": "Webhook",
+           "webhook": {
+              "clientConfig": {
+                  "service": {
+                     "name": {{ include "kubeblocks.svcName" . | quote }},
+                     "namespace": {{ .Release.Namespace | quote }},
+                     "port": {{ .Values.service.port }},
+                     "path": "/convert"
+                  }
+                  {{- if .Values.webhooks.createSelfSignedCert -}}
+                  ,
+                  "caBundle": {{ $ca.Cert | b64enc | quote }}
+                  {{- end }}
+              },
+             "conversionReviewVersions": ["v1"]
+           }
+        }
+      }
+    }
+{{- end }}
+{{- end }}

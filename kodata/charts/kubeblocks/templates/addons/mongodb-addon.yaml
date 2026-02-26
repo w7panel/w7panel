@@ -1,0 +1,12 @@
+{{- if has "mongodb" .Values.autoInstalledAddons  }}
+{{- $selectorLabels := include "kubeblocks.selectorLabels" . }}
+{{- include "kubeblocks.buildAddonCR" (merge (dict
+  "kbVersion" ">=1.0.0"
+  "selectorLabels" $selectorLabels
+  "name" "mongodb"
+  "version" "1.0.1"
+  "model" "document"
+  "provider" "community"
+  "description" "MongoDB is a document database designed for ease of application development and scaling."
+  "autoInstall" true) . ) -}}
+  {{- end }}

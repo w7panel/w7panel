@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "helm.fullname" . }}-{{ .Release.Revision }}
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      serviceAccountName: "w7"
+      containers:
+        - name: registerjob
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["w7panel"]
+          args:
+            - "cluster:register"
+            - "--apiServerUrl={{ .Values.register.apiServerUrl }}"
+            - "--thirdPartyCDToken={{ .Values.register.thirdPartyCDToken }}"
+            - "--username={{ .Values.register.username }}"
+            - "--password={{ .Values.register.password }}"
+            - "--offlineUrl={{ .Values.register.offlineUrl }}"
+            - "--registerCluster={{ .Values.register.create }}"
+          env:
+            - name: CONSOLE_BASE_URL
+              value: {{ .Values.register.consoleBaseUrl }}
+            - name: LONGHORN_WATCH
+              value: "false"  
+            - name: USER_AGENT
+              value: {{ .Values.register.userAgent }}   
+            - name: RELEASE_NAME_SUFFIX
+              value: {{ .Release.Name }}    
+      restartPolicy: Never
+  backoffLimit: 4

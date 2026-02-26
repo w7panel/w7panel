@@ -1,0 +1,7 @@
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+    name: system-managed-components-node-selector
+status:
+    applied: false
+value: node-role.kubernetes.io/storage:true

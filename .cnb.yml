@@ -1,0 +1,44 @@
+# .cnb.yml
+1.0.*:
+  tag_push:
+    - env:
+        - KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui
+        - KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel-dev
+        # export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && export KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel 
+      docker:
+        # 通过此参数控制使用的 Dockerfile 构建镜像必须公开
+        image: ccr.ccs.tencentyun.com/afan-public/ubuntu:go-build
+      stages:
+       
+        - name: upzip
+          script: cd ./kodata/ && unzip -o ./kui.zip
+        - name: unzipwebdav
+          script: cd ./kodata/plugin/webdav && unzip -o ./webdav.zip
+        - name: logo
+          script: mv ./kodata/logo.png ./kodata/assets/logo.png
+        - name: login
+          script: /root/go/bin/ko login docker.cnb.cool -u cnb -p ${CNB_TOKEN}
+        - name: login-tencent
+          script: /root/go/bin/ko login ccr.ccs.tencentyun.com -u 446897682 -p Fykdmx521 
+        # - name: build-dev
+        #   script: export KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel-dev && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
+          # 构建镜像，并推送到镜像仓库
+        - name: build
+          script:  export KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
+        - name: push
+          settingsFrom:
+            - ./test.txt
+            - ./publish.sh
+          script: export KUBECONFIG=./test.txt && ./publish.sh
+$:
+  vscode:
+    - runner:
+        cpus: 8
+      docker:
+        build: .ide/Dockerfile
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: ls
+          script: ls -al

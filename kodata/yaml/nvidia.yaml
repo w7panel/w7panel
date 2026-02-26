@@ -1,0 +1,13 @@
+apiVersion: gpuclass.k8s.io/v1alpha1
+kind: GpuClass
+metadata:
+  annotations:
+    title: Nvidia GPU
+  name: nvidia
+spec:
+  enabled: true
+  labels: 
+    gpu: "on"
+  vgpuMode: "0"
+  gpuOperatorMode: "0"
+  appName: nvidia_gpuoperator

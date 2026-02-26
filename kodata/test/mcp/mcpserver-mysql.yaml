@@ -1,0 +1,18 @@
+apiVersion: mcpserver.w7.cc/v1alpha1
+kind: McpServer
+metadata:
+  annotations:
+    title: hello-test1222
+  name: mcpserver-mysql
+spec:
+  command: uvx
+  args:
+    - --from
+    - "mysql-mcp-server1"
+    - "mysql_mcp_server133"
+  env:
+    MYSQL_HOST: "w7-mysql-eshezduw.default.svc.cluster.local"
+    MYSQL_PORT: "3306"
+    MYSQL_USER: "root223"
+    MYSQL_PASSWORD: "p_koecppyqrn"
+    MYSQL_DATABASE: "dbname_sajgzvtbxg"

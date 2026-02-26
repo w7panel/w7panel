@@ -1,0 +1,25 @@
+apiVersion: extensions.higress.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  creationTimestamp: "2025-11-03T09:40:05Z"
+  generation: 9
+  labels:
+    higress.io/resource-definer: higress
+    higress.io/wasm-plugin-built-in: "true"
+    higress.io/wasm-plugin-category: traffic
+    higress.io/wasm-plugin-name: w7-white-domain
+    higress.io/wasm-plugin-version: 1.0.0
+  name: w7-white-domain
+  namespace: higress-system
+spec:
+  defaultConfig:
+    response_code: "404"
+    response_content: not found
+    white_domains: []
+  defaultConfigDisable: true
+  failStrategy: FAIL_OPEN
+  matchRules: []
+  phase: AUTHN
+  priority: 220
+  url: >-
+    http://w7panel-offline.default.svc:8000/ui/wasm/plugin-domain-1.0.2.wasm

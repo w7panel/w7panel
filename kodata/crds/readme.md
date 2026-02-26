@@ -1,0 +1,1 @@
+api-approved.kubernetes.io: "https://www.w7.cc"

@@ -1,0 +1,41 @@
+apiVersion: k3k.io/v1beta1
+kind: Cluster
+metadata:
+
+    finalizers:
+        - cluster.k3k.io/finalizer
+    name: test7
+    namespace: k3k-test7
+spec:
+    addons:
+        -
+            secretNamespace: k3k-system
+            secretRef: k3k-virtual
+    agents: 0
+    expose:
+        nodePort: {}
+    mode: virtual
+    persistence:
+        storageClassName: aaaa
+        storageRequestSize: 10Gi
+        type: dynamic
+    serverArgs:
+        - '--kubelet-arg=$cgroup_root'
+        - '--disable=traefik'
+        - '--embedded-registry'
+        - '--disable-network-policy'
+    servers: 1
+    sync:
+        # configmaps:
+        #     enabled: true
+        ingresses: {}
+        persistentVolumeClaims:
+            enabled: true
+        priorityClasses: {}
+        secrets:
+            enabled: true
+        services:
+            enabled: true
+    tlsSANs:
+        - k3k-test7-service.k3k-test7
+

@@ -1,0 +1,22 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+    labels:
+        app: vmagent
+    name: vmagent
+spec:
+    externalLabels: {}
+    extraArgs:
+        maxLabelsPerTimeseries: '300'
+        promscrape.dropOriginalLabels: 'true'
+        promscrape.streamParse: 'true'
+    image:
+        tag: v1.113.0
+    license: {}
+    port: '8429'
+    remoteWrite:
+        -
+            url: >-
+                http://vmsingle-vmsingle.default.svc.cluster.local.:8429/api/v1/write
+    scrapeInterval: 30s
+    selectAllByDefault: true

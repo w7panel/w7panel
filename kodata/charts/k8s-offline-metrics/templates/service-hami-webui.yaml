@@ -1,0 +1,24 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-hami-webui
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+    endpoints:
+        -
+            # bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: metrics
+            scheme: http
+            # tlsConfig:
+            #     caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            #     serverName: kubernetes
+    jobLabel: component
+    namespaceSelector:
+        matchNames:
+            - kube-system
+    selector:
+        matchLabels:
+            app.kubernetes.io/component: hami-webui
+            app.kubernetes.io/instance: hamiui
+            app.kubernetes.io/name: hami-webui

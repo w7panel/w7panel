@@ -1,0 +1,840 @@
+global:
+  scrape_interval: 20s
+  external_labels:
+    prometheus: default/vmks-victoria-metrics-k8s-stack
+scrape_configs:
+- job_name: serviceScrape/default/vmagent-vmks-victoria-metrics-k8s-stack/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  metrics_path: /metrics
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_component
+    regex: monitoring
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks-victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: vmagent
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_managed_by
+    regex: vm-operator
+  - action: drop
+    source_labels:
+    - __meta_kubernetes_service_labelpresent_operator_victoriametrics_com_additional_service
+    regex: "true"
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-core-dns/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - kube-system
+  honor_labels: false
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app
+    regex: vmks-victoria-metrics-k8s-stack-core-dns
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    regex: core-dns
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http-metrics
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http-metrics
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-grafana/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: grafana
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: service
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: service
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-kube-api-server/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  scheme: https
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_component
+    regex: apiserver
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_provider
+    regex: kubernetes
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: https
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_component
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: https
+  tls_config:
+    insecure_skip_verify: false
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    server_name: kubernetes
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-kube-controller-manager/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - kube-system
+  honor_labels: false
+  scheme: https
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app
+    regex: vmks-victoria-metrics-k8s-stack-kube-controller-manager
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    regex: kube-controller-manager
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http-metrics
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http-metrics
+  tls_config:
+    insecure_skip_verify: false
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    server_name: kubernetes
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-kube-etcd/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - kube-system
+  honor_labels: false
+  scheme: https
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app
+    regex: vmks-victoria-metrics-k8s-stack-kube-etcd
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    regex: kube-etcd
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http-metrics
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http-metrics
+  tls_config:
+    insecure_skip_verify: false
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-kube-scheduler/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - kube-system
+  honor_labels: false
+  scheme: https
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app
+    regex: vmks-victoria-metrics-k8s-stack-kube-scheduler
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    regex: kube-scheduler
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http-metrics
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http-metrics
+  tls_config:
+    insecure_skip_verify: false
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-kube-state-metrics/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: true
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: kube-state-metrics
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http
+  metric_relabel_configs:
+  - regex: (uid|container_id|image_id)
+    action: labeldrop
+- job_name: serviceScrape/default/vmks-victoria-metrics-k8s-stack-prometheus-node-exporter/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: prometheus-node-exporter
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: metrics
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - source_labels:
+    - __meta_kubernetes_service_label_jobLabel
+    target_label: job
+    regex: (.+)
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: metrics
+  metric_relabel_configs:
+  - source_labels:
+    - mountpoint
+    regex: /var/lib/kubelet/pods.+
+    action: drop
+- job_name: serviceScrape/default/vmks-victoria-metrics-operator/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: victoria-metrics-operator
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http
+- job_name: serviceScrape/default/vmsingle-vmks-victoria-metrics-k8s-stack/0
+  kubernetes_sd_configs:
+  - role: endpoints
+    namespaces:
+      names:
+      - default
+  honor_labels: false
+  metrics_path: /metrics
+  relabel_configs:
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_component
+    regex: monitoring
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_instance
+    regex: vmks-victoria-metrics-k8s-stack
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_app_kubernetes_io_name
+    regex: vmsingle
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_service_label_managed_by
+    regex: vm-operator
+  - action: drop
+    source_labels:
+    - __meta_kubernetes_service_labelpresent_operator_victoriametrics_com_additional_service
+    regex: "true"
+  - action: keep
+    source_labels:
+    - __meta_kubernetes_endpoint_port_name
+    regex: http
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Node;(.*)
+    replacement: ${1}
+    target_label: node
+  - source_labels:
+    - __meta_kubernetes_endpoint_address_target_kind
+    - __meta_kubernetes_endpoint_address_target_name
+    separator: ;
+    regex: Pod;(.*)
+    replacement: ${1}
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_name
+    target_label: pod
+  - source_labels:
+    - __meta_kubernetes_pod_container_name
+    target_label: container
+  - source_labels:
+    - __meta_kubernetes_namespace
+    target_label: namespace
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: service
+  - source_labels:
+    - __meta_kubernetes_service_name
+    target_label: job
+    replacement: ${1}
+  - target_label: endpoint
+    replacement: http
+- job_name: nodeScrape/default/vmks-victoria-metrics-k8s-stack-cadvisor/0
+  kubernetes_sd_configs:
+  - role: node
+  honor_labels: true
+  honor_timestamps: false
+  scrape_interval: 30s
+  scrape_timeout: 5s
+  metrics_path: /metrics/cadvisor
+  scheme: https
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_node_name
+    target_label: node
+  - target_label: job
+    replacement: default/vmks-victoria-metrics-k8s-stack-cadvisor
+  - regex: __meta_kubernetes_node_label_(.+)
+    action: labelmap
+  - source_labels:
+    - __metrics_path__
+    target_label: metrics_path
+  - target_label: job
+    replacement: kubelet
+  metric_relabel_configs:
+  - regex: (uid)
+    action: labeldrop
+  - regex: (id|name)
+    action: labeldrop
+  - source_labels:
+    - __name__
+    regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+    action: drop
+  tls_config:
+    insecure_skip_verify: true
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: nodeScrape/default/vmks-victoria-metrics-k8s-stack-kubelet/1
+  kubernetes_sd_configs:
+  - role: node
+  honor_labels: true
+  honor_timestamps: false
+  scrape_interval: 30s
+  scrape_timeout: 5s
+  scheme: https
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_node_name
+    target_label: node
+  - target_label: job
+    replacement: default/vmks-victoria-metrics-k8s-stack-kubelet
+  - regex: __meta_kubernetes_node_label_(.+)
+    action: labelmap
+  - source_labels:
+    - __metrics_path__
+    target_label: metrics_path
+  - target_label: job
+    replacement: kubelet
+  metric_relabel_configs:
+  - regex: (uid)
+    action: labeldrop
+  - regex: (id|name)
+    action: labeldrop
+  - source_labels:
+    - __name__
+    regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+    action: drop
+  tls_config:
+    insecure_skip_verify: true
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: nodeScrape/default/vmks-victoria-metrics-k8s-stack-probes/2
+  kubernetes_sd_configs:
+  - role: node
+  honor_labels: true
+  honor_timestamps: false
+  scrape_interval: 30s
+  scrape_timeout: 5s
+  metrics_path: /metrics/probes
+  scheme: https
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_node_name
+    target_label: node
+  - target_label: job
+    replacement: default/vmks-victoria-metrics-k8s-stack-probes
+  - regex: __meta_kubernetes_node_label_(.+)
+    action: labelmap
+  - source_labels:
+    - __metrics_path__
+    target_label: metrics_path
+  - target_label: job
+    replacement: kubelet
+  metric_relabel_configs:
+  - regex: (uid)
+    action: labeldrop
+  - regex: (id|name)
+    action: labeldrop
+  - source_labels:
+    - __name__
+    regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+    action: drop
+  tls_config:
+    insecure_skip_verify: true
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+- job_name: nodeScrape/default/vmks-victoria-metrics-k8s-stack-resources/3
+  kubernetes_sd_configs:
+  - role: node
+  honor_labels: true
+  honor_timestamps: false
+  scrape_interval: 30s
+  scrape_timeout: 5s
+  metrics_path: /metrics/resource
+  scheme: https
+  relabel_configs:
+  - source_labels:
+    - __meta_kubernetes_node_name
+    target_label: node
+  - target_label: job
+    replacement: default/vmks-victoria-metrics-k8s-stack-resources
+  - regex: __meta_kubernetes_node_label_(.+)
+    action: labelmap
+  - source_labels:
+    - __metrics_path__
+    target_label: metrics_path
+  - target_label: job
+    replacement: kubelet
+  metric_relabel_configs:
+  - regex: (uid)
+    action: labeldrop
+  - regex: (id|name)
+    action: labeldrop
+  - source_labels:
+    - __name__
+    regex: (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+    action: drop
+  tls_config:
+    insecure_skip_verify: true
+    ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+  bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token

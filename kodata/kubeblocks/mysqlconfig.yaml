@@ -1,0 +1,21 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: OpsRequest
+metadata:
+  name: mycluster-configuring-abcd
+  namespace: default
+spec:
+  clusterName: xxxxx
+  enqueueOnForce: false
+  preConditionDeadlineSeconds: 0
+  reconfigure:
+    componentName: mysql
+    configurations:
+      - keys:
+          - key: my.cnf
+            parameters:
+              - key: innodb_buffer_pool_size
+                value: 256M
+              - key: max_connections
+                value: "1000"
+        name: mysql-replication-config
+  type: Reconfiguring

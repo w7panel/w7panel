@@ -1,0 +1,135 @@
+#!/bin/bash
+set -e
+# 检查终端是否支持颜色输出
+if [ -t 1 ]; then
+    INFO_COLOR='\033[0m'
+    WARN_COLOR='\033[33m'
+    ERROR_COLOR='\033[31m'
+    SUCCESS_COLOR='\033[32m'
+    NC='\033[0m' # No Color
+else
+    INFO_COLOR=''
+    WARN_COLOR=''
+    ERROR_COLOR=''
+    SUCCESS_COLOR=''
+    NC=''
+fi
+
+# 信息日志
+info() {
+    printf "${INFO_COLOR}[INFO]${NC} %s\n" "$*"
+}
+
+# 警告日志
+warn() {
+    printf "${WARN_COLOR}[WARN] %s${NC}\n" "$*" >&2
+}
+
+# 成功日志
+success() {
+    printf "${SUCCESS_COLOR}[SUCCESS]${NC} %s\n" "$*"
+}
+
+# 错误日志
+fatal() {
+    printf "${ERROR_COLOR}[ERROR] %s${NC}\n" "$*" >&2
+    exit 1
+}
+# export STORAGE_CLASS_NAME=disk1                                                      
+# export K3K_MODE=shared                                                               
+# export K3K_NAMESPACE=k3k-k8
+# export K3K_NAME=k8
+# export KO_DATA_PATH=/home/workspace/k8s-offline/kodata
+# export KUBECONFIG_PATH=/home/workspace/k8s-offline/kodata/shell/k3k-k8-k8-kubeconfig.yaml
+
+# 定义ingressclass名称变量
+export INGRESS_CLASS=traefik
+
+info "开始创建集群..."
+k3kcli cluster create --storage-class-name=${STORAGE_CLASS_NAME} --mode ${K3K_MODE} --namespace ${K3K_NAMESPACE} --kubeconfig-server=${KUBECONFIG_SERVER} ${K3K_NAME}
+
+export KUBECONFIG=${KUBECONFIG_PATH} 
+# /home/workspace/k8s-offline/kodata/charts/k3k-k7-k7-kubeconfig.yaml
+info "修改kubeconfig server端口为443..."
+sed -i 's|:[0-9]\+$|:443|' ${KUBECONFIG_PATH}
+
+
+
+info "部署CRDs资源..."
+kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f $KO_DATA_PATH/crds --server-side && kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f $KO_DATA_PATH/crds-kubeblocks --server-side
+
+info "检查并创建默认用户..."
+if ! kubectl --kubeconfig=${KUBECONFIG_PATH} get sa $K3K_NAME &> /dev/null; then
+    kubectl --kubeconfig=${KUBECONFIG_PATH} create sa $K3K_NAME
+    success "默认用户 $K3K_NAME 创建成功"
+else
+    warn "默认用户 $K3K_NAME 已存在，跳过创建"
+fi
+
+info "检查并绑定集群角色..."
+if ! kubectl --kubeconfig=${KUBECONFIG_PATH} get clusterrolebinding $K3K_NAME-cluster-admin &> /dev/null; then
+    kubectl --kubeconfig=${KUBECONFIG_PATH} create clusterrolebinding $K3K_NAME-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:$K3K_NAME
+    success "集群角色绑定 $K3K_NAME-cluster-admin 创建成功"
+else
+    warn "集群角色绑定 $K3K_NAME-cluster-admin 已存在，跳过创建"
+fi
+
+
+info "检查并设置默认ingressclass..."
+if ! kubectl --kubeconfig=${KUBECONFIG_PATH} get ingressclass ${INGRESS_CLASS} &> /dev/null; then
+    kubectl --kubeconfig=${KUBECONFIG_PATH} create -f - <<EOF
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: ${INGRESS_CLASS}
+  annotations:
+    ingressclass.kubernetes.io/is-default-class: "true"
+spec:
+  controller: ${INGRESS_CLASS}.io/ingress-controller
+EOF
+    success "创建${INGRESS_CLASS} ingressclass并设置为默认"
+else
+    kubectl --kubeconfig=${KUBECONFIG_PATH} annotate ingressclass ${INGRESS_CLASS} ingressclass.kubernetes.io/is-default-class="true" --overwrite
+    success "${INGRESS_CLASS} ingressclass已存在，设置为默认"
+fi
+
+# 仅在shared模式下处理storageclass
+if [ "${K3K_MODE}" == "shared" ]; then
+    info "检查并设置默认storageclass..."
+    if ! kubectl --kubeconfig=${KUBECONFIG_PATH} get storageclass ${STORAGE_CLASS_NAME} &> /dev/null; then
+        warn "虚拟集群 ${STORAGE_CLASS_NAME} storageclass不存在，请先创建"
+        # exit 1
+    else
+        kubectl --kubeconfig=${KUBECONFIG_PATH} patch storageclass ${STORAGE_CLASS_NAME} -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+        success "${STORAGE_CLASS_NAME} storageclass已存在，设置为默认"
+    fi
+else
+    info "当前模式为${K3K_MODE}，跳过storageclass设置"
+fi
+
+
+# 如果配置了storage class name，则创建默认PVC
+if [ -n "${STORAGE_CLASS_NAME}" ] && [ "${K3K_MODE}" == "shared" ]; then
+    info "检查默认PVC ${K3K_NAME}..."
+    if ! kubectl --kubeconfig=${KUBECONFIG_PATH} get pvc ${K3K_NAME} &> /dev/null; then
+        info "创建默认PVC ${K3K_NAME}..."
+        kubectl --kubeconfig=${KUBECONFIG_PATH} create -f - <<EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ${K3K_NAME}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ${STORAGE_CLASS_NAME}
+  resources:
+    requests:
+      storage: 1Gi
+EOF
+        success "默认PVC ${K3K_NAME} 创建成功"
+    else
+        info "默认PVC ${K3K_NAME} 已存在，跳过创建"
+    fi
+fi
+
+info "集群创建完成"

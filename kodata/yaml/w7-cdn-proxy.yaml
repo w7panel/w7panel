@@ -1,0 +1,22 @@
+apiVersion: extensions.higress.io/v1alpha1
+kind: WasmPlugin
+metadata:
+    annotations:
+        higress.io/wasm-plugin-description: 异步请求将上游文件缓存到存储中，从而减缓对上游的流量压力。
+        higress.io/wasm-plugin-title: 文件缓存
+        w7.cc/plugin-url: http://w7panel-offline.default.svc:8000/ui/wasm/plugin-2.0.5.wasm
+    labels:
+        higress.io/resource-definer: higress
+        higress.io/wasm-plugin-built-in: "false"
+        higress.io/wasm-plugin-category: custom
+        higress.io/wasm-plugin-name: w7-cdn-proxy
+        higress.io/wasm-plugin-version: 2.0.6
+    name: w7-cdn-proxy
+    namespace: higress-system
+spec:
+    defaultConfigDisable: true
+    failStrategy: FAIL_OPEN
+    matchRules: []
+    phase: UNSPECIFIED_PHASE
+    priority: 1
+    url: http://w7panel-offline.default.svc:8000/ui/wasm/plugin-2.0.6.wasm #oci://docker.wos.w7.com/public/proxy:go-2.0.5

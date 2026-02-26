@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "gpustack.fullname" . }}-test-connection"
+  labels:
+    {{- include "gpustack.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "gpustack.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

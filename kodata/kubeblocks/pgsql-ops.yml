@@ -1,0 +1,17 @@
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: OpsRequest
+metadata:
+  name: pgsql-config
+spec:
+  clusterName: kubeblocks-postgresql-gelexfru
+  reconfigure:
+    componentName: postgresql
+    configurations:
+      - keys:
+          - key: postgresql.conf
+            parameters:
+              - key: max_connections
+                value: "800"
+        name: postgresql-configuration
+  preConditionDeadlineSeconds: 0
+  type: Reconfiguring

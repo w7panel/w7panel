@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>pgAdmin 4</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- To set pgAdmin4 shortcut icon in browser -->
+    <link rel="shortcut icon" href="/favicon.ico?ver=81300"/>
+    <style>
+        .pg-sp-container {
+            position: absolute;
+            min-width: 100%;
+            min-height: 100%;
+            background: #090d1199;
+            z-index: 1056;
+            top: 0;
+        }
+        .pg-sp-container .pg-sp-content {
+            position: absolute;
+            width: 100%;
+            top: 40%;
+        }
+        .pg-sp-icon {
+          background: url("data:image/svg+xml;charset=UTF-8,%3c?xml version='1.0' encoding='utf-8'?%3e%3csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 38 38' style='enable-background:new 0 0 38 38;' xml:space='preserve'%3e%3cstyle type='text/css'%3e .st0%7bfill:none;stroke:%23ebeef3;stroke-width:2;%7d .st1%7bfill:none;stroke:%23326690;stroke-width:2;%7d %3c/style%3e%3cg%3e%3cg transform='translate(1 1)'%3e%3ccircle class='st0' cx='18' cy='18' r='18'/%3e%3cpath class='st1' d='M36,18c0-9.9-8.1-18-18-18 '%3e%3canimateTransform accumulate='none' additive='replace' attributeName='transform' calcMode='linear' dur='0.7s' fill='remove' from='0 18 18' repeatCount='indefinite' restart='always' to='360 18 18' type='rotate'%3e%3c/animateTransform%3e%3c/path%3e%3c/g%3e%3c/g%3e%3c/svg%3e") center center no-repeat;
+          height: 75px;
+          width: 100%;
+          text-align: center;
+        }
+        .pg-sp-text {
+          font-size: 20px;
+          text-align: center;
+          color: #fff;
+        }
+    </style>
+
+    <!-- Base template stylesheets -->
+    <link type="text/css" rel="stylesheet" href="/static/js/generated/style.css?ver=81300"/>
+
+     <!--View specified stylesheets-->
+    
+    <script type="application/javascript">
+        /* This is used to change publicPath of webpack at runtime */
+        window.resourceBasePath = "/static/js/generated/";
+    </script>
+    <script type="application/javascript"
+        src="/static/vendor/require/require.min.js?ver=81300"></script>
+    <!-- Base template scripts -->
+    <script type="application/javascript">
+            require.config({
+                baseUrl: '',
+                urlArgs: 'ver=81300',
+                waitSeconds: 0,
+                shim: {},
+                paths: {
+                    sources: "/static/js",
+                    datagrid: "/static/js/generated/datagrid",
+                    sqleditor: "/static/js/generated/sqleditor",
+                    'pgadmin.browser.utils': "/browser/" + "js/utils",
+                    'pgadmin.browser.endpoints': "/browser/" + "js/endpoints",
+                    'pgadmin.browser.messages': "/browser/" + "js/messages",
+                    'pgadmin.server.supported_servers': "/browser/" + "server/supported_servers",
+                    'pgadmin.user_management.current_user': "/user_management/" + "current_user",
+                    'translations': "/tools/" + "translations",
+                    'security.pages': "/static/js/generated/security.pages"
+                }
+            });
+
+    </script>
+    <script type="application/javascript" src="/static/js/generated/vendor.react.js?ver=81300" ></script>
+    <script type="application/javascript" src="/static/js/generated/vendor.main.js?ver=81300" ></script>
+    <script type="application/javascript" src="/static/js/generated/vendor.others.js?ver=81300" ></script>
+    <script type="application/javascript" src="/static/js/generated/vendor.sqleditor.js?ver=81300"></script>
+    <script type="application/javascript" src="/static/js/generated/pgadmin_commons.js?ver=81300" ></script>
+
+</head>
+<body>
+<style>
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  font-size: 0.875rem;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  font-family: "Roboto", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+</style>
+<!--[if lt IE 7]>
+<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade
+    your browser</a> to improve your experience.</p>
+<![endif]-->
+
+<style>
+    #root:not(:empty) + .pg-sp-container {
+        display: none;
+    }
+</style>
+<div id="root" style="height: 100%"></div>
+<div class="pg-sp-container">
+    <div class="pg-sp-content">
+        <div class="pg-sp-icon"></div>
+    </div>
+</div>
+<script type="application/javascript">
+            try {
+    require(
+        ['security.pages'],
+        function() {
+            window.renderSecurityPage('login_user', {"authSources": ["internal"], "authSourcesEnum": {"KERBEROS": "kerberos", "OAUTH2": "oauth2"}, "csrfToken": "IjJiNTZlMWM3ZWVjYzc0ZDAwYmEzZjY3NjVhNjFjOGJiYWQwMjE3MWIi.Z1A8lQ.9wjehJb8Eq8iZntN_ZbWOKmkxAI", "forgotPassUrl": "/browser/reset_password", "langOptions": [{"label": "English", "value": "en"}, {"label": "Chinese (Simplified)", "value": "zh"}, {"label": "Czech", "value": "cs"}, {"label": "French", "value": "fr"}, {"label": "German", "value": "de"}, {"label": "Indonesian", "value": "id"}, {"label": "Italian", "value": "it"}, {"label": "Japanese", "value": "ja"}, {"label": "Korean", "value": "ko"}, {"label": "Polish", "value": "pl"}, {"label": "Portuguese (Brazilian)", "value": "pt_BR"}, {"label": "Russian", "value": "ru"}, {"label": "Spanish", "value": "es"}], "loginBanner": "", "loginUrl": "/authenticate/login", "oauth2Config": [{"OAUTH2_BUTTON_COLOR": null, "OAUTH2_DISPLAY_NAME": "\u003cOauth2 Display Name\u003e", "OAUTH2_ICON": null, "OAUTH2_NAME": null}], "userLanguage": "en"},
+                {"messages": [["Warning", "Email/Username is not valid"]]});
+        }, function() {
+            console.log(arguments);
+        }
+    );
+} catch (err) {
+    console.log(err);
+}
+</script>
+
+</body>
+</html>

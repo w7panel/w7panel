@@ -1,0 +1,64 @@
+{{- if .Values.daemonset.create -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "helm.fullname" . }}-monitor
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "helm.fullname" . }}-monitor
+  template:
+    metadata:
+      labels:
+        app: {{ include "helm.fullname" . }}-monitor
+        {{- with .Values.daemonset.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: {{ .Release.Name }}
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /
+          type: ""
+      containers:
+        - name: w7panel-ds
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8000
+            protocol: TCP
+            name: http
+            # readOnly: true
+          env: 
+          - name: LONGHORN_WATCH
+            value: "false"
+          - name: METRIC_ENABLED
+            value: "false"   
+          - name: REGISTRY_WATCH
+            value: "true"     
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP  
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName        
+          args:
+            - server:start
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+{{- end }}            
+
+
+        

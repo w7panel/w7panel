@@ -1,0 +1,29 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-agent
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+    externalLabels: {}
+    extraArgs:
+        maxLabelsPerTimeseries: '300'
+        promscrape.dropOriginalLabels: 'true'
+        promscrape.streamParse: 'true'
+    image:
+        tag: v1.113.0
+    license: {}
+    port: '8429'
+    # resources:
+    #     # requests:
+    #     #   memory: "64Mi"
+    #     #   cpu: "250m"
+    #     limits:
+    #       memory: "512Mi"
+    #       cpu: "500m"
+    remoteWrite:
+        -
+            url: >-
+                http://vmsingle-{{ include "k8s-offline-metrics.fullname" . }}-single.{{ .Release.Namespace }}.svc.cluster.local.:8429/api/v1/write
+    scrapeInterval: 30s
+    selectAllByDefault: true
