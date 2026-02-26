@@ -1,0 +1,4 @@
+
+kubectl create -f  https://gitproxy.click/https://github.com/apecloud/kubeblocks/releases/download/v0.9.3/kubeblocks_crds.yaml
+
+     

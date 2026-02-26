@@ -1,0 +1,79 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMNodeScrape
+metadata:
+    annotations:
+        kubectl.kubernetes.io/last-applied-configuration: >
+            {"apiVersion":"operator.victoriametrics.com/v1beta1","kind":"VMNodeScrape","metadata":{"annotations":{"meta.helm.sh/release-name":"vmks","meta.helm.sh/release-namespace":"default"},"creationTimestamp":"2025-03-14T05:57:01Z","generation":1,"labels":{"app.kubernetes.io/instance":"vmks","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/name":"victoria-metrics-k8s-stack","app.kubernetes.io/version":"v1.113.0","helm.sh/chart":"victoria-metrics-k8s-stack-0.39.0"},"name":"vmks-victoria-metrics-k8s-stack-kubelet","namespace":"default","resourceVersion":"1054605","uid":"01d9d233-26a4-460c-9103-b27e7fa3d968"},"spec":{"bearerTokenFile":"/var/run/secrets/kubernetes.io/serviceaccount/token","honorLabels":true,"honorTimestamps":false,"interval":"30s","metricRelabelConfigs":[{"action":"labeldrop","regex":"__meta_kubernetes_node_label_nvidia_com.*"},{"action":"labeldrop","regex":"__meta_kubernetes_node_label_feature_node.*"},{"action":"labeldrop","regex":"(uid)"},{"action":"labeldrop","regex":"(id|name)"},{"action":"drop","regex":"(rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)","source_labels":["__name__"]}],"relabelConfigs":[{"action":"labeldrop","regex":"__meta_kubernetes_node_label_nvidia_com.*"},{"action":"labeldrop","regex":"__meta_kubernetes_node_label_feature_node.*"},{"action":"labelmap","regex":"__meta_kubernetes_node_label_(.+)"},{"sourceLabels":["__metrics_path__"],"targetLabel":"metrics_path"},{"replacement":"kubelet2","targetLabel":"job"}],"scheme":"https","scrapeTimeout":"5s","selector":{},"tlsConfig":{"caFile":"/var/run/secrets/kubernetes.io/serviceaccount/ca.crt","insecureSkipVerify":true}},"status":{"conditions":[{"lastTransitionTime":"2025-03-14T05:57:45Z","lastUpdateTime":"2025-03-14T05:57:45Z","observedGeneration":1,"reason":"ConfigParsedAndApplied","status":"True","type":"vmks-victoria-metrics-k8s-stack.default.vmagent.victoriametrics.com/Applied"}],"observedGeneration":1,"updateStatus":"operational"}}
+        meta.helm.sh/release-name: vmks
+        meta.helm.sh/release-namespace: default
+    creationTimestamp: '2025-03-14T05:57:01Z'
+    generation: 2
+    labels:
+        app.kubernetes.io/instance: vmks
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: victoria-metrics-k8s-stack
+        app.kubernetes.io/version: v1.113.0
+        helm.sh/chart: victoria-metrics-k8s-stack-0.39.0
+    name: vmks-victoria-metrics-k8s-stack-kubelet
+    namespace: default
+    resourceVersion: '1070927'
+    uid: 01d9d233-26a4-460c-9103-b27e7fa3d968
+spec:
+    bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+    honorLabels: true
+    honorTimestamps: false
+    interval: 30s
+    metricRelabelConfigs:
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_nvidia_com.*
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_feature_node.*
+        -
+            action: labeldrop
+            regex: (uid)
+        -
+            action: labeldrop
+            regex: (id|name)
+        -
+            action: drop
+            regex: >-
+                (rest_client_request_duration_seconds_bucket|rest_client_request_duration_seconds_sum|rest_client_request_duration_seconds_count)
+            source_labels:
+                - __name__
+    relabelConfigs:
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_nvidia_com.*
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label_feature_node.*
+        -
+            action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+        -
+            sourceLabels:
+                - __metrics_path__
+            targetLabel: metrics_path
+        -
+            replacement: kubelet2
+            targetLabel: job
+    scheme: https
+    scrapeTimeout: 5s
+    selector: {}
+    tlsConfig:
+        caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecureSkipVerify: true
+status:
+    conditions:
+        -
+            lastTransitionTime: '2025-03-14T05:57:45Z'
+            lastUpdateTime: '2025-03-14T06:51:55Z'
+            observedGeneration: 2
+            reason: ConfigParsedAndApplied
+            status: 'True'
+            type: >-
+                vmks-victoria-metrics-k8s-stack.default.vmagent.victoriametrics.com/Applied
+    observedGeneration: 2
+    updateStatus: operational

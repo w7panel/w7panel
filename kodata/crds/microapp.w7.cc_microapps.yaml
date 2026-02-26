@@ -1,0 +1,146 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.20.0
+  name: microapps.microapp.w7.cc
+spec:
+  group: microapp.w7.cc
+  names:
+    kind: MicroApp
+    listKind: MicroAppList
+    plural: microapps
+    singular: microapp
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              backendUrl:
+                type: string
+              bindings:
+                items:
+                  properties:
+                    framework:
+                      type: string
+                    is_default_register:
+                      type: integer
+                    location:
+                      type: string
+                    menu:
+                      items:
+                        properties:
+                          displayorder:
+                            type: integer
+                          do:
+                            type: string
+                          icon:
+                            type: string
+                          is_default:
+                            type: integer
+                          location:
+                            type: string
+                          title:
+                            type: string
+                        required:
+                        - do
+                        - title
+                        type: object
+                      type: array
+                    name:
+                      type: string
+                    status:
+                      type: integer
+                    support:
+                      type: string
+                    title:
+                      type: string
+                  required:
+                  - name
+                  - title
+                  type: object
+                nullable: true
+                type: array
+              config:
+                properties:
+                  props:
+                    additionalProperties:
+                      type: string
+                    type: object
+                type: object
+              config-v2:
+                nullable: true
+                properties:
+                  props:
+                    nullable: true
+                    properties:
+                      roleConfig:
+                        additionalProperties:
+                          properties:
+                            frontend_props:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            load_mode:
+                              nullable: true
+                              type: string
+                            proxy_request:
+                              properties:
+                                headers:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                query:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                              type: object
+                            serverUrl:
+                              type: string
+                          type: object
+                        nullable: true
+                        type: object
+                    type: object
+                type: object
+              description:
+                type: string
+              framework:
+                type: string
+              frontendUrl:
+                type: string
+              logo:
+                type: string
+              proxyUrl:
+                type: string
+              title:
+                type: string
+            required:
+            - frontendUrl
+            - title
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true

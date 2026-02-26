@@ -1,0 +1,156 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: higress
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/higress-2.0.4.tgz
+  version: v2.0.4
+  targetNamespace: higress-system
+  createNamespace: true
+  set:
+    higress-core.gateway.service.loadBalancerClass: "io.cilium/node"
+    global.ingressClass: "higress"
+    higress-core.gateway.replicas: 1
+    higress-core.gateway.resources.limits.cpu: 0
+    higress-core.gateway.resources.limits.memory: 0
+    higress-core.gateway.resources.requests.cpu: 0
+    higress-core.gateway.resources.requests.memory: 0
+    higress-core.controller.replicas: 1
+    higress-core.controller.resources.requests.cpu: 0
+    higress-core.controller.resources.requests.memory: 0
+    higress-core.controller.resources.limits.cpu: 0
+    higress-core.controller.resources.limits.memory: 0
+    higress-core.pilot.replicaCount: 1
+    higress-core.pilot.resources.requests.cpu: 0
+    higress-core.pilot.resources.requests.memory: 0
+    higress-core.downstream.connectionBufferLimits: 3276800
+    higress-console.replicaCount: 0
+    higress-console.resources.requests.cpu: 0
+    higress-console.resources.requests.memory: 0
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: higress-tls-params
+  namespace: higress-system
+spec:
+  configPatches:
+  - applyTo: FILTER_CHAIN
+    match:
+      context: GATEWAY
+      listener:
+        name: 0.0.0.0_443
+    patch:
+      operation: MERGE
+      value:
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+            common_tls_context:
+              tls_params:
+                tls_maximum_protocol_version: TLSv1_3
+                tls_minimum_protocol_version: TLSv1_1
+  workloadSelector:
+    labels:
+      app: higress-gateway
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: higress-compressor
+  namespace: higress-system
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.cors
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.compressor
+          typed_config:
+            '@type': >-
+              type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
+            compressor_library:
+              name: text_optimized
+              typed_config:
+                '@type': >-
+                  type.googleapis.com/envoy.extensions.compression.gzip.compressor.v3.Gzip
+                chunk_size: 4096
+                compression_level: BEST_COMPRESSION
+                compression_strategy: DEFAULT_STRATEGY
+                memory_level: 5
+                window_bits: 12
+            request_direction_config:
+              common_config:
+                enabled:
+                  default_value: false
+                  runtime_key: request_compressor_enabled
+            response_direction_config:
+              common_config:
+                content_type:
+                  - text/html
+                  - text/css
+                  - text/plain
+                  - text/javascript
+                  - application/json
+                  - application/javascript
+                  - application/x-javascript
+                  - application/css
+                  - application/xml
+                  - application/xml+rss
+                  - application/xhtml+xml
+                  - image/jpeg
+                  - image/gif
+                  - image/png
+                  - image/x-ms-bmp
+                  - image/webp
+                  - image/svg+xml
+                min_content_length: 1024
+              disable_on_etag_header: true
+  workloadSelector:
+    labels:
+      app: higress-gateway
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cert-manager
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/cert-manager-v1.16.2.tgz
+  version: v1.16.2
+  targetNamespace: cert-manager
+  createNamespace: true
+  set:
+    crds.enabled: "true"
+    prometheus.enabled: "false"
+    webhook.timeoutSeconds: 4
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: w7-letsencrypt-prod
+spec:
+  acme:
+    # The ACME server URL
+    server: https://acme-v02.api.letsencrypt.org/directory
+    # Email address used for ACME registration
+    email: 446897682@qq.com
+    # Name of a secret used to store the ACME account private key
+    privateKeySecretRef:
+      name: w7-letsencrypt-prod
+    # Enable the HTTP-01 challenge provider
+    solvers:
+      - http01:
+          ingress:
+            class: higress

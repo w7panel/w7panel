@@ -1,0 +1,8 @@
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+    name: taint-toleration
+    namespace: longhorn-system
+status:
+    applied: false
+value: node-role.kubernetes.io/storage:NoSchedule

@@ -1,0 +1,144 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+    name: w7-pros-28692-onncyjmtda-build-yowmz
+    namespace: default
+    uid: bc9d908c-dc99-4f0b-aa29-3f878da549c4
+    resourceVersion: '4730021'
+    generation: 1
+    creationTimestamp: '2025-08-05T09:27:50Z'
+    labels:
+        app: w7-pros-28692-onncyjmtda
+        app.kubernetes.io/created-by: zpk
+        app.kubernetes.io/instance: w7-pros-28692-onncyjmtda
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/managed-by-sub: w7panel
+        app.kubernetes.io/name: w7-pros-28692
+        app.kubernetes.io/version: 2.8.88
+        searchJob: w7-pros-28692-onncyjmtda-build-install
+        w7.cc/group-name: w7-pros-28692-onncyjmtda
+        w7.cc/has-build: 'true'
+        w7.cc/has-shell: 'true'
+        w7.cc/identifie: w7-pros-28692
+        w7.cc/install-id: yowmz
+        w7.cc/job-source: appgroup
+        w7.cc/module-name: w7-pros-28692
+        w7.cc/name: w7-pros-28692-onncyjmtda
+        w7.cc/release-name: w7-pros-28692-onncyjmtda
+        w7.cc/shell-type: install
+        w7.cc/suffix: onncyjmtda
+    annotations:
+        meta.helm.sh/release-name: w7-pros-28692-onncyjmtda
+        meta.helm.sh/release-namespace: default
+        title: '[应用安装时触发]微擎2免费版构建镜像任务'
+        w7.cc/deploy-title: 部署任务
+        w7.cc/group-name: w7-pros-28692-onncyjmtda
+        w7.cc/job-source: appgroup
+        w7.cc/job-source-name: w7-pros-28692-onncyjmtda
+        w7.cc/job-source-title: 微擎2免费版
+        w7.cc/release-name: w7-pros-28692-onncyjmtda
+        w7.cc/shell-type: install
+        w7.cc/title: '[应用安装时触发]微擎2免费版构建镜像任务'
+spec:
+    parallelism: 1
+    completions: 1
+    backoffLimit: 3
+    selector:
+        matchLabels:
+            batch.kubernetes.io/controller-uid: bc9d908c-dc99-4f0b-aa29-3f878da549c4
+    manualSelector: false
+    template:
+        metadata:
+            creationTimestamp: null
+            labels:
+                batch.kubernetes.io/controller-uid: bc9d908c-dc99-4f0b-aa29-3f878da549c4
+                batch.kubernetes.io/job-name: w7-pros-28692-onncyjmtda-build-yowmz
+                controller-uid: bc9d908c-dc99-4f0b-aa29-3f878da549c4
+                job-name: w7-pros-28692-onncyjmtda-build-yowmz
+        spec:
+            volumes:
+                -
+                    name: my-host
+                    hostPath:
+                        path: /
+                        type: ''
+            containers:
+                -
+                    name: docker-build
+                    image: >-
+                        ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-16
+                    command:
+                        - /kaniko/start.sh
+                    workingDir: /workspace
+                    env:
+                        -
+                            name: PUSH_IMAGE
+                            value: >-
+                                registry.local.w7.cc/default/w7_pros_28692:2.8.88
+                        -
+                            name: CURL_CA_BUNDLE
+                            value: /kaniko/ssl/certs/ca-certificates.crt
+                        -
+                            name: CONTEXT
+                            value: /workspace/w7_pros_28692
+                        -
+                            name: KANIKO_REGISTRY_MAP
+                            value: "index.docker.io=mirror.ccs.tencentyun.com;index.docker.io=registry.cn-hangzhou.aliyuncs.com;\n\tindex.docker.io=docker.m.daocloud.io;index.docker.io=docker.1panel.live"
+                        -
+                            name: EMBED
+                            value: 'true'
+                        -
+                            name: USER_AGENT
+                            value: release
+                        -
+                            name: MODULE_NAME
+                            value: w7_pros_28692
+                        -
+                            name: DOCKER_AUTH
+                            value: >-
+                                {"auths":{"registry.local.w7.cc":{"auth":"YWRtaW46dzctc2VjcmV0"}}}
+                        -
+                            name: INSECURE
+                            value: '--insecure'
+                        -
+                            name: DOWNLOAD_URL
+                            value: >-
+                                http://app-attachment-1251470023.cos.ap-shanghai.myqcloud.com/20/33/58/d9/0e/86/2f/53/4c/5b/12/dc/3c/bb/cb/88?sign=q-sign-algorithm%3Dsha1%26q-ak%3DAKIDaw3wPd0Mq4QXjhFs52mGXZQ1lFUWmm23%26q-sign-time%3D1754386010%3B1754386430%26q-key-time%3D1754386010%3B1754386430%26q-header-list%3Dhost%26q-url-param-list%3D%26q-signature%3Da7763f319e0dd73582d41dcda4c0e85bc48a8a19&
+                        -
+                            name: NOTIFY_COMPLETION_URL
+                            value: >-
+                                http://218.23.2.55:9090/api/v1/zpk/build-image-success?namespace=default&releaseName=w7-pros-28692-onncyjmtda&domainHost=swf.fan.b2.sz.w7.com&deploymentName=w7-pros-28692-onncyjmtda&thirdpartyCDToken=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2NvbnNvbGUudzcuY2MvYXBpL3RoaXJkcGFydHktY2QvdG9rZW4vcmVmcmVzaCIsImlhdCI6MTc1NDM4NTU5MywiZXhwIjoxNzU0Mzg5MTkzLCJuYmYiOjE3NTQzODU1OTMsImp0aSI6InpiNWVkc2M5YzMyMWdLT1giLCJzdWIiOiI3NjA1MiIsInBydiI6ImYwZDE5MGY3YWYyZTg3Y2U2ZjAxNmFhODIwNTBmYzcwZjIzZjU5NWMiLCJvcGVuX2lkIjoiQ0pndF9oUjJWc0Q3aF9RbXNBQWd6QSIsImZvdW5kZXJfb3BlbmlkIjoiQ0pndF9oUjJWc0Q3aF9RbXNBQWd6QSIsInJvbGVfaWRlbnRpZnkiOiJmb3VuZGVyIiwib3JpZ2luX2FwcGlkIjoiMzE0ODk5Iiwibmlja25hbWUiOiJ0bXAiLCJ1c2VyX2lkIjo3NjA1MiwiaXNfdmFsaWQiOnRydWV9.sBpbQ6bZfX1ZDVtRvEygeFb9S70ID1LW1a49DJ0MJK8&api-token=eyJhbGciOiJSUzI1NiIsImtpZCI6IklZd3JvWW5mQWM5Uk1VaWlhVmVLOWQzcE1SZFoteloyUXhCOC10YlQxakEifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiLCJrM3MiXSwiZXhwIjoxNzU0Mzg5MDU1LCJpYXQiOjE3NTQzODU0NTUsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiY2YzZjdjZGQtNjcyNC00ZWYzLWFkODgtNjhkYTQ2M2RlZTc4Iiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwic2VydmljZWFjY291bnQiOnsibmFtZSI6ImFkbWluIiwidWlkIjoiOWE3YWVkYWItYTU2Yi00NzQyLWFmNTEtZmYyMmIyZGM4ZDZkIn19LCJuYmYiOjE3NTQzODU0NTUsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmFkbWluIn0.VgGRqy32ivPeUqlcTVdL02AsgHKsyT-fxHB0ZFImOsfgm-LKRCdPESmgODyBrLd-cWD7Mr6NtSGuwlfy4z3Qx1F5eL-ZyQ1gXFfk-pD9YjnIfKRz75RuoS1LKBjqI9BcJWLKUjtTH_-S8yyt9271pRgyRUyq9YVKHQnhJoCFMlbFcwDLV-edvk08IcVetIDm_MBkyApkw5yB55Fze9lSavxBwfV_dYNhoFEhCftBGum6x4HR0qY_GA8XKl8LQDaXgkhP7tE6JYlb2_WWrQDnR9Pm9sXy0M9IaMFoVyI1qnEzvDjN5HQrzOkBnUyJoti0u8vk_NrJaD2zxcE-_o9wvA
+                        -
+                            name: NOTIFY_FAILED_URL
+                            value: /
+                        -
+                            name: DOCKER_FILE
+                            value: /workspace/w7_pros_28692/Dockerfile
+                        -
+                            name: ATTACHMENT_TYPE
+                            value: zip
+                    resources: {}
+                    volumeMounts:
+                        -
+                            name: my-host
+                            mountPath: /host
+                    terminationMessagePath: /dev/termination-log
+                    terminationMessagePolicy: File
+                    imagePullPolicy: Always
+            restartPolicy: Never
+            terminationGracePeriodSeconds: 30
+            dnsPolicy: ClusterFirstWithHostNet
+            hostNetwork: true
+            hostPID: true
+            hostIPC: true
+            securityContext: {}
+            schedulerName: default-scheduler
+    completionMode: NonIndexed
+    suspend: false
+    podReplacementPolicy: TerminatingOrFailed
+status:
+    startTime: '2025-08-05T09:27:50Z'
+    active: 1
+    terminating: 0
+    uncountedTerminatedPods: {}
+    ready: 1

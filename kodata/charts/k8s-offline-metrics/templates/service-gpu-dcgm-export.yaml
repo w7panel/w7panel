@@ -1,0 +1,39 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-gpu-dcgm-exporter
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+    endpoints:
+        -
+            # bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: gpu-metrics
+            scheme: http
+            # tlsConfig:
+            #     caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            #     serverName: kubernetes
+    jobLabel: nvidia-dcgm-exporter
+    # relabelConfigs:
+    #     -
+    #         action: labeldrop
+    #         regex: __meta_kubernetes_node_label_nvidia_com.*
+    #     -
+    #         action: labeldrop
+    #         regex: __meta_kubernetes_node_label_feature_node.*
+    #     -
+    #         action: labelmap
+    #         regex: __meta_kubernetes_node_label_(.+)
+    #     -
+    #         sourceLabels:
+    #             - __metrics_path__
+    #         targetLabel: metrics_path
+    #     -
+    #         replacement: nvidia-dcgm-exporter
+    #         targetLabel: instance
+    namespaceSelector:
+        matchNames:
+            - default
+    selector:
+        matchLabels:
+            app: nvidia-dcgm-exporter

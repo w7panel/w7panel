@@ -1,0 +1,297 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2025-03-11T11:07:52Z"
+  generateName: vmagent-vmks-victoria-metrics-k8s-stack-84c88b54bd-
+  labels:
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/instance: vmks-victoria-metrics-k8s-stack
+    app.kubernetes.io/name: vmagent
+    managed-by: vm-operator
+    pod-template-hash: 84c88b54bd
+  name: vmagent-vmks-victoria-metrics-k8s-stack-84c88b54bd-l2h77
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: vmagent-vmks-victoria-metrics-k8s-stack-84c88b54bd
+    uid: fc84be06-e5f9-4279-83f9-145ac7d50d5f
+  resourceVersion: "38779"
+  uid: 30261cf6-7987-445a-86b2-e0f49ade42cd
+spec:
+  containers:
+  - args:
+    - --reload-url=http://localhost:8429/-/reload
+    - --config-envsubst-file=/etc/vmagent/config_out/vmagent.env.yaml
+    - --config-file=/etc/vmagent/config/vmagent.yaml.gz
+    command:
+    - /bin/prometheus-config-reloader
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          apiVersion: v1
+          fieldPath: metadata.name
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.68.0
+    imagePullPolicy: IfNotPresent
+    name: config-reloader
+    resources:
+      limits:
+        cpu: 100m
+        memory: 25Mi
+      requests:
+        cpu: 100m
+        memory: 25Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: FallbackToLogsOnError
+    volumeMounts:
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+    - mountPath: /etc/vmagent/config
+      name: config
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+  - args:
+    - -httpListenAddr=:8429
+    - -promscrape.config=/etc/vmagent/config_out/vmagent.env.yaml
+    - -promscrape.dropOriginalLabels=true
+    - -promscrape.streamParse=true
+    - -remoteWrite.maxDiskUsagePerURL=1073741824
+    - -remoteWrite.tmpDataPath=/tmp/vmagent-remotewrite-data
+    - -remoteWrite.url=http://vmsingle-vmks-victoria-metrics-k8s-stack.default.svc.cluster.local.:8429/api/v1/write
+    image: victoriametrics/vmagent:v1.112.0
+    imagePullPolicy: IfNotPresent
+    livenessProbe:
+      failureThreshold: 10
+      httpGet:
+        path: /health
+        port: 8429
+        scheme: HTTP
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 5
+    name: vmagent
+    ports:
+    - containerPort: 8429
+      name: http
+      protocol: TCP
+    readinessProbe:
+      failureThreshold: 10
+      httpGet:
+        path: /health
+        port: 8429
+        scheme: HTTP
+      periodSeconds: 5
+      successThreshold: 1
+      timeoutSeconds: 5
+    resources:
+      limits:
+        cpu: 200m
+        memory: 500Mi
+      requests:
+        cpu: 50m
+        memory: 200Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: FallbackToLogsOnError
+    volumeMounts:
+    - mountPath: /tmp/vmagent-remotewrite-data
+      name: persistent-queue-data
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+      readOnly: true
+    - mountPath: /etc/vmagent-tls/certs
+      name: tls-assets
+      readOnly: true
+    - mountPath: /etc/vmagent/config
+      name: config
+      readOnly: true
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  initContainers:
+  - args:
+    - -c
+    - gunzip -c /etc/vmagent/config/vmagent.yaml.gz > /etc/vmagent/config_out/vmagent.env.yaml
+    command:
+    - /bin/sh
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.68.0
+    imagePullPolicy: IfNotPresent
+    name: config-init
+    resources:
+      limits:
+        cpu: 100m
+        memory: 25Mi
+      requests:
+        cpu: 100m
+        memory: 25Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/vmagent/config
+      name: config
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+  nodeName: server1
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: vmagent-vmks-victoria-metrics-k8s-stack
+  serviceAccountName: vmagent-vmks-victoria-metrics-k8s-stack
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - emptyDir: {}
+    name: persistent-queue-data
+  - name: tls-assets
+    secret:
+      defaultMode: 420
+      secretName: tls-assets-vmagent-vmks-victoria-metrics-k8s-stack
+  - emptyDir: {}
+    name: config-out
+  - name: config
+    secret:
+      defaultMode: 420
+      secretName: vmagent-vmks-victoria-metrics-k8s-stack
+  - name: kube-api-access-jmqfs
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-11T11:07:56Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-11T11:07:58Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-11T11:08:02Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-11T11:08:02Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2025-03-11T11:07:52Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://eb6ca170dbd0c83edafa0196d67f5d8b72be9a81709519032f345346a895b9e7
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.68.0
+    imageID: quay.io/prometheus-operator/prometheus-config-reloader@sha256:2eada80dc7264dd53fcfa67ca86f8a398a07112cce7017eb44d6574483801356
+    lastState: {}
+    name: config-reloader
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2025-03-11T11:07:58Z"
+    volumeMounts:
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+    - mountPath: /etc/vmagent/config
+      name: config
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+      recursiveReadOnly: Disabled
+  - containerID: containerd://160de5578a2dd94aed328d8019091718e88c04193c23d47c1df0ec1b2a13d84a
+    image: docker.io/victoriametrics/vmagent:v1.112.0
+    imageID: docker.io/victoriametrics/vmagent@sha256:146243ef8eb68d5a37acf757609c65081017ef90257656ed633ea044778af804
+    lastState: {}
+    name: vmagent
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2025-03-11T11:08:01Z"
+    volumeMounts:
+    - mountPath: /tmp/vmagent-remotewrite-data
+      name: persistent-queue-data
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+      readOnly: true
+      recursiveReadOnly: Disabled
+    - mountPath: /etc/vmagent-tls/certs
+      name: tls-assets
+      readOnly: true
+      recursiveReadOnly: Disabled
+    - mountPath: /etc/vmagent/config
+      name: config
+      readOnly: true
+      recursiveReadOnly: Disabled
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 10.0.0.206
+  hostIPs:
+  - ip: 10.0.0.206
+  initContainerStatuses:
+  - containerID: containerd://ddbb47d92c0add55900adce760f75530ee4c28b16b455c619967fdc5aeb578bb
+    image: quay.io/prometheus-operator/prometheus-config-reloader:v0.68.0
+    imageID: quay.io/prometheus-operator/prometheus-config-reloader@sha256:2eada80dc7264dd53fcfa67ca86f8a398a07112cce7017eb44d6574483801356
+    lastState: {}
+    name: config-init
+    ready: true
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://ddbb47d92c0add55900adce760f75530ee4c28b16b455c619967fdc5aeb578bb
+        exitCode: 0
+        finishedAt: "2025-03-11T11:07:55Z"
+        reason: Completed
+        startedAt: "2025-03-11T11:07:55Z"
+    volumeMounts:
+    - mountPath: /etc/vmagent/config
+      name: config
+    - mountPath: /etc/vmagent/config_out
+      name: config-out
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-jmqfs
+      readOnly: true
+      recursiveReadOnly: Disabled
+  phase: Running
+  podIP: 10.42.0.13
+  podIPs:
+  - ip: 10.42.0.13
+  qosClass: Burstable
+  startTime: "2025-03-11T11:07:52Z"

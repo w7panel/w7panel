@@ -1,0 +1,9 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ include "nfs-subdir-external-provisioner.fullname" . }}
+  labels:
+    {{- include "nfs-subdir-external-provisioner.labels" . | nindent 4 }}
+provisioner: nfs-provisioner
+volumeBindingMode: Immediate
+reclaimPolicy: Delete

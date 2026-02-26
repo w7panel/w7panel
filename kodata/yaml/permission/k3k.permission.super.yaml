@@ -1,0 +1,18 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: k3k.permission.super
+  namespace: default
+  labels:
+    clustermode: global
+    type: permission
+    typemode : in
+  annotations:
+    title: 管理员
+    # w7.cc/domain-white-list: "[]"
+data:
+  debug: "true"
+  fileeditor: "true"
+  menu: >-
+    ["cluster","cluster-panel","cluster-resource","app","app-apps","app-apps-add","app-apps-edit","app-apps-delete","app-cronjob","app-cronjob-add","app-cronjob-edit","app-cronjob-delete","app-rvproxy","app-rvproxy-add","app-rvproxy-edit","app-rvproxy-delete","app-dblist","app-dblist-add","app-dblist-delete","app-gpustack","storage","storage-node","storage-node-add","storage-node-edit","storage-node-delete","storage-zone","zpk","system","system-cloud","system-order-center","system-cost-center","cluster-nodes","cluster-nodes-add","cluster-nodes-registries","cluster-nodes-gpu","cluster-nodes-memory","system-whitelist","system-user","system-usergroup","system-permission","system-quota", "system-license","system-cost-center","system-cost","system-white-domain","system-system", "system-license", "system-manage"]
+  webshell: "true"

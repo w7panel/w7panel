@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "gpustack.fullname" . }}
+  labels:
+    {{- include "gpustack.labels" . | nindent 4 }}
+  annotations:
+    # helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - {{ .Values.cluster.storageRWMode }}
+  storageClassName: {{ .Values.cluster.storageClassName | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.cluster.storageSize | quote }}

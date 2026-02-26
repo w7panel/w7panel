@@ -1,0 +1,31 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: code.php
+    namespace: default
+    labels:
+        type: code
+    annotations:
+        title: php    
+data:
+    code: |-
+        <?php
+        include 'vendor/autoload.php';
+        use W7\Sdk\Console\Api\W7Panel;
+
+
+        $appid = getenv('APP_ID');//获取环境变量APP_ID
+        $appsecret = getenv('APP_SECRET');//获取环境变量APP_SECRET
+        echo $appid;
+        $panel = new W7Panel($appid, $appsecret);
+        $result = $panel->CreateCouponCode(7, 1);//创建优惠码代码，参数分别为优惠ID和数量
+        var_dump($result);
+        /*
+        array(1) {
+          'codes' =>
+          array(1) {
+            [0] =>
+            string(23) "20260106102957-FFTAVU3D"
+          }
+        }
+         */

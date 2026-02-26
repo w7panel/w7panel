@@ -1,0 +1,6 @@
+#https://github.com/we7coreteam/gorm-gen-yaml
+config:
+  tag_json_camel: lower
+relation:
+  - table: ims_site
+  - table: ims_compose

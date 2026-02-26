@@ -1,0 +1,52 @@
+{{- if .Values.cluster.mongodb -}}
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+  name: {{ .Release.Name | trimSuffix "-" }}
+  annotations:
+      kubeblocks.io/version: "0.9.3"
+      w7panel.kubeblocks.io/port: "27017"
+      w7panel.kubeblocks.io/account-secret-name: {{ .Release.Name | trimSuffix "-" }}-mongodb-account-root
+      w7panel.kubeblocks.io/host: {{ .Release.Name | trimSuffix "-" }}-mongodb-mongodb
+      w7panel.kubeblocks.io/svc-name-ro: {{ .Release.Name | trimSuffix "-" }}-mongodb-mongodb-ro
+      w7panel.kubeblocks.io/configmap-name: {{ .Release.Name | trimSuffix "-" }}-mongodb-mongodb-config
+      w7panel.kubeblocks.io/configmap-format: "yaml"
+      w7panel.kubeblocks.io/configmap-key: mongodb.conf
+      w7panel.kubeblocks.io/constraints-name: mongodb-config-constraints
+      w7panel.kubeblocks.io/reconfigure-name: mongodb-config
+      w7panel.kubeblocks.io/reconfigure-component-name: mongodb
+  labels:
+      w7panel.kubeblocks.io/version: {{ .Values.cluster.serviceVersion | quote }}
+      w7panel.kubeblocks.io/name: mongodb
+spec:
+  terminationPolicy: Delete
+  affinity:
+    podAntiAffinity: Preferred
+    topologyKeys:
+#   tolerations:
+#     - key: kb-data
+#       operator: Equal
+#       value: 'true'
+#       effect: NoSchedule
+  componentSpecs:
+  - name: mongodb
+    componentDef: mongodb
+    serviceVersion: {{ .Values.cluster.serviceVersion | quote }}
+    replicas: 1
+    resources:
+        limits:
+            cpu: {{ .Values.cluster.cpu | quote }}
+            memory: {{ .Values.cluster.memory | quote }}
+        requests:
+            cpu: {{ .Values.cluster.cpu | quote }}
+            memory: {{ .Values.cluster.memory | quote }}
+    volumeClaimTemplates:
+    - name: data
+      spec:
+        accessModes:
+        - {{ .Values.cluster.storageRWMode | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.cluster.storageSize | quote }}
+        storageClassName: {{ .Values.cluster.storageClassName | quote }}    
+{{- end }}          

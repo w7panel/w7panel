@@ -1,0 +1,63 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: higress-compressor
+  namespace: higress-system
+spec:
+  configPatches:
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.cors
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.compressor
+          typed_config:
+            '@type': >-
+              type.googleapis.com/envoy.extensions.filters.http.compressor.v3.Compressor
+            compressor_library:
+              name: text_optimized
+              typed_config:
+                '@type': >-
+                  type.googleapis.com/envoy.extensions.compression.gzip.compressor.v3.Gzip
+                chunk_size: 4096
+                compression_level: BEST_COMPRESSION
+                compression_strategy: DEFAULT_STRATEGY
+                memory_level: 5
+                window_bits: 12
+            request_direction_config:
+              common_config:
+                enabled:
+                  default_value: false
+                  runtime_key: request_compressor_enabled
+            response_direction_config:
+              common_config:
+                content_type:
+                  - text/html
+                  - text/css
+                  - text/plain
+                  - text/javascript
+                  - application/json
+                  - application/javascript
+                  - application/x-javascript
+                  - application/css
+                  - application/xml
+                  - application/xml+rss
+                  - application/xhtml+xml
+                  - image/jpeg
+                  - image/gif
+                  - image/png
+                  - image/x-ms-bmp
+                  - image/webp
+                  - image/svg+xml
+                min_content_length: 1024
+              disable_on_etag_header: true
+  workloadSelector:
+    labels:
+      app: higress-gateway

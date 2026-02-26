@@ -1,0 +1,1 @@
+curl -fsSL https://kubeblocks.io/installer/install_cli.sh | bash -s

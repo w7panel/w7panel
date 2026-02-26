@@ -1,0 +1,18 @@
+builds:
+- id: main
+  dir: .  # default is .
+  main: ./main.go
+  env:
+  - GODEBUG=madvdontneed=1
+#   flags:
+#   - -tags
+#   - netgo
+  ldflags:
+  - -s -w
+  # - GODEBUG=madvdontneed=1
+defaultPlatforms:
+- linux/arm64
+- linux/amd64
+
+#   - -extldflags "-static"
+#   - -X main.version={{.Env.VERSION}}

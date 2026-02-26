@@ -1,0 +1,60 @@
+{{- if .Values.cluster.mysql -}}
+apiVersion: apps.kubeblocks.io/v1alpha1
+kind: Cluster
+metadata:
+    name: {{ .Release.Name | trimSuffix "-" }}
+    annotations:
+      kubeblocks.io/version: "0.9.3"
+      w7panel.kubeblocks.io/port: "3306"
+      w7panel.kubeblocks.io/account-secret-name: {{ .Release.Name | trimSuffix "-" }}-mysql-account-root
+      w7panel.kubeblocks.io/host: {{ .Release.Name | trimSuffix "-" }}-mysql-mysql-server
+      w7panel.kubeblocks.io/configmap-name: {{ .Release.Name | trimSuffix "-" }}-mysql-mysql-replication-config
+      w7panel.kubeblocks.io/configmap-format: "ini"
+       w7panel.kubeblocks.io/configmap-format-sectionname: "mysqld"
+      w7panel.kubeblocks.io/reconfigure-name: mysql-replication-config
+      w7panel.kubeblocks.io/reconfigure-component-name: mysql
+      w7panel.kubeblocks.io/configmap-key: my.cnf
+      # 如果版本5.7以下，请使用mysql5.7 如果是8.0，8.4以上，请使用mysql8.0 
+      {{- if eq .Values.cluster.serviceVersion "5.7.44" }}
+      w7panel.kubeblocks.io/constraints-name: oracle-mysql5.7-config-constraints
+      {{- else }}
+      w7panel.kubeblocks.io/constraints-name: oracle-mysql8.0-config-constraints
+      {{- end }}
+    labels:
+       w7panel.kubeblocks.io/version: {{ .Values.cluster.serviceVersion | toString }}
+       w7panel.kubeblocks.io/name: mysql
+spec:
+    # clusterDefinitionRef: {{ .Values.cluster.clusterDefinitionRef | quote }}
+    # clusterVersionRef: {{ .Values.cluster.clusterVersionRef | quote }}
+    # clusterDef: mysql
+    componentSpecs:
+        -
+            # componentDef: {{ .Values.cluster.componentDef | toString }}
+            componentDef: mysql-{{ .Values.cluster.serviceVersion | trunc 3 }}
+            monitor: false
+            name: mysql
+            serviceVersion: {{ .Values.cluster.serviceVersion | quote }}
+            replicas: {{ .Values.replicaCount | toString }}
+            resources:
+                limits:
+                    cpu: {{ .Values.cluster.cpu | quote }}
+                    memory: {{ .Values.cluster.memory | quote }}
+                requests:
+                    cpu: {{ .Values.cluster.cpu | quote }}
+                    memory: {{ .Values.cluster.memory | quote }}
+            # serviceAccountName: w7panel-offline
+            switchPolicy:
+                type: Noop
+            volumeClaimTemplates:
+                -
+                    name: data
+                    spec:
+                        accessModes:
+                            - {{ .Values.cluster.storageRWMode | quote }}
+                        resources:
+                            requests:
+                                storage: {{ .Values.cluster.storageSize | quote }}
+                        storageClassName: {{ .Values.cluster.storageClassName | quote }}
+    terminationPolicy: Delete
+{{- end }}  
+

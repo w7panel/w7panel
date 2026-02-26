@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: 'hami-31992'
+    static_configs:
+      - targets: ['218.23.2.55:31992']
+  - job_name: 'hami-31993'
+    static_configs:
+      - targets: ['218.23.2.55:31993']     
+  - job_name: 'hami-webui'
+    static_configs:
+      - targets: ['hamiui-hami-webui.kube-system.svc:8000']
+  - job_name: 'nvidia-dcgm-exporter'
+    static_configs:
+      - targets: ['nvidia-dcgm-exporter.default.svc:9400']
+  - job_name: 'panel'
+    static_configs:
+      - targets: ['218.23.2.55:9090']
+  - job_name: 'victoriametrics'
+    static_configs:
+      - targets: ['metricssingle-kynvjpzq.default.svc.cluster.local:8428']

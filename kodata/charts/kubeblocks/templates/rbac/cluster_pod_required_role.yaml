@@ -1,0 +1,30 @@
+# permissions for end users to edit clusters.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kubeblocks-cluster-pod-role
+  labels:
+    {{- include "kubeblocks.labels" . | nindent 4 }}
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      {{- include "kubeblocks.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/required-by: pod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "kubeblocks.fullname" . }}-kbagent-pod-role
+  labels:
+    {{- include "kubeblocks.labels" . | nindent 4 }}
+    app.kubernetes.io/required-by: pod
+rules:
+# this is needed to create role probe events
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - get
+  - update

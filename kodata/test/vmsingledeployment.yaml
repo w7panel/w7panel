@@ -1,0 +1,125 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+    name: vms-single2-victoria-metrics-single-server
+    namespace: default
+    uid: 1199930f-1296-44da-a400-f3811bd62fcb
+    resourceVersion: '640656'
+    generation: 2
+    creationTimestamp: '2025-03-12T14:07:18Z'
+    labels:
+        app: server
+        app.kubernetes.io/instance: vms-single2
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: victoria-metrics-single
+        app.kubernetes.io/version: v1.112.0
+        helm.sh/chart: victoria-metrics-single-0.14.3
+    annotations:
+        meta.helm.sh/release-name: vms-single2
+        meta.helm.sh/release-namespace: default
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: server
+            app.kubernetes.io/instance: vms-single2
+            app.kubernetes.io/name: victoria-metrics-single
+    template:
+        metadata:
+            creationTimestamp: null
+            labels:
+                app: server
+                app.kubernetes.io/instance: vms-single2
+                app.kubernetes.io/managed-by: Helm
+                app.kubernetes.io/name: victoria-metrics-single
+                app.kubernetes.io/version: v1.112.0
+                helm.sh/chart: victoria-metrics-single-0.14.3
+        spec:
+            volumes:
+                -
+                    name: scrapeconfig
+                    configMap:
+                        name: >-
+                            vms-single2-victoria-metrics-single-server-scrapeconfig
+                        defaultMode: 420
+                -
+                    name: server-volume
+                    emptyDir: {}
+            containers:
+                -
+                    name: vmsingle
+                    image: victoriametrics/victoria-metrics:v1.112.0
+                    args:
+                        - '--envflag.enable'
+                        - '--envflag.prefix=VM_'
+                        - '--httpListenAddr=:8428'
+                        - '--loggerFormat=json'
+                        - '--maxLabelsPerTimeseries=200'
+                        - '--promscrape.config=/scrapeconfig/scrape.yml'
+                        - '--retentionPeriod=1'
+                        - '--storageDataPath=/storage'
+                    ports:
+                        -
+                            name: http
+                            containerPort: 8428
+                            protocol: TCP
+                    resources: {}
+                    volumeMounts:
+                        -
+                            name: server-volume
+                            mountPath: /storage
+                        -
+                            name: scrapeconfig
+                            mountPath: /scrapeconfig
+                    livenessProbe:
+                        tcpSocket:
+                            port: http
+                        initialDelaySeconds: 30
+                        timeoutSeconds: 5
+                        periodSeconds: 30
+                        successThreshold: 1
+                        failureThreshold: 10
+                        type: tcpSocket
+                    readinessProbe:
+                        httpGet:
+                            path: /health
+                            port: http
+                            scheme: HTTP
+                        initialDelaySeconds: 5
+                        timeoutSeconds: 5
+                        periodSeconds: 15
+                        successThreshold: 1
+                        failureThreshold: 3
+                        type: httpGet
+                    terminationMessagePath: /dev/termination-log
+                    terminationMessagePolicy: File
+                    imagePullPolicy: IfNotPresent
+                    securityContext: {}
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 60
+            dnsPolicy: ClusterFirst
+            serviceAccountName: vms-single2-victoria-metrics-single-server
+            serviceAccount: vms-single2-victoria-metrics-single-server
+            automountServiceAccountToken: true
+            securityContext: {}
+            schedulerName: default-scheduler
+    serviceName: vms-single2-victoria-metrics-single-server
+    podManagementPolicy: OrderedReady
+    updateStrategy:
+        type: RollingUpdate
+        rollingUpdate:
+            partition: 0
+    revisionHistoryLimit: 10
+    persistentVolumeClaimRetentionPolicy:
+        whenDeleted: Retain
+        whenScaled: Retain
+status:
+    observedGeneration: 2
+    replicas: 1
+    readyReplicas: 1
+    currentReplicas: 1
+    updatedReplicas: 1
+    currentRevision: vms-single2-victoria-metrics-single-server-7466ffc857
+    updateRevision: vms-single2-victoria-metrics-single-server-7466ffc857
+    collisionCount: 0
+    availableReplicas: 1

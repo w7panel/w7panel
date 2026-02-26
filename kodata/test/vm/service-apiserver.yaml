@@ -1,0 +1,47 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+    annotations:
+        meta.helm.sh/release-name: vmks
+        meta.helm.sh/release-namespace: default
+    creationTimestamp: '2025-03-14T05:57:02Z'
+    generation: 1
+    labels:
+        app.kubernetes.io/instance: vmks
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: victoria-metrics-k8s-stack
+        app.kubernetes.io/version: v1.113.0
+        helm.sh/chart: victoria-metrics-k8s-stack-0.39.0
+    name: vmks-victoria-metrics-k8s-stack-kube-api-server
+    namespace: default
+    resourceVersion: '1550344'
+    uid: d3d72248-db87-4c03-bc81-49a4da99772c
+spec:
+    endpoints:
+        -
+            bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
+            port: https
+            scheme: https
+            tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                serverName: kubernetes
+    jobLabel: component
+    namespaceSelector:
+        matchNames:
+            - default
+    selector:
+        matchLabels:
+            component: apiserver
+            provider: kubernetes
+status:
+    conditions:
+        -
+            lastTransitionTime: '2025-03-14T05:57:45Z'
+            lastUpdateTime: '2025-03-15T07:25:31Z'
+            observedGeneration: 1
+            reason: ConfigParsedAndApplied
+            status: 'True'
+            type: >-
+                vmks-victoria-metrics-k8s-stack.default.vmagent.victoriametrics.com/Applied
+    observedGeneration: 1
+    updateStatus: operational

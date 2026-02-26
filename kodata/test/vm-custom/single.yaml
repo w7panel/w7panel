@@ -1,0 +1,96 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+    name: metricssingle-kynvjpzq
+    namespace: default
+    uid: 2df255c4-56de-4152-93ac-958e621aa487
+    resourceVersion: '295660'
+    generation: 7
+    creationTimestamp: '2025-03-12T02:01:36Z'
+    labels:
+        app: metricssingle-kynvjpzq
+        w7.cc/suffix: kynvjpzq
+    annotations:
+        deployment.kubernetes.io/revision: '7'
+        title: metrics-single
+        w7.cc.app/ports: '{"8428":0}'
+        w7.cc.app/title: metrics-single
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: metricssingle-kynvjpzq
+    template:
+        metadata:
+            creationTimestamp: null
+            labels:
+                app: metricssingle-kynvjpzq
+        spec:
+            volumes:
+                -
+                    name: gzml-ekjrphfdzv
+                    persistentVolumeClaim:
+                        claimName: default-volume
+            containers:
+                -
+                    name: metricssingle-kynvjpzq
+                    image: victoriametrics/victoria-metrics:v1.113.0
+                    ports:
+                        -
+                            name: port-8428
+                            containerPort: 8428
+                            protocol: TCP
+                    env:
+                        -
+                            name: RELEASE_NAME_SUFFIX
+                            value: kynvjpzq
+                    resources:
+                        limits:
+                            cpu: '0'
+                            memory: '0'
+                    volumeMounts:
+                        -
+                            name: gzml-ekjrphfdzv
+                            mountPath: /victoria-metrics-data
+                            subPath: bb307092a427283f702c3681e85ff1b8
+                    lifecycle: {}
+                    terminationMessagePath: /dev/termination-log
+                    terminationMessagePolicy: File
+                    imagePullPolicy: IfNotPresent
+                    securityContext:
+                        privileged: false
+            restartPolicy: Always
+            terminationGracePeriodSeconds: 30
+            dnsPolicy: ClusterFirst
+            securityContext: {}
+            schedulerName: default-scheduler
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxUnavailable: 25%
+            maxSurge: 25%
+    revisionHistoryLimit: 10
+    progressDeadlineSeconds: 600
+status:
+    observedGeneration: 7
+    replicas: 1
+    updatedReplicas: 1
+    readyReplicas: 1
+    availableReplicas: 1
+    conditions:
+        -
+            type: Progressing
+            status: 'True'
+            lastUpdateTime: '2025-03-12T02:32:04Z'
+            lastTransitionTime: '2025-03-12T02:01:36Z'
+            reason: NewReplicaSetAvailable
+            message: >-
+                ReplicaSet "metricssingle-kynvjpzq-ffcb94d58" has successfully
+                progressed.
+        -
+            type: Available
+            status: 'True'
+            lastUpdateTime: '2025-03-12T06:15:19Z'
+            lastTransitionTime: '2025-03-12T06:15:19Z'
+            reason: MinimumReplicasAvailable
+            message: Deployment has minimum availability.

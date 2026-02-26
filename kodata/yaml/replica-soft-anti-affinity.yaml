@@ -1,0 +1,6 @@
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+    name: replica-soft-anti-affinity
+    namespace: longhorn-system
+value: "true"

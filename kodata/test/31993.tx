@@ -1,0 +1,33 @@
+# HELP GPUDeviceCoreAllocated Device core allocated for a certain GPU
+# TYPE GPUDeviceCoreAllocated gauge
+GPUDeviceCoreAllocated{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 20
+# HELP GPUDeviceCoreLimit Device memory core limit for a certain GPU
+# TYPE GPUDeviceCoreLimit gauge
+GPUDeviceCoreLimit{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 100
+# HELP GPUDeviceMemoryAllocated Device memory allocated for a certain GPU
+# TYPE GPUDeviceMemoryAllocated gauge
+GPUDeviceMemoryAllocated{devicecores="20",deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 6.291456e+08
+# HELP GPUDeviceMemoryLimit Device memory limit for a certain GPU
+# TYPE GPUDeviceMemoryLimit gauge
+GPUDeviceMemoryLimit{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 3.4359738368e+10
+# HELP GPUDeviceSharedNum Number of containers sharing this GPU
+# TYPE GPUDeviceSharedNum gauge
+GPUDeviceSharedNum{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 2
+# HELP nodeGPUMemoryPercentage GPU Memory Allocated Percentage on a certain GPU
+# TYPE nodeGPUMemoryPercentage gauge
+nodeGPUMemoryPercentage{deviceidx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",zone="vGPU"} 0.018310546875
+# HELP nodeGPUOverview GPU overview on a certain node
+# TYPE nodeGPUOverview gauge
+nodeGPUOverview{devicecores="20",deviceidx="0",devicememorylimit="32768",devicetype="NVIDIA-Tesla V100-SXM3-32GB",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodeid="server1",sharedcontainers="2",zone="vGPU"} 6.291456e+08
+# HELP vGPUCorePercentage vGPU core allocated from a container
+# TYPE vGPUCorePercentage gauge
+vGPUCorePercentage{containeridx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",zone="vGPU"} 10
+vGPUCorePercentage{containeridx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-p82qr",podnamespace="default",zone="vGPU"} 10
+# HELP vGPUMemoryPercentage vGPU memory percentage allocated from a container
+# TYPE vGPUMemoryPercentage gauge
+vGPUMemoryPercentage{containeridx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",zone="vGPU"} 0.0091552734375
+vGPUMemoryPercentage{containeridx="0",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-p82qr",podnamespace="default",zone="vGPU"} 0.0091552734375
+# HELP vGPUPodsDeviceAllocated vGPU Allocated from pods
+# TYPE vGPUPodsDeviceAllocated gauge
+vGPUPodsDeviceAllocated{containeridx="0",deviceusedcore="10",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-8q2zb",podnamespace="default",zone="vGPU"} 3.145728e+08
+vGPUPodsDeviceAllocated{containeridx="0",deviceusedcore="10",deviceuuid="GPU-59ab1128-3130-b95a-9870-4bd748926e97",nodename="server1",podname="gpu-cxeyttpu-5bc96fc469-p82qr",podnamespace="default",zone="vGPU"} 3.145728e+08

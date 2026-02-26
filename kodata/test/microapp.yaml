@@ -1,0 +1,16 @@
+apiVersion: microapp.w7.cc/v1alpha1
+kind: MicroApp
+metadata:
+  name: microapp-sample
+  namespace: default
+spec:
+  frontendUrl: https://zpk.w7.cc/static/gpustack_backend/index.html
+  backendUrl: /k8s/v1/namespaces/default/services/gpustack-backend-xdegqmka/proxy-no
+  config:
+    props:
+      username: "admin"
+      password: "nimkxisoeq"
+      backendUrl: /k8s/v1/namespaces/default/services/gpustack-backend-xdegqmka/proxy-no
+  title: "gpustack-backend"
+  logo: "logo.png"
+  description: "MicroApp Sample Description"

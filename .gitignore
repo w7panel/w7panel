@@ -1,0 +1,41 @@
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+.idea
+./runtime
+runtime/http.pid
+runtime/** 
+runtime/main
+./k8s-offline
+*__debug
+vendor/** 
+vendor
+./kodata/schema
+__debug**
+*/debug**
+*/__debug**
+./kodata/assets/**
+/kodata/index.yaml
+./kodata/index.yaml
+/kodata/assets
+/kodata/assets/*
+/kodata/microapp/**
+/kodata/plugins/webdav/*
+/node_modules/*
+node_modules
+k8s-offline

@@ -1,0 +1,97 @@
+app:
+  name: w7panel
+  env: debug
+  server: http
+  aeskey: ${AES_KEY-abcd44567890efgh}
+  tty_chroot_dir: ${CHROOT_DIR-} # webshell chroot 目录 空则不使用
+  console_base_url: ${CONSOLE_BASE_URL-https://console.w7.cc}
+  node_ip: ${NODE_IP-10.0.71.209} # 当前节点ip地址
+  helm_namespace: ${HELM_NAMESPACE-default}
+  helm_version: ${HELM_VERSION-0.1.240}
+  helm_release_name: ${RELEASE_NAME_SUFFIX-w7panel}
+  metadata_name: ${METADATA_NAME-w7panel}
+  deployment_name: ${DEPLOYMENT_NAME-w7panel}
+  upgrade_enable: ${UPGRADE_ENABLE-true} # 是否开启自动升级功能
+  refresh_token_enable: ${REFRESH_TOKEN_ENABLE-false} # 是否开启刷新token
+  login_seconds: ${LOGIN_SECONDS-3600} # 登陆有效时间 单位秒
+  watch: ${APP_WATCH-false} # 是否开启监控功能
+  local_mock: ${LOCAL_MOCK-false} # 开发模式：使用当前服务模拟agent（生产环境必须设为false）
+  static_path: ${KO_DATA_PATH-./kodata} # 静态文件目录
+  debug: ${DEBUG-false}
+static:
+  download_enabled: ${STATIC_DOWN_ENABLED-false}
+  microapp_path: ${MICROAPP_PATH-./kodata/microapp} # 静态文件目录
+gpustack:
+  watch: ${GPUSTACK_WATCH-false}
+upgrade:
+  enabled: ${UPGRADE_ENABLED-true} # 是否开启自动升级功能
+  check_interval: ${UPGRADE_CHECK_INTERVAL-30s} # 自动升级检查间隔 单位分钟
+  mock_upgrade: ${MOCK_UPGRADE-false} # 模拟是否有新版本
+clean:
+  enabled: ${CLEAN_ENABLED-true} # 是否开启自动升级功能
+  interval: ${CLEAN_CHECK_INTERVAL-66s} # 清理s3过期文件 单位分钟
+registry:
+  watch: ${REGISTRY_WATCH-false}
+
+mcp:
+  watch: ${MCP_WATCH-false}
+k3k:
+  watch: ${K3K_WATCH-false}
+server:
+  http:
+    host: ${W7PANEL_HTTP_SERVER_HOST-0.0.0.0}
+    port: ${W7PANEL_HTTP_SERVER_PORT-8080}
+  prof:
+    host: 0.0.0.0
+    port: 6060
+longhorn:
+  watch: ${LONGHORN_WATCH-false} # 是否监听longhorn 状态
+  mock: ${LONGHORN_MOCK-false}
+higress:
+  watch: ${HIGRESS_WATCH-false} # 是否监听higress 状态
+captcha:
+  enabled: ${CAPTCHA_ENABLED-true}
+lxcfs:
+  enabled: ${LXCFS_ENABLED-false}  
+site:
+  enabled: ${SITE_ENABLED-false}
+  token_refresh_resolution: ${TOKEN_REFRESH_RESOLUTION-600s} # token刷新间隔
+log:
+  default:
+    driver: stack
+    channels:
+      - file
+      - console
+  file:
+    driver: file
+    path: ${APP_DIR}runtime/logs/w7panel.log
+    level: ${LOG_LEVEL-info}
+  console:
+    driver: console
+    level: ${LOG_LEVEL-info}
+database:
+  default:
+    driver: sqlite
+    db_name: ${APP_DIR}w7panel.db
+    charset: utf8mb4
+    show_sql: false
+    prefix: ims_
+k8s:
+  config_path: ${KUBECONFIG-./kubeconfig.yaml}
+  default_namespace: ${K8S_DEFAULT_NAMESPACE} # 需要同步的namespace
+  config_secret_name: ${K8S_CONFIG_SECRET_NAME-w7} # 需要同步的namespace
+  login_type: k8s # 需要同步的namespace
+  watch: ${K8S_WATCH-false}
+metrics:
+  resolution: ${METRIC_RESOLUTION-60s} # 指标采集间隔 秒
+  duration: ${METRIC_DURATION-7200s} # 指标采集清理间隔 分钟
+  db_file: ${METRIC_DB_file-/tmp/metrics.db} # 指标采集清理间隔 分钟
+  enabled: ${METRIC_ENABLED-false} # 是否开启指标采集
+s3:
+  base_dir: ${S3BASEDIR-/tmp/buckets} # 上传 下载文件 临时中转目录
+pyroscope:
+  enabled: ${PYROSCOPE_ENABLED-false}
+  server_address: ${PYROSCOPE_SERVER_ADDRESS-http://172.16.1.126:4040}
+
+webhook:
+  enabled: ${WEBHOOK_ENABLED-false}

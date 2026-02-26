@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "k8s-offline-metrics.fullname" . }}-test-connection"
+  labels:
+    {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "k8s-offline-metrics.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

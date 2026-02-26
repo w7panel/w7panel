@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+    name: code.go
+    namespace: default
+    labels:
+        type: code
+    annotations: 
+        title: Go   
+data:
+    code: "package main\n\nimport (\n\t\"log/slog\"\n\t\"os\"\n\n\tw7 \"github.com/w7corp/sdk-open-cloud-go\"\n)\n\ntype License struct {\n\tAppId     string\n\tAppSecret string\n}\n\ntype ConsoleError struct {\n\tErrorMsg string `json:\"error\"`   //程序 返回error字段\n\tMessage  string `json:\"message\"` //laravel 返回message字段\n}\n\ntype Codes struct {\n\tCodes []string `json:\"codes\"`\n}\n\nfunc NewW7Client(appid, secret string) *w7.Client {\n\tclient := w7.NewClient(\n\t\tappid,\n\t\tsecret,\n\t\tw7.Option{\n\t\t\tApiUrl: \"https://console.w7.cc\",\n\t\t\tDebug:  false,\n\t\t})\n\treturn client\n}\n\n/*\n接口示例\n*/\nfunc main() {\n\n\tAPPID := os.Getenv(\"APP_ID\")      //appid\n\tSECRET := os.Getenv(\"APP_SECRET\") //appsecret\n\tpromotionId := \"7\"                //优惠id\n\tquantity := \"1\"                   //数量\n\n\turl := \"/api/thirdparty-cd/k8s-offline/sdk/promotion/\" + promotionId + \"/coupon\"\n\tcodes := &Codes{}\n\tconsoleErr := &ConsoleError{}\n\tclient := NewW7Client(APPID, SECRET)\n\trequest := client.GetHttpClient().R().SetHeader(\"accept\", \"application/json\").SetFormData(map[string]string{\n\t\t\"quantity\": quantity,\n\t})\n\tres, err := request.SetResult(codes).SetError(consoleErr).Post(url)\n\tif err != nil {\n\t\tslog.Error(\"request error\", \"error\", err)\n\t\treturn\n\t}\n\tif res.StatusCode() > 399 {\n\t\tslog.Error(\"request error\", \"error\", consoleErr.ErrorMsg, \"message\", consoleErr.Message)\n\t\treturn\n\t}\n\t// 打印请求结果\n\tslog.Info(\"request success\", \"codes\", codes)\n}\n"
