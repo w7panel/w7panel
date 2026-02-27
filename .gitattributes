@@ -1,3 +1,0 @@
-kodata/plugin/webdav/webdav.zip filter=lfs diff=lfs merge=lfs -text
-kodata/GeoLite2-City.mmdb filter=lfs diff=lfs merge=lfs -text
-kodata/ip2region_v4.xdb filter=lfs diff=lfs merge=lfs -text
