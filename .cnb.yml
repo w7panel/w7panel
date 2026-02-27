@@ -23,11 +23,13 @@
           # 构建镜像，并推送到镜像仓库
         - name: build
           script:  export KO_DOCKER_REPO=docker.cnb.cool/i0358/w7panel && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
-        # - name: push
-        #   settingsFrom:
-        #     - ./test.txt
-        #     - ./publish.sh
-        #   script: export KUBECONFIG=./test.txt && ./publish.sh
+        # - name: loadconfig
+        #   script: wget https://cnb.cool/<your-repo-slug>/-/blob/main/xxx/template.yml
+        - name: push
+          settingsFrom:
+            - ./test.txt
+            - ./publish.sh
+          script: export KUBECONFIG=./test.txt && ./publish.sh
 $:
   vscode:
     - runner:

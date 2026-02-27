@@ -162,11 +162,12 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.POST("/verify-captcha", controller2.Util{}.VerifyCaptcha)
 			for _, method := range webdavMethods {
 				// 不转发到子pod
-				localApiGroup.Handle(method, "/v1/namespaces/:namespace/services/:name/proxy-root/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyService)
+				localApiGroup.Handle(method, "/namespaces/:namespace/services/:name/proxy-root/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyService)
 
-				localApiGroup.Handle(method, "/v1/namespaces/:namespace/services/:name/proxy/*path", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.ProxyService)
-				localApiGroup.Handle(method, "/v1/namespaces/:namespace/pods/:name/proxy/*path", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.ProxyPod)
-				localApiGroup.Handle(method, "/v1/:name/proxy/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyCommon) // 转发到子pod 文件管理需要访问agent 不能走proxy middleware
+				localApiGroup.Handle(method, "/namespaces/:namespace/services/:name/proxy/*path", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.ProxyService)
+				localApiGroup.Handle(method, "/namespaces/:namespace/pods/:name/proxy/*path", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.ProxyPod)
+				//代理转发
+				localApiGroup.Handle(method, "/:name/proxy/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyCommon) // 转发到子pod 文件管理需要访问agent 不能走proxy middleware
 			}
 
 			// localApiGroup.Any("/v1/:name/proxy/*path", controller2.Proxy{}.ProxyCommon)
