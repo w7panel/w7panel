@@ -1,5 +1,5 @@
 # .cnb.yml
-1.0.*:
+1.1.*:
   tag_push:
     - env:
         - KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui
