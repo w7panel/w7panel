@@ -12,8 +12,8 @@
        
         - name: upzip
           script: cd ./kodata/ && unzip -o ./kui.zip
-        - name: unzipwebdav
-          script: cd ./kodata/plugin/webdav && unzip -o ./webdav.zip
+        # - name: unzipwebdav
+        #   script: cd ./kodata/plugin/webdav && unzip -o ./webdav.zip
         - name: logo
           script: mv ./kodata/logo.png ./kodata/assets/logo.png
         - name: login
