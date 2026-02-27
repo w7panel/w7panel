@@ -22,6 +22,8 @@ import (
 	// appsv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 )
 
+const buildimage = "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-19"
+
 type K8sResourceMetaInterface interface {
 	GetTitle() string
 	GetRootTitle() string
@@ -281,7 +283,7 @@ func ToBuildJob(p K8sResourceInterface, opt types.BuildImageInterface, shellType
 					Containers: []corev1.Container{
 						{
 							Name:            "docker-build",
-							Image:           "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-19",
+							Image:           buildimage,
 							Env:             option.ToEnv(),
 							WorkingDir:      "/workspace",
 							ImagePullPolicy: corev1.PullAlways,
@@ -997,7 +999,7 @@ func toBuildPodSpec(option types.BuildImageOption) corev1.PodSpec {
 		Containers: []corev1.Container{
 			{
 				Name:            "docker-build",
-				Image:           "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-16",
+				Image:           buildimage,
 				Env:             option.ToEnv(),
 				WorkingDir:      "/workspace",
 				ImagePullPolicy: corev1.PullAlways,
