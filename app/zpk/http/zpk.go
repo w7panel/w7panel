@@ -779,7 +779,7 @@ func (self Zpk) BuildImageJob(http *gin.Context) {
 		params.DockerRegistry.Username = "admin"
 		params.DockerRegistry.Password = "w7-secret"
 	}
-	sdk := k8s.NewK8sClient().Sdk
+	sdk := k8s.NewK8sClient()
 	if params.DockerRegistrySecretName != "" {
 		dockerSecret, err := sdk.ClientSet.CoreV1().Secrets("default").Get(sdk.Ctx, params.DockerRegistrySecretName, metav1.GetOptions{})
 		if err != nil {
