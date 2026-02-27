@@ -13,7 +13,7 @@ import (
 	helm "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk/types"
 	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
-
+	"github.com/aws/smithy-go/ptr"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -573,22 +573,50 @@ func (p *PackageApp) GetRuntimeClassName() string {
 }
 
 func (p *PackageApp) GetPodSecurityContext() *corev1.PodSecurityContext {
-	return &corev1.PodSecurityContext{
-		RunAsUser:    &p.Manifest.Platform.Container.SecurityContext.RunAsUser,
-		RunAsGroup:   &p.Manifest.Platform.Container.SecurityContext.RunAsGroup,
-		RunAsNonRoot: &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot,
-		FSGroup:      &p.Manifest.Platform.Container.SecurityContext.FsGroup,
+	result := &corev1.PodSecurityContext{
+		// RunAsUser:    &p.Manifest.Platform.Container.SecurityContext.RunAsUser,
+		// RunAsGroup:   &p.Manifest.Platform.Container.SecurityContext.RunAsGroup,
+		// RunAsNonRoot: &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot,
+		// FSGroup:      &p.Manifest.Platform.Container.SecurityContext.FsGroup,
 	}
+	if p.Manifest.Platform.Container.SecurityContext.FsGroup > 0 {
+		result.FSGroup = &p.Manifest.Platform.Container.SecurityContext.FsGroup
+	}
+	if p.Manifest.Platform.Container.SecurityContext.RunAsGroup > 0 {
+		result.RunAsGroup = &p.Manifest.Platform.Container.SecurityContext.RunAsGroup
+	}
+	if p.Manifest.Platform.Container.SecurityContext.RunAsUser > 0 {
+		result.RunAsUser = &p.Manifest.Platform.Container.SecurityContext.RunAsUser
+	}
+	if p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot {
+		result.RunAsNonRoot = &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot
+	}
+	return result
 }
 
 func (p *PackageApp) GetContainerSecurityContext() *corev1.SecurityContext {
-	return &corev1.SecurityContext{
-		RunAsUser:    &p.Manifest.Platform.Container.SecurityContext.RunAsUser,
-		RunAsGroup:   &p.Manifest.Platform.Container.SecurityContext.RunAsGroup,
-		RunAsNonRoot: &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot,
-		// Privileged:   &p.Manifest.Platform.Container.Privileged.Bool(),
-		// FSGroup:      &p.Manifest.Platform.Container.SecurityContext.FsGroup,
+	result := &corev1.SecurityContext{}
+	// if p.Manifest.Platform.Container.SecurityContext.RunAsUser > 0 {
+	// 	result.RunAsUser = &p.Manifest.Platform.Container.SecurityContext.RunAsUser
+	// }
+	// if p.Manifest.Platform.Container.SecurityContext.RunAsGroup > 0 {
+	// 	result.RunAsGroup = &p.Manifest.Platform.Container.SecurityContext.RunAsGroup
+	// }
+	// if p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot {
+	// 	result.RunAsNonRoot = &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot
+	// }
+	if p.IsPrivileged() {
+		result.Privileged = ptr.Bool(p.IsPrivileged())
 	}
+	return result
+
+	// return &corev1.SecurityContext{
+	// 	RunAsUser:    &p.Manifest.Platform.Container.SecurityContext.RunAsUser,
+	// 	RunAsGroup:   &p.Manifest.Platform.Container.SecurityContext.RunAsGroup,
+	// 	RunAsNonRoot: &p.Manifest.Platform.Container.SecurityContext.RunAsNonRoot,
+	// 	// Privileged:   &p.Manifest.Platform.Container.Privileged.Bool(),
+	// 	// FSGroup:      &p.Manifest.Platform.Container.SecurityContext.FsGroup,
+	// }
 }
 
 /*
