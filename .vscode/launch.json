@@ -1,0 +1,50 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Start Application",
+            "env": {
+                "KO_DATA_PATH": "./kodata",
+                "LONGHORN_MOCK": "true",
+                "LOCAL_MOCK": "false",
+                "REGISTRY_WATCH": "true",
+                "NODE_NAME": "server1",
+                // "USER_AGENT": "we7test-beta",
+                "GPU_MOCK": "true",
+                "HELM_VERSION": "1.0.118.45",
+                "APP_WATCH": "true",
+                "MOCK_UPGRADE": "true",
+                "LONGHORN_WATCH": "true",
+                "METRIC_ENABLED": "false",
+                "WEBHOOK_ENABLED": "true",
+                "DEPLOYMENT_NAME": "w7panel-offline",
+                "SVC_NAME": "ide-go123-gytfgzlc",
+                "STATIC_DOWN_ENABLED": "true",
+                "GPUSTACK_WATCH": "true",
+                "HIGRESS_WATCH": "true",
+                "MCP_WATCH": "true",
+                "SITE_ENABLED": "true",
+                "SDK_DEBUG": "false",
+                "K3K_WATCH": "true",
+                "K8S_WATCH": "true",
+                "DEBUG": "true",
+                "IMAGE_REPO": "ccr.ccs.tencentyun.com/afan-public/w7panel",
+                "POD_IP": "10.42.0.117",
+                "NODE_IP": "10.0.0.206"
+                // "KUBECONFIG": "/home/workspace/k8s-offline/k3k-k8-k8-kubeconfig.yaml"
+            },
+            "type": "go",
+            "request": "launch",
+            "asRoot": true,
+            "args": [
+                "server:start",
+                "http|prof"
+            ],
+            "program": "${workspaceFolder}",
+            "console": "internalConsole",
+            "dlvFlags": [
+                "--check-go-version=false"
+            ]
+        }
+    ]
+}
