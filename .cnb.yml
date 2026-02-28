@@ -5,6 +5,8 @@
         - KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui
         - KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel-dev
         # export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && export KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel 
+      imports:
+        - https://cnb.cool/i0358/mykey/-/blob/main/218.yml
       docker:
         # 通过此参数控制使用的 Dockerfile 构建镜像必须公开
         image: ccr.ccs.tencentyun.com/afan-public/ubuntu:go-build
@@ -23,13 +25,9 @@
           # 构建镜像，并推送到镜像仓库
         - name: build
           script:  export KO_DOCKER_REPO=docker.cnb.cool/i0358/w7panel && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
-        # - name: loadconfig
-        #   script: wget https://cnb.cool/<your-repo-slug>/-/blob/main/xxx/template.yml
-        - name: push
-          settingsFrom:
-            - ./test.txt
-            - ./publish.sh
-          script: export KUBECONFIG=./test.txt && ./publish.sh
+
+        - name: publish
+          script: echo $HELM_KUBECAFILE_BASE64 | base64 -d >/tmp/ca.crt && ./publish.sh
 $:
   vscode:
     - runner:
