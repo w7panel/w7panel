@@ -48,10 +48,10 @@ func (self Zpk) GetConfig(http *gin.Context) {
 		return
 	}
 
-	if params.ThirdpartyCDToken == "" {
-		self.JsonResponseWithServerError(http, errors.New("thirdpartyCDToken is required, please login first or refresh the page"))
-		return
-	}
+	// if params.ThirdpartyCDToken == "" {
+	// 	self.JsonResponseWithServerError(http, errors.New("thirdpartyCDToken is required, please login first or refresh the page"))
+	// 	return
+	// }
 
 	var config []types.PackageAddConfig
 

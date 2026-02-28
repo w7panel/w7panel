@@ -420,7 +420,7 @@ func (self PodExec) GetAgentPodAndPid(http *gin.Context) {
 	} else {
 		// 生产模式: 通过 agent pod 代理访问
 		webdavUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
-		webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
+		webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/agent" //前端根据这个过滤掉 当前目录?
 		compressUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/compress-agent/" + pidstr
 		permissionUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/permission-agent/" + pidstr
 		if subPid > 0 {
