@@ -27,7 +27,7 @@
         #   script: export KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel-dev && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
           # 构建镜像，并推送到镜像仓库
         - name: build
-          script:  export KO_DOCKER_REPO=docker.cnb.cool/i0358/w7panel && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
+          script:  export KO_DOCKER_REPO=docker.cnb.cool/i0358/zpk && export KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui && /root/go/bin/ko build --bare --tags=${CNB_BRANCH} --tag-only --sbom=none --platform=all
 
         - name: publish
           script: echo $HELM_KUBECAFILE_BASE64 | base64 -d >/tmp/ca.crt && ./publish.sh
