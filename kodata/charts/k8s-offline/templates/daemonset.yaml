@@ -1,0 +1,78 @@
+{{- if .Values.daemonset.create -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "helm.fullname" . }}-agent
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+    w7.cc/title : "面板代理"
+    title : "面板代理"
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "helm.fullname" . }}-agent
+  template:
+    metadata:
+      labels:
+        app: {{ include "helm.fullname" . }}-agent
+        {{- with .Values.daemonset.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      hostPID: true
+      hostIPC: true
+      serviceAccountName: {{ .Release.Name }}
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /
+          type: ""
+      tolerations:
+      - 
+        operator: Exists
+        effect: NoSchedule        
+      containers:
+        - name: k8s-offline-ds
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8000
+            protocol: TCP
+            name: http
+            # readOnly: true
+          env: 
+          - name: GOGC
+            value: "10"
+          - name: REGISTRY_WATCH
+            value: "true"     
+          - name: IS_AGENT
+            value: "true"   
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP  
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP        
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName     
+          - name: TZ
+            value: {{ .Values.timezone | quote }} 
+          args:
+            - server:start
+          securityContext:
+            privileged: true
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}  
+          volumeMounts:
+            - name: host-root
+              mountPath: /host
+{{- end }}            
+
+
+        

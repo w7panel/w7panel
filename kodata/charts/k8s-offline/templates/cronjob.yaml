@@ -1,0 +1,107 @@
+{{- if .Values.cronjob.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "helm.fullname" . }}-order
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+    w7.cc/title: "微擎面板订单"
+    title: "微擎面板订单"
+spec:
+  schedule: {{ .Values.cronjob.schedule | quote }}
+  {{- with .Values.cronjob.timezone }}
+  timeZone: {{ . | quote }}
+  {{- end }}
+  concurrencyPolicy: {{ .Values.cronjob.concurrencyPolicy | default "Allow" }}
+  {{- if .Values.cronjob.suspend }}
+  suspend: {{ .Values.cronjob.suspend }}
+  {{- end }}
+  startingDeadlineSeconds: {{ .Values.cronjob.startingDeadlineSeconds | default 300 }}
+  jobTemplate:
+    spec:
+      {{- with .Values.cronjob.jobTemplate.activeDeadlineSeconds }}
+      activeDeadlineSeconds: {{ . }}
+      {{- end }}
+      {{- with .Values.cronjob.jobTemplate.backoffLimit }}
+      backoffLimit: {{ . }}
+      {{- end }}
+      {{- with .Values.cronjob.jobTemplate.completions }}
+      completions: {{ . }}
+      {{- end }}
+      {{- with .Values.cronjob.jobTemplate.parallelism }}
+      parallelism: {{ . }}
+      {{- end }}
+      template:
+        metadata:
+          labels:
+            {{- include "helm.selectorLabels-order" . | nindent 12 }}
+            {{- with .Values.cronjob.podLabels }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          annotations:
+            w7.cc/title: "微擎面板订单"
+            title: "微擎面板订单"
+        spec:
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cronjob.restartPolicy }}
+          restartPolicy: {{ . }}
+          {{- end }}
+          serviceAccountName: {{ .Release.Name }}
+          {{- with .Values.cronjob.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cronjob.priorityClassName }}
+          priorityClassName: {{ . }}
+          {{- end }}
+          containers:
+          - name: {{ .Chart.Name }}-cronjob
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            {{- with .Values.cronjob.command }}
+            command:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.args }}
+            args:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.env }}
+            env:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.resources }}
+            resources:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.containerSecurityContext }}
+            securityContext:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+            {{- with .Values.cronjob.volumeMounts }}
+            volumeMounts:
+              {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.cronjob.volumes }}
+          volumes:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cronjob.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cronjob.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.cronjob.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+{{- end }}

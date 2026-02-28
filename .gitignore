@@ -21,7 +21,6 @@ go.work
 runtime/http.pid
 runtime/** 
 runtime/main
-
 *__debug
 vendor/** 
 vendor
@@ -38,7 +37,6 @@ __debug**
 /kodata/plugins/webdav/*
 /node_modules/*
 node_modules
-k8s-offline
 .DS_Store
 ._.DS_Store
 **/.DS_Store

@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "helm.fullname" . }}-{{ .Release.Revision }}-upgrade-{{ randAlpha 5 | lower }}
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+    title: '[自定义触发]面板更新脚本'
+    w7.cc/title: '[自定义触发]面板更新脚本'
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  activeDeadlineSeconds: 300
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+        - name: registerjob
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          command: ["sh", "-c", "$KO_DATA_PATH/shell/upgrade.sh"]
+          env:
+            - name: RELEASE_NAME_SUFFIX
+              value: {{ .Release.Name }}   
+            - name: DEPLOYMENT_NAME
+              value: {{ include "helm.fullname" . }}    
+            - name: NAMESPACE
+              value: {{ .Release.Namespace }}     
+            - name: HELM_VERSION
+              value: {{ .Values.image.tag | default .Chart.AppVersion }}
+      restartPolicy: Never
+  backoffLimit: 4
