@@ -405,30 +405,30 @@ func (self PodExec) GetAgentPodAndPid(http *gin.Context) {
 	var webdavUrl, webdavBasePath, compressUrl, permissionUrl string
 	if localMock {
 		// 本地模拟模式: 直接使用本地路由，不通过 agent 代理
-		webdavUrl = "/k8s/webdav-agent/" + pidstr + "/agent"
-		webdavBasePath = "k8s/webdav-agent/" + pidstr + "/agent"
-		compressUrl = "/k8s/compress-agent/" + pidstr
-		permissionUrl = "/k8s/permission-agent/" + pidstr
+		webdavUrl = "/panel-api/webdav-agent/" + pidstr + "/agent"
+		webdavBasePath = "panel-api/v1/webdav-agent/" + pidstr + "/agent"
+		compressUrl = "/panel-api/v1/compress-agent/" + pidstr
+		permissionUrl = "/panel-api/v1/permission-agent/" + pidstr
 		if subPid > 0 {
 			subpidstr := strconv.Itoa(subPid)
-			webdavUrl = "/k8s/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
-			webdavBasePath = "k8s/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
-			compressUrl = "/k8s/compress-agent/" + pidstr + "/subagent/" + subpidstr
-			permissionUrl = "/k8s/permission-agent/" + pidstr + "/subagent/" + subpidstr
+			webdavUrl = "/panel-api/v1/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
+			webdavBasePath = "panel-api/v1/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
+			compressUrl = "/panel-api/v1/compress-agent/" + pidstr + "/subagent/" + subpidstr
+			permissionUrl = "/panel-api/v1/permission-agent/" + pidstr + "/subagent/" + subpidstr
 		}
 		slog.Info("local_mock mode enabled", "webdavUrl", webdavUrl, "compressUrl", compressUrl, "permissionUrl", permissionUrl)
 	} else {
 		// 生产模式: 通过 agent pod 代理访问
-		webdavUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/webdav-agent/" + pidstr + "/agent"
+		webdavUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/webdav-agent/" + pidstr + "/agent"
 		webdavBasePath = "k8s/webdav-agent/" + pidstr + "/agent"
-		compressUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/compress-agent/" + pidstr
-		permissionUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/permission-agent/" + pidstr
+		compressUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/compress-agent/" + pidstr
+		permissionUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/permission-agent/" + pidstr
 		if subPid > 0 {
 			subpidstr := strconv.Itoa(subPid)
-			webdavUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
+			webdavUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
 			webdavBasePath = "k8s/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
-			compressUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/compress-agent/" + pidstr + "/subagent/" + subpidstr
-			permissionUrl = "/k8s/v1/" + podIp + ":8000/proxy/k8s/permission-agent/" + pidstr + "/subagent/" + subpidstr
+			compressUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/compress-agent/" + pidstr + "/subagent/" + subpidstr
+			permissionUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/permission-agent/" + pidstr + "/subagent/" + subpidstr
 		}
 	}
 
