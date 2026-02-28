@@ -22,7 +22,7 @@ type File struct {
 func (self File) Download(http *gin.Context) {
 	r := http.Request
 	filename := filepath.Join(facade.GetConfig().GetString("s3.base_dir"),
-		strings.TrimPrefix(r.URL.Path, "/k8s/download/"),
+		strings.TrimPrefix(r.URL.Path, "/panel-api/v1/download/"),
 	)
 	fs, err := os.Stat(filename)
 	if os.IsNotExist(err) {
