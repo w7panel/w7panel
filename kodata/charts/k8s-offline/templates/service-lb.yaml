@@ -1,0 +1,21 @@
+{{- if .Values.servicelb.create -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helm.fullname" . }}-lb
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  # if loadBalancerClass 是否空
+  {{- with .Values.servicelb.loadBalancerClass }}
+  loadBalancerClass: {{ . }}
+  {{- end }}
+  type: LoadBalancer
+  ports:
+    - port: {{ .Values.servicelb.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "helm.selectorLabels" . | nindent 4 }}
+{{- end }}

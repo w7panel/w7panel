@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "helm.fullname" . }}
+  annotations:
+    {{- include "helm.annotations" . | nindent 4 }}
+    w7.cc/title: "微擎面板"
+    title: "微擎面板"
+    w7.cc/create-svc: 'true'
+    {{- include "helm.servicelb.annotations" . | nindent 4 }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "helm.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }} 
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "helm.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Release.Name }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env: 
+          - name: GOGC
+            value: "10"
+          - name: HELM_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+          - name: RELEASE_NAME_SUFFIX
+            value: {{ .Release.Name }} 
+          - name: SERVICE_ACCOUNT_NAME
+            value: {{ .Release.Name }}   
+          - name: APP_WATCH
+            value: {{ .Values.controller.appWatch | quote }}  
+          - name: HIGRESS_WATCH
+            value: "true"     
+          - name: GPUSTACK_WATCH
+            value: {{ .Values.gpustack.watch | quote }}      
+          - name: MOCK_UPGRADE
+            value: {{ .Values.mock.upgrade | quote }} 
+          - name: LONGHORN_WATCH
+            value: {{ .Values.longhorn.watch | quote }}     
+          - name: DEPLOYMENT_NAME
+            value: {{ include "helm.fullname" . }}   
+          - name: HELM_VERSION
+            value: {{ .Values.image.tag | default .Chart.AppVersion }}
+          - name: MICROAPP_PATH
+            value: /data/microapp
+          - name: SITE_ENABLED
+            value: "true"     
+          - name: K3K_WATCH
+            value: {{ .Values.k3k.watch | quote }}     
+          - name: K8S_WATCH
+            value: {{ .Values.k8s.watch | quote }}     
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP      
+          - name: METADATA_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: SVC_NAME
+            value: {{ include "helm.fullname" . }}
+          - name: SVC_LB_CLASS
+            value: {{ .Values.servicelb.loadBalancerClass | quote }}  
+          - name: WEBHOOK_ENABLED
+            value: {{ .Values.webhook.enabled | quote }} 
+          - name: STATIC_DOWN_ENABLED
+            value: {{ .Values.static.downEnabled | quote }} 
+          - name: LOG_LEVEL
+            value: {{ .Values.log.level | quote }}   
+          - name: IMAGE_REPO
+            value: {{ .Values.image.repository | quote }}    
+          - name: TZ
+            value: {{ .Values.timezone | quote }} 
+          args:
+          - server:start
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: webhook
+              containerPort: 9443
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- if .Values.storage.enabled }}
+          volumeMounts:
+          - name: data
+            mountPath: /data
+            subPath: data
+           {{- end }}    
+      {{- if .Values.storage.enabled }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ include "helm.fullname" . }}
+      {{- end }}    
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

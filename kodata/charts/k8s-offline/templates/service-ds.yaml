@@ -1,0 +1,21 @@
+{{- if .Values.daemonset.create -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helm.fullname" . }}-agent
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  # if loadBalancerClass 是否空
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "helm.fullname" . }}-agent
+    {{- with .Values.daemonset.podLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+{{- end }}
