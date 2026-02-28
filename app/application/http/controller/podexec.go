@@ -405,10 +405,10 @@ func (self PodExec) GetAgentPodAndPid(http *gin.Context) {
 	var webdavUrl, webdavBasePath, compressUrl, permissionUrl string
 	if localMock {
 		// 本地模拟模式: 直接使用本地路由，不通过 agent 代理
-		webdavUrl = "/panel-api/files/webdav-agent/" + pidstr + "/agent"
-		webdavBasePath = "panel-api/files/v1/webdav-agent/" + pidstr + "/agent"
-		compressUrl = "/panel-api/files/v1/compress-agent/" + pidstr
-		permissionUrl = "/panel-api/files/v1/permission-agent/" + pidstr
+		webdavUrl = "/panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
+		webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
+		compressUrl = "/panel-api/v1/filescompress-agent/" + pidstr
+		permissionUrl = "/panel-api/v1/files/permission-agent/" + pidstr
 		if subPid > 0 {
 			subpidstr := strconv.Itoa(subPid)
 			webdavUrl = "/panel-api/v1/files/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
@@ -420,13 +420,13 @@ func (self PodExec) GetAgentPodAndPid(http *gin.Context) {
 	} else {
 		// 生产模式: 通过 agent pod 代理访问
 		webdavUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
-		webdavBasePath = "k8s/webdav-agent/" + pidstr + "/agent"
+		webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
 		compressUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/compress-agent/" + pidstr
 		permissionUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/permission-agent/" + pidstr
 		if subPid > 0 {
 			subpidstr := strconv.Itoa(subPid)
 			webdavUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
-			webdavBasePath = "k8s/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
+			webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/subagent/" + subpidstr + "/agent"
 			compressUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/compress-agent/" + pidstr + "/subagent/" + subpidstr
 			permissionUrl = "/panel-api/v1/" + podIp + ":8000/proxy/panel-api/v1/files/permission-agent/" + pidstr + "/subagent/" + subpidstr
 		}
