@@ -202,6 +202,8 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 
 			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid)
 		}
+		//临时兼容旧版api
+		engine.Any("/k8s/v1/namespaces/:namespace/services/:name/proxy-no/*path", middleware.ProxyNoAuth{}.Process, controller2.Proxy{}.ProxyNoAuthService)
 
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/compress", middleware.Auth{}.Process, controller2.CompressAgent{}.Compress)
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/extract", middleware.Auth{}.Process, controller2.CompressAgent{}.Extract)
