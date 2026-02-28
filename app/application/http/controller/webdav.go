@@ -255,7 +255,7 @@ func (c Webdav) HandlePid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	webDirPath := procpath.GetRootPath(pid)
 	c.handleWithPermissionPreservation(ctx,
-		"/panel-api/v1/webdav-agent/"+pid+"/agent",
+		"/panel-api/v1/files/webdav-agent/"+pid+"/agent",
 		webdav.Dir(webDirPath), pid, webDirPath)
 }
 
@@ -263,9 +263,9 @@ func (c Webdav) HandlePidSubPid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	subpid := ctx.Param("subpid")
 	webDirPath := procpath.GetRootPathWithSubPid(pid, subpid)
-	prefix := "/panel-api/v1/webdav-agent/" + pid + "/agent"
+	prefix := "/panel-api/v1/files/webdav-agent/" + pid + "/agent"
 	if subpid != "" {
-		prefix = "/panel-api/v1/webdav-agent/" + pid + "/subagent/" + subpid + "/agent"
+		prefix = "/panel-api/v1/files/webdav-agent/" + pid + "/subagent/" + subpid + "/agent"
 	}
 	c.handleWithPermissionPreservation(ctx,
 		prefix,
