@@ -10,8 +10,8 @@ import (
 	"strings"
 	"syscall"
 
-	webdav1 "gitee.com/we7coreteam/k8s-offline/common/service/webdav"
 	"gitee.com/we7coreteam/k8s-offline/common/service/procpath"
+	webdav1 "gitee.com/we7coreteam/k8s-offline/common/service/webdav"
 	"github.com/gin-gonic/gin"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 	"golang.org/x/net/webdav"
@@ -28,20 +28,20 @@ func (fs *crossDeviceFileSystem) Rename(ctx context.Context, oldName, newName st
 		errStr := err.Error()
 		if len(errStr) >= 25 && errStr[len(errStr)-25:] == "invalid cross-device link" {
 			slog.Warn("webdav Rename failed, trying cp+rm fallback", "oldName", oldName, "newName", newName, "error", err)
-			
+
 			srcPath := fs.dir + oldName
 			dstPath := fs.dir + newName
-			
+
 			if err := exec.Command("cp", "-a", srcPath, dstPath).Run(); err != nil {
 				slog.Error("cp failed", "src", srcPath, "dst", dstPath, "error", err)
 				return err
 			}
-			
+
 			if err := exec.Command("rm", "-rf", srcPath).Run(); err != nil {
 				slog.Error("rm failed", "src", srcPath, "error", err)
 				return err
 			}
-			
+
 			slog.Info("webdav Rename cp+rm fallback success", "oldName", oldName, "newName", newName)
 			return nil
 		}
@@ -157,7 +157,7 @@ func (c Webdav) handleWithPermissionPreservation(ctx *gin.Context, prefix string
 		if dir, ok := fs.(webdav.Dir); ok {
 			dirStr = string(dir)
 		}
-		
+
 		handler := webdav.Handler{
 			Prefix:     prefix,
 			FileSystem: &crossDeviceFileSystem{FileSystem: fs, dir: dirStr},
@@ -255,7 +255,7 @@ func (c Webdav) HandlePid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	webDirPath := procpath.GetRootPath(pid)
 	c.handleWithPermissionPreservation(ctx,
-		"/k8s/webdav-agent/"+pid+"/agent",
+		"/panel-api/v1/webdav-agent/"+pid+"/agent",
 		webdav.Dir(webDirPath), pid, webDirPath)
 }
 
@@ -263,9 +263,9 @@ func (c Webdav) HandlePidSubPid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	subpid := ctx.Param("subpid")
 	webDirPath := procpath.GetRootPathWithSubPid(pid, subpid)
-	prefix := "/k8s/webdav-agent/" + pid + "/agent"
+	prefix := "/panel-api/v1/webdav-agent/" + pid + "/agent"
 	if subpid != "" {
-		prefix = "/k8s/webdav-agent/" + pid + "/subagent/" + subpid + "/agent"
+		prefix = "/panel-api/v1/webdav-agent/" + pid + "/subagent/" + subpid + "/agent"
 	}
 	c.handleWithPermissionPreservation(ctx,
 		prefix,
