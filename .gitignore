@@ -1,0 +1,13 @@
+# Git 配置
+gitconfig.yaml
+
+# K8s 配置
+kubeconfig.yaml
+
+# 项目目录
+w7panel/
+w7panel-ui/
+dist/
+docs/
+backup_repo/
+codeblitz/
