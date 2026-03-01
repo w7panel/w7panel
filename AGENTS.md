@@ -1,5 +1,209 @@
 # w7panel 开发指南
 
+#====================================================
+# 全局规则 (必须遵守)
+#====================================================
+
+## 全局规则
+
+### 一、交流规则
+
+- 始终使用中文回复
+- **无特别要求时，部署测试均使用测试模式 (LOCAL_MOCK=true)**
+
+### 二、开发规范
+
+- **每次开发前先拉取最新代码**，防止代码冲突：
+  ```bash
+  # 后端
+  cd $BASE_DIR/w7panel && git fetch origin dev-v1 && git pull origin dev-v1
+  
+  # 前端
+  cd $BASE_DIR/w7panel-ui && git fetch origin dev-v1 && git pull origin dev-v1
+  ```
+
+### 三、Git 配置
+
+项目使用 `gitconfig.yaml` 管理 Git 凭证和代理配置。
+
+```yaml
+[user]
+    username = <用户名>
+    password = <GitHub Token>
+
+[http]
+    proxy = <代理服务器地址>
+
+[https]
+    proxy = <代理服务器地址>
+
+[url "https://github.com/"]
+    insteadOf = git@github.com:
+```
+
+**使用方法**:
+```bash
+# 创建软链接
+ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel/.gitconfig
+ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel-ui/.gitconfig
+```
+
+### 四、文档更新规则
+
+**项目文档分为两部分：**
+1. **AGENTS.md** - AI助手开发指南（快速参考），包含UI设计规范
+2. **/docs/** - 完整项目文档（详细说明）
+
+```
+docs/
+├── README.md           # 项目概述
+├── changelog/          # 更新日志（每版本独立文件）
+│   ├── 1.0.0.md        # 当前版本（最新文件名即为当前版本号）
+│   └── ...             # 历史版本
+├── user-guide/         # 用户操作手册
+│   ├── README.md       # 快速入门
+│   ├── app-management.md
+│   ├── file-management.md
+│   ├── storage-management.md
+│   ├── domain-management.md
+│   └── faq.md
+├── api/                # API接口文档
+├── deployment/         # 部署文档
+├── development/        # 开发指南
+└── testing/            # 测试文档
+```
+
+**以下情况必须立即更新文档：**
+
+| 触发条件 | 更新 AGENTS.md | 更新 /docs |
+|---------|---------------|-----------|
+| 新增/删除目录 | 目录结构、编译部署 | development/README.md |
+| 修改构建命令 | 编译部署 | deployment/README.md |
+| 新增/修改/删除 API | API 接口 | api/README.md |
+| 修改环境变量 | 环境变量 | deployment/README.md |
+| 新增/修改测试 | 测试流程 | testing/README.md |
+| 新增功能模块 | - | user-guide/, development/ |
+| 修改用户操作流程 | - | user-guide/ |
+| 新增/修改UI组件 | UI设计规范（第10节） | - |
+| 完成开发 | 版本管理规范 | changelog/{版本号}.md |
+| 新增后端功能 | 后端 README | w7panel/README.md |
+| 新增前端功能 | 前端 README | w7panel-ui/README.md |
+| 新增编辑器功能 | 编辑器 README | codeblitz/README.md |
+
+**更新检查清单：**
+```
+□ AGENTS.md 是否需要更新？（包括UI设计规范）
+□ docs/changelog/{版本号}.md 是否需要更新？（版本日志）
+□ docs/user-guide/ 是否需要更新？（用户操作）
+□ docs/api/ 是否需要更新？
+□ docs/deployment/ 是否需要更新？
+□ docs/development/ 是否需要更新？
+□ docs/testing/ 是否需要更新？
+□ w7panel/README.md 是否需要更新？（后端）
+□ w7panel-ui/README.md 是否需要更新？（前端）
+□ codeblitz/README.md 是否需要更新？（编辑器）
+□ tests/README.md 是否需要更新？（测试脚本）
+```
+
+**未遵守规则的后果：**
+- 其他开发者无法正确部署
+- 文档与实际代码不一致导致混乱
+- AI助手无法提供准确帮助
+
+### 五、开发流程规则
+
+#### 1. 前后端同步开发
+
+**后端修改后，必须同步修改前端：**
+- 修改了 API 返回字段 → 检查前端是否使用该字段
+- 修改了 URL 路由格式 → 检查前端 API 调用路径
+- 新增了接口 → **必须**在前端添加对应调用
+
+**重要：每次修改后端代码后，必须执行以下检查：**
+```bash
+# 1. 检查是否需要修改前端
+cd $BASE_DIR
+
+# 新增路由或修改响应字段时，搜索相关关键字
+grep -r "permission-agent\|permissionUrl\|compressUrl\|webdavUrl" w7panel-ui/src/ || true
+
+# 2. 如果前端需要修改，同步修改
+# 3. 前后端同时编译通过后才能提交
+# 4. 验证功能是否正常工作
+```
+
+**涉及文件：**
+- 后端：Controller、Service、路由
+- 前端：API 接口、页面组件、类型定义
+- 编辑器：`codeblitz/src/index.tsx`、`codeblitz/editor.html`
+- 文档：更新 AGENTS.md
+
+**未遵守规则的后果：**
+- 功能不完整，前端无法使用新接口
+- 必须返工，增加工作量
+- 破坏用户体验
+
+#### 2. 接口设计规范
+
+**遵守协议标准：**
+- **绝不破坏原有协议标准**（如 WebDAV 必须返回 XML）
+- 在原接口基础上增强功能，而非新建冗余接口
+- 保持接口统一性，避免同一功能多套实现
+
+#### 3. 性能优化规范
+
+- 最大文件大小: 50MB
+- 最大目录条目: 5000
+- 请求超时: 10秒
+- 特殊文件系统处理 (/proc, /sys, /dev)
+
+### 六、项目特定检查
+
+项目特定检查：
+- [ ] 检查是否有 `offline`、`k8soffline` 等旧命名
+- [ ] 检查 localStorage/sessionStorage 键名
+- [ ] 检查 API 路径命名
+- [ ] 检查环境变量命名
+
+### 七、API 路由规范
+
+#### 路由分层原则
+
+```
+/panel-api/v1/     面板业务 API (核心)
+/k8s-proxy/        纯粹的 K8s API 代理
+```
+
+#### 详细规范
+
+| 类型 | 前缀 | 说明 |
+|------|------|------|
+| 面板业务 | `/panel-api/v1/` | Helm、配置、密钥、事件、代理等 |
+| K8s 代理 | `/k8s-proxy/` | 仅转发 K8s API (api/v1/*, apis/*) |
+| 未授权公开 | `/panel-api/v1/noauth/site/*` | 公开接口（必须只返回业务字段） |
+
+#### 未授权接口规范 (安全优先)
+
+```
+✅ 正确：只返回业务数据
+GET /panelauth/site/beian
+Response: { "icpnumber": "xxx", "number": "xxx", "location": "xxx" }
+
+❌ 错误：返回完整 K8s 资源
+GET /panel-api/v1/noauth/namespaces/default/configmaps/beian
+Response: { "kind": "ConfigMap", "metadata": {...}, "data": {...} }
+```
+
+#### 禁止事项
+
+- ❌ 禁止将面板业务 API 放到 `/k8s-proxy/` 下
+- ❌ 禁止在 `/k8s-proxy/` 下添加非 K8s API 路由
+- ❌ 禁止创建 `/panel-api/v1/v1/*` 这样的重复前缀
+- ❌ 禁止未授权接口返回完整 K8s 资源对象
+
+#====================================================
+# 环境配置
+#====================================================
 ## 环境变量
 
 ```bash
@@ -33,8 +237,6 @@ export LOCAL_MOCK=false
 # 错误方式 - 环境变量不会传递给子进程
 nohup ./w7panel server:start &  # ❌ 不推荐
 ```
-
----
 
 ## 环境初始化规范
 
@@ -115,173 +317,6 @@ npm --version
 # 验证 Go
 go version
 ```
-
----
-
-## 交流规则
-
-- 始终使用中文回复
-- **无特别要求时，部署测试均使用测试模式 (LOCAL_MOCK=true)**
-
-### 开发规范
-
-- **每次开发前先拉取最新代码**，防止代码冲突：
-  ```bash
-  # 后端
-  cd $BASE_DIR/w7panel && git fetch origin dev-v1 && git pull origin dev-v1
-  
-  # 前端
-  cd $BASE_DIR/w7panel-ui && git fetch origin dev-v1 && git pull origin dev-v1
-  ```
-
-### Git 配置
-
-项目使用 `gitconfig.yaml` 管理 Git 凭证和代理配置。
-
-```yaml
-[user]
-    username = <用户名>
-    password = <GitHub Token>
-
-[http]
-    proxy = <代理服务器地址>
-
-[https]
-    proxy = <代理服务器地址>
-
-[url "https://github.com/"]
-    insteadOf = git@github.com:
-```
-
-**使用方法**:
-```bash
-# 创建软链接
-ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel/.gitconfig
-ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel-ui/.gitconfig
-```
-
-### 文档更新规则（重要！）
-
-**项目文档分为两部分：**
-1. **AGENTS.md** - AI助手开发指南（快速参考），包含UI设计规范
-2. **/docs/** - 完整项目文档（详细说明）
-
-```
-docs/
-├── README.md           # 项目概述
-├── changelog/          # 更新日志（每版本独立文件）
-│   ├── 1.0.0.md        # 当前版本（最新文件名即为当前版本号）
-│   └── ...             # 历史版本
-├── user-guide/         # 用户操作手册
-│   ├── README.md       # 快速入门
-│   ├── app-management.md
-│   ├── file-management.md
-│   ├── storage-management.md
-│   ├── domain-management.md
-│   └── faq.md
-├── api/                # API接口文档
-├── deployment/         # 部署文档
-├── development/        # 开发指南
-└── testing/            # 测试文档
-```
-
-**以下情况必须立即更新文档：**
-
-| 触发条件 | 更新 AGENTS.md | 更新 /docs |
-|---------|---------------|-----------|
-| 新增/删除目录 | 目录结构、编译部署 | development/README.md |
-| 修改构建命令 | 编译部署 | deployment/README.md |
-| 新增/修改/删除 API | API 接口 | api/README.md |
-| 修改环境变量 | 环境变量 | deployment/README.md |
-| 新增/修改测试 | 测试流程 | testing/README.md |
-| 新增功能模块 | - | user-guide/, development/ |
-| 修改用户操作流程 | - | user-guide/ |
-| 新增/修改UI组件 | UI设计规范（第10节） | - |
-| 完成开发 | 版本管理规范 | changelog/{版本号}.md |
-| 新增后端功能 | 后端 README | w7panel/README.md |
-| 新增前端功能 | 前端 README | w7panel-ui/README.md |
-| 新增编辑器功能 | 编辑器 README | codeblitz/README.md |
-
-**更新检查清单：**
-```
-□ AGENTS.md 是否需要更新？（包括UI设计规范）
-□ docs/changelog/{版本号}.md 是否需要更新？（版本日志）
-□ docs/user-guide/ 是否需要更新？（用户操作）
-□ docs/api/ 是否需要更新？
-□ docs/deployment/ 是否需要更新？
-□ docs/development/ 是否需要更新？
-□ docs/testing/ 是否需要更新？
-□ w7panel/README.md 是否需要更新？（后端）
-□ w7panel-ui/README.md 是否需要更新？（前端）
-□ codeblitz/README.md 是否需要更新？（编辑器）
-□ tests/README.md 是否需要更新？（测试脚本）
-```
-
-**未遵守规则的后果：**
-- 其他开发者无法正确部署
-- 文档与实际代码不一致导致混乱
-- AI助手无法提供准确帮助
-
----
-
-## 开发流程规则
-
-### 1. 前后端同步开发（项目特定）
-
-**后端修改后，必须同步修改前端：**
-- 修改了 API 返回字段 → 检查前端是否使用该字段
-- 修改了 URL 路由格式 → 检查前端 API 调用路径
-- 新增了接口 → **必须**在前端添加对应调用
-
-**重要：每次修改后端代码后，必须执行以下检查：**
-```bash
-# 1. 检查是否需要修改前端
-cd $BASE_DIR
-
-# 新增路由或修改响应字段时，搜索相关关键字
-grep -r "permission-agent\|permissionUrl\|compressUrl\|webdavUrl" w7panel-ui/src/ || true
-
-# 2. 如果前端需要修改，同步修改
-# 3. 前后端同时编译通过后才能提交
-# 4. 验证功能是否正常工作
-```
-
-**涉及文件：**
-- 后端：Controller、Service、路由
-- 前端：API 接口、页面组件、类型定义
-- 编辑器：`codeblitz/src/index.tsx`、`codeblitz/editor.html`
-- 文档：更新 AGENTS.md
-
-**未遵守规则的后果：**
-- 功能不完整，前端无法使用新接口
-- 必须返工，增加工作量
-- 破坏用户体验
-
-### 2. 项目特定规范
-
-**w7panel 项目特定：**
-
-#### 接口设计规范
-
-**遵守协议标准：**
-- **绝不破坏原有协议标准**（如 WebDAV 必须返回 XML）
-- 在原接口基础上增强功能，而非新建冗余接口
-- 保持接口统一性，避免同一功能多套实现
-
-#### 性能优化规范
-
-- 最大文件大小: 50MB
-- 最大目录条目: 5000
-- 请求超时: 10秒
-- 特殊文件系统处理 (/proc, /sys, /dev)
-
-### 项目特定检查
-
-项目特定检查：
-- [ ] 检查是否有 `offline`、`k8soffline` 等旧命名
-- [ ] 检查 localStorage/sessionStorage 键名
-- [ ] 检查 API 路径命名
-- [ ] 检查环境变量命名
 
 ---
 
@@ -779,49 +814,6 @@ console.log({
   wsBaseUrl: localStorage.getItem('wsBaseUrl')
 })
 ```
-
----
-
-## API 路由规范 (v5.3)
-
-### 路由分层原则
-
-```
-/panel-api/v1/     面板业务 API (核心)
-/k8s-proxy/        纯粹的 K8s API 代理
-```
-
-### 详细规范
-
-| 类型 | 前缀 | 说明 |
-|------|------|------|
-| 面板业务 | `/panel-api/v1/` | Helm、配置、密钥、事件、代理等 |
-| K8s 代理 | `/k8s-proxy/` | 仅转发 K8s API (api/v1/*, apis/*) |
-| 未授权公开 | `/panel-api/v1/noauth/site/*` | 公开接口（必须只返回业务字段） |
-
-### 未授权接口规范 (安全优先)
-
-```
-✅ 正确：只返回业务数据-api/v1/no
-GET /panelauth/site/beian
-Response: { "icpnumber": "xxx", "number": "xxx", "location": "xxx" }
-
-❌ 错误：返回完整 K8s 资源
-GET /panel-api/v1/noauth/namespaces/default/configmaps/beian
-Response: { "kind": "ConfigMap", "metadata": {...}, "data": {...} }
-```
-
-### 禁止事项
-
-- ❌ 禁止将面板业务 API 放到 `/k8s-proxy/` 下
-- ❌ 禁止在 `/k8s-proxy/` 下添加非 K8s API 路由
-- ❌ 禁止创建 `/panel-api/v1/v1/*` 这样的重复前缀
-- ❌ 禁止未授权接口返回完整 K8s 资源对象
-
-### 参考文档
-
-- v5.4: `docs/refactoring/refactoring-plan-v5.4.md` (Hook 规范化、代码质量优化、深入分析)
-- v5.3: `docs/refactoring/refactoring-plan-v5.3.md` (API 路由重构)
 
 ---
 
