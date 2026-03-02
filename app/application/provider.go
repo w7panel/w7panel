@@ -217,6 +217,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 
 		engine.GET("/panel-api/v1/kubeconfig", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.Kubeconfig)
 		engine.Any("/panel-api/v1/s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process)
+		engine.Any("s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process) //s3fakeserver 不支持多路径
 
 		// 安全的未授权接口 - 只返回必要的公开字段
 		engine.GET("/panel-api/v1/noauth/site/beian", controller2.Site{}.Beian)
