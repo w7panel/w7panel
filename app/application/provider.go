@@ -205,6 +205,11 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		//临时兼容旧版api
 		engine.Any("/k8s/v1/namespaces/:namespace/services/:name/proxy-no/*path", middleware.ProxyNoAuth{}.Process, controller2.Proxy{}.ProxyNoAuthService)
 
+		// engine.POST("/panel-api/v1/files/upload-agent/:pid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Upload)
+		// engine.POST("/panel-api/v1/files/download-agent/:pid/download", middleware.Auth{}.Process, controller2.Webdav{}.Download)
+		// engine.POST("/panel-api/v1/files/upload-agent/:pid/subagent/:subpid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Upload)
+		// engine.POST("/panel-api/v1/files/download-agent/:pid/subagent/:subpid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Download)
+
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/compress", middleware.Auth{}.Process, controller2.CompressAgent{}.Compress)
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/extract", middleware.Auth{}.Process, controller2.CompressAgent{}.Extract)
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/subagent/:subpid/compress", middleware.Auth{}.Process, controller2.CompressAgent{}.Compress)
