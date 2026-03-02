@@ -238,21 +238,21 @@ func (self Proxy) proxyUrl(gin *gin.Context, proxyUrl string, path string) {
 		req.URL.Path = path
 
 		// 处理 WebDAV Destination 头
-		if dest := req.Header.Get("Destination"); dest != "" {
-			if destURL, err := url.Parse(dest); err == nil {
-				destPath := destURL.Path
-				if idx := strings.Index(destPath, "/k8s/webdav"); idx >= 0 {
-					destPath = destPath[idx:]
-				} else if idx := strings.Index(destPath, "/webdav"); idx >= 0 {
-					destPath = destPath[idx:]
-				}
-				if destURL.RawQuery != "" {
-					destPath += "?" + destURL.RawQuery
-				}
-				req.Header.Set("Destination", destPath)
-				slog.Info("Rewrote Destination header", "original", dest, "new", destPath)
-			}
-		}
+		// if dest := req.Header.Get("Destination"); dest != "" {
+		// 	if destURL, err := url.Parse(dest); err == nil {
+		// 		destPath := destURL.Path
+		// 		if idx := strings.Index(destPath, "/panel-api/v1/files"); idx >= 0 {
+		// 			destPath = destPath[idx:]
+		// 		} else if idx := strings.Index(destPath, "/webdav"); idx >= 0 {
+		// 			destPath = destPath[idx:]
+		// 		}
+		// 		if destURL.RawQuery != "" {
+		// 			destPath += "?" + destURL.RawQuery
+		// 		}
+		// 		req.Header.Set("Destination", destPath)
+		// 		slog.Info("Rewrote Destination header", "original", dest, "new", destPath)
+		// 	}
+		// }
 	}
 	proxy.ModifyResponse = func(res *http.Response) error {
 		res.Header.Del("Access-Control-Allow-Origin")
