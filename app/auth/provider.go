@@ -36,7 +36,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 	server.RegisterRouters(func(engine *gin.Engine) {
 		engine.POST("/panel-api/v1/login", controller2.Auth{}.Login)
 
-		localApiGroup := engine.Group("/panel-api/v1/auth").Use(middleware.Cors{}.Process)
+		localApiGroup := engine.Group("/panel-api/v1").Use(middleware.Cors{}.Process)
 		{
 			localApiGroup.POST("/login", controller2.Auth{}.Login)
 			localApiGroup.POST("/register", controller2.Auth{}.Register)
