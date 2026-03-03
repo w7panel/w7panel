@@ -36,9 +36,9 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 	server.RegisterRouters(func(engine *gin.Engine) {
 		engine.POST("/panel-api/v1/login", controller2.Auth{}.Login)
 
-		localApiGroup := engine.Group("/panel-api/v1").Use(middleware.Cors{}.Process)
+		localApiGroup := engine.Group("/panel-api/v1/auth").Use(middleware.Cors{}.Process)
 		{
-			localApiGroup.POST("/login", controller2.Auth{}.Login)
+			// localApiGroup.POST("/login", controller2.Auth{}.Login)
 			localApiGroup.POST("/register", controller2.Auth{}.Register)
 			// localApiGroup.POST("/console/k3k-register", middleware.Auth{}.Process, controller2.Auth{}.RegisterUseUid)
 			// localApiGroup.POST("/refresh-token", middleware.Auth{}.Process, controller2.Auth{}.RefreshToken) //废弃
