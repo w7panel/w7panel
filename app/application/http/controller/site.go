@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
@@ -78,4 +79,16 @@ func (self Site) InitUser(http *gin.Context) {
 	}
 
 	self.JsonResponseWithoutError(http, response)
+}
+
+func (self Site) Lianxi(http *gin.Context) {
+	sdk := k8s.NewK8sClient()
+
+	list, err := sdk.ClientSet.CoreV1().ConfigMaps(sdk.GetNamespace()).List(http, metav1.ListOptions{LabelSelector: "type=contactus"})
+	if err != nil {
+		self.JsonResponseWithoutError(http, corev1.ConfigMapList{})
+		return
+	}
+	self.JsonResponseWithoutError(http, list)
+
 }
