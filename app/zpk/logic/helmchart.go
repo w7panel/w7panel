@@ -142,7 +142,10 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	// if !packageApp.IsHelm() {
 	// packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl
 	// }
-	packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl //统一使用新的helmUrl
+	if packageApp.HelmUrl != "" {
+		packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl //统一使用新的helmUrl
+
+	}
 	helmConfig := packageApp.Manifest.Platform.Helm
 	labels := packageApp.GetLabels()
 	anno := packageApp.GetAnnotations()
