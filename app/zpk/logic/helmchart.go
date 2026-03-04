@@ -114,6 +114,7 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	}
 
 	set += " --set " + "replicas=" + strconv.Itoa(int(packageApp.Replicas))
+	// 完全交给helm 外部不干预 只提供PVC_NAME
 	// if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
 	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
 	// 	if err != nil {
