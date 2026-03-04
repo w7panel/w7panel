@@ -144,6 +144,8 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	// }
 	if packageApp.HelmUrl != "" {
 		packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl //统一使用新的helmUrl
+		packageApp.Manifest.Platform.Helm.Repository = ""                //
+		packageApp.Manifest.Platform.Helm.Version = ""                   //
 
 	}
 	helmConfig := packageApp.Manifest.Platform.Helm
