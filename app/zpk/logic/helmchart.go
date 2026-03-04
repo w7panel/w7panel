@@ -108,23 +108,28 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	for _, env := range packageApp.Manifest.Platform.Container.Env {
 		set += " --set " + childName + env.Name + "='" + env.Value + "'"
 	}
+
+	if packageApp.PvcName != "" {
+		set += " --set PVC_NAME=" + (packageApp.PvcName)
+	}
+
 	set += " --set " + "replicas=" + strconv.Itoa(int(packageApp.Replicas))
-	if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
-		jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
-		if err != nil {
-			slog.Error("helm install job", "error", err)
-		} else {
-			set += " --set-json '" + childName + "volumeMounts=" + jsonstr + "'"
-		}
-	}
-	if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
-		jsonstr, err := helper.ToJson(packageApp.GetVolumes())
-		if err != nil {
-			slog.Error("helm install job", "error", err)
-		} else {
-			set += " --set-json '" + childName + "volumes=" + jsonstr + "'"
-		}
-	}
+	// if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
+	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
+	// 	if err != nil {
+	// 		slog.Error("helm install job", "error", err)
+	// 	} else {
+	// 		set += " --set-json '" + childName + "volumeMounts=" + jsonstr + "'"
+	// 	}
+	// }
+	// if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
+	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumes())
+	// 	if err != nil {
+	// 		slog.Error("helm install job", "error", err)
+	// 	} else {
+	// 		set += " --set-json '" + childName + "volumes=" + jsonstr + "'"
+	// 	}
+	// }
 	if fillfullName {
 		set += " --set " + childName + "fullnameOverride=" + packageApp.GetName()
 	}
