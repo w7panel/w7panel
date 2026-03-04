@@ -56,9 +56,9 @@ func TestCreateBaseResourceOrder(t *testing.T) {
 	os.Setenv("USER_AGENT", "we7test-beta")
 	// os.Setenv("LOCAL_MOCK", "1")
 	os.Setenv("DEBUG", "true")
-
 	// console.SetConsoleApi("http://172.16.1.116:9004")
 	// Setup mock
+
 	sdk := k8s.NewK8sClient().Sdk
 	client, err := sdk.ToSigClient()
 	if err != nil {
