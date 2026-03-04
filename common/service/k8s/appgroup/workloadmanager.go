@@ -225,12 +225,14 @@ func (d *WorkloadManager) HandleWorkload(ds WorkloadWrapperInterface, delete boo
 	if delete {
 		if group.IsExists() {
 			group.RemoveStatusItem(itemStatus)
-			_, err := d.groupApi.Persist(group)
-			if err != nil {
-				slog.Error("delete group error", "error", err)
-				return err
+			if itemStatus.Kind != "Job" {
+				_, err := d.groupApi.Persist(group)
+				if err != nil {
+					slog.Error("delete group error", "error", err)
+					return err
+				}
+				return nil
 			}
-			return nil
 		}
 		return nil
 	}
