@@ -67,7 +67,7 @@ func TestCreateBaseResourceOrder(t *testing.T) {
 	}
 
 	sa := &v1.ServiceAccount{}
-	err = client.Get(sdk.Ctx, ktypes.NamespacedName{Namespace: "default", Name: "console-164315"}, sa)
+	err = client.Get(sdk.Ctx, ktypes.NamespacedName{Namespace: "default", Name: "console-117057"}, sa)
 	if err != nil {
 		t.Error(err)
 		return
@@ -77,8 +77,8 @@ func TestCreateBaseResourceOrder(t *testing.T) {
 	bs := types.BuyResource{
 		Cpu:       2,
 		Memory:    4,
-		Storage:   10,
-		Bandwidth: 100,
+		Storage:   5,
+		Bandwidth: 50,
 	}
 	pay, err := CreateBaseResourceOrder(&types.BuyBaseResource{CouponCode: "", BaseConfigName: "admin", UnitQuantity: types.UnitQuantity{Unit: "month", Quantity: 1}, BuyResource: bs}, k3kUser)
 	if err != nil {
