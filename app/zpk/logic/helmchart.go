@@ -115,8 +115,9 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	}
 
 	set += " --set " + "replicas=" + strconv.Itoa(int(packageApp.Replicas))
-	// 正常应该 完全交给helm 外部不干预 只提供PVC_NAME 子应用无法获取原始volume volumes 配置
+	// 正常应该 完全交给helm 外部不干预 只提供PVC_NAME
 	// 目前因为subPath问题，需要直接传volumes volumeMounts
+	// 子应用无法获取原始volume volumes 配置
 	// if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
 	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
 	// 	if err != nil {
