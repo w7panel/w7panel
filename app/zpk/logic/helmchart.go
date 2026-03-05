@@ -111,7 +111,7 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 
 	if packageApp.PvcName != "" {
 		// set += " --set PVC_NAME=" + (packageApp.PvcName)
-		set += " --set " + childName + "PVC_NAME='" + (packageApp.PvcName)
+		set += " --set " + childName + "PVC_NAME=" + (packageApp.PvcName)
 	}
 
 	set += " --set " + "replicas=" + strconv.Itoa(int(packageApp.Replicas))
