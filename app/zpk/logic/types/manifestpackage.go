@@ -215,6 +215,9 @@ func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bo
 			//根据DeployName 获取上次的安装参数
 			suffix := getSuffix(releaseName)
 			result.DeployName = GetDeployName(p.Manifest.Application.Identifie, suffix)
+			if p.Manifest.IsOnce() { // fix 获取上次安装参数的问题
+				result.DeployName = GetIdentifieName(p.Manifest.Application.Identifie)
+			}
 		}
 	}
 	if p.Manifest.IsHelm() {
