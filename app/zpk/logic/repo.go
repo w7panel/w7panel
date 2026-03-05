@@ -292,7 +292,7 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 		copyPkg.Manifest.Application.Identifie = formula.Name
 		copyPkg.Manifest.Application.Name = formula.Title
 		copyPkg.RequireInstall = formula.Required
-		copyPkg.Manifest.StartParams = formula.StartParams
+		copyPkg.Manifest.Platform.Container.StartParams = formula.StartParams
 
 		p.Children[formula.Name] = copyPkg
 	}
