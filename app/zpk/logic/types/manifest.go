@@ -60,6 +60,9 @@ func (m *Manifest) MenuLabels() map[string]string {
 	return result
 }
 func (m *Manifest) requrirePvc() bool {
+	if m.Platform.Container.RequirePvc {
+		return true
+	}
 	volumes := m.Platform.Container.Volumes
 	for _, volume := range volumes {
 		if volume.Type == "diskStorage" {
@@ -308,6 +311,7 @@ type Container struct {
 	StartParams         []StartParams   `json:"startParams"`
 	Volumes             []Volumes       `json:"volumes"`
 	Shells              []Shell         `json:"shells"`
+	RequirePvc          bool            `json:"requirePvc"` // repo.go mockchild 应用 赋给值
 }
 
 // IsPrivileged 返回Container是否有特权
@@ -442,7 +446,7 @@ type InstallFormula struct {
 	Name        string        `json:"name"`
 	Title       string        `json:"title"`
 	Required    bool          `json:"required"`
-	RequirePvc  bool          `json:"requirePvc"`
+	RequirePvc  bool          `json:"requirepvc"`
 	StartParams []StartParams `json:"start_params"`
 }
 

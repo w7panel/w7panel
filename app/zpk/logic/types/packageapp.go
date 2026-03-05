@@ -27,7 +27,9 @@ func GetDeployName(identifie, suffix string) string {
 	identifie = strings.ToLower(strings.Replace(identifie, "_", "-", -1))
 	return strings.ToLower(strings.ReplaceAll(identifie+"-"+suffix, "_", "-"))
 }
-
+func GetIdentifieName(identifie string) string {
+	return strings.ToLower(strings.ReplaceAll(identifie, "_", "-"))
+}
 func getSuffix(releaseName string) string {
 	suffix := releaseName
 	rp := strings.Split(suffix, "-")
