@@ -208,6 +208,7 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 		DeployItems:        zpkInfo.Data.DeployItems,
 		IconUrl:            zpkInfo.Data.IconUrl,
 		Ticket:             zpkInfo.Data.Ticket,
+		InstallFormulas:    zpkInfo.Data.InstallFormulas,
 	}
 
 	// if p.HelmUrl != "" {
@@ -271,7 +272,7 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 			// return p, nil
 		}
 	}
-	if isParent {
+	if isParent && p.HelmUrl == "" { //旧版才加载子应用
 		p.RequireInstall = true
 		_ = self.LoadDependsByPackage(p)
 	}

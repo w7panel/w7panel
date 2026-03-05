@@ -48,7 +48,8 @@ type Data struct {
 	ZipURL      string            `json:"zip_url"`
 	HelmUrl     string            `json:"helm_url"`
 	WebZipURL   map[string]string `json:"webzip_url"`
-	ReleaseName string            `json:"app_name"` //控制台接口用这个字段
+
+	ReleaseName string `json:"app_name"` //控制台接口用这个字段
 }
 
 func downStatic(appgroup *v1alpha1.AppGroup) {

@@ -425,16 +425,25 @@ type Version struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 type Data struct {
-	Manifest    string            `json:"manifest"`
-	Version     Version           `json:"version"`
-	ZipURL      string            `json:"zip_url"`
-	HelmUrl     string            `json:"helm_url"`
-	OciURL      string            `json:"oci_url"`
-	WebZipURL   map[string]string `json:"webzip_url"`
-	ReleaseName string            `json:"app_name"` //控制台接口用这个字段
-	DeployItems []DeployItem      `json:"deploy_items"`
-	IconUrl     string            `json:"icon_url"`
-	Ticket      string            `json:"ticket"`
+	Manifest        string            `json:"manifest"`
+	Version         Version           `json:"version"`
+	ZipURL          string            `json:"zip_url"`
+	HelmUrl         string            `json:"helm_url"`
+	OciURL          string            `json:"oci_url"`
+	WebZipURL       map[string]string `json:"webzip_url"`
+	ReleaseName     string            `json:"app_name"` //控制台接口用这个字段
+	DeployItems     []DeployItem      `json:"deploy_items"`
+	IconUrl         string            `json:"icon_url"`
+	Ticket          string            `json:"ticket"`
+	InstallFormulas []InstallFormula  `json:"install_formulas"`
+}
+
+type InstallFormula struct {
+	Name        string        `json:"name"`
+	Title       string        `json:"title"`
+	Required    bool          `json:"required"`
+	RequirePvc  bool          `json:"requirePvc"`
+	StartParams []StartParams `json:"start_params"`
 }
 
 // backend start
