@@ -28,7 +28,7 @@ var siteroZpk = siteZpkOption{}
 var stopChZpk = make(chan struct{})
 
 func (c SiteZpk) GetName() string {
-	return "site:register"
+	return "site:register-zpk"
 }
 
 func (c SiteZpk) Configure(cmd *cobra.Command) {

@@ -22,6 +22,7 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 	console.RegisterCommand(new(app.Register))
 	console.RegisterCommand(new(app.Cluster))
 	console.RegisterCommand(new(app.Site))
+	console.RegisterCommand(new(app.SiteZpk))
 	console.RegisterCommand(new(app.CreateInnerDb))
 	console.RegisterCommand(new(app.Unzip))
 
