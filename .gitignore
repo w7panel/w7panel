@@ -39,4 +39,7 @@ __debug**
 node_modules
 .DS_Store
 ._.DS_Store
+.DS_Store
+._.DS_Store
 **/.DS_Store
+kubeconfig.yaml
