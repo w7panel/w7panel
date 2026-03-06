@@ -118,22 +118,23 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	// 正常应该 完全交给helm 外部不干预 只提供PVC_NAME
 	// 目前因为subPath问题，需要直接传volumes volumeMounts
 	// 子应用无法获取原始volume volumes 配置
-	// if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
-	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
-	// 	if err != nil {
-	// 		slog.Error("helm install job", "error", err)
-	// 	} else {
-	// 		set += " --set-json '" + childName + "volumeMounts=" + jsonstr + "'"
-	// 	}
-	// }
-	// if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
-	// 	jsonstr, err := helper.ToJson(packageApp.GetVolumes())
-	// 	if err != nil {
-	// 		slog.Error("helm install job", "error", err)
-	// 	} else {
-	// 		set += " --set-json '" + childName + "volumes=" + jsonstr + "'"
-	// 	}
-	// }
+	// 
+	if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
+		jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
+		if err != nil {
+			slog.Error("helm install job", "error", err)
+		} else {
+			set += " --set-json '" + childName + "volumeMounts=" + jsonstr + "'"
+		}
+	}
+	if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
+		jsonstr, err := helper.ToJson(packageApp.GetVolumes())
+		if err != nil {
+			slog.Error("helm install job", "error", err)
+		} else {
+			set += " --set-json '" + childName + "volumes=" + jsonstr + "'"
+		}
+	}
 	if fillfullName {
 		set += " --set " + childName + "fullnameOverride=" + packageApp.GetName()
 	}

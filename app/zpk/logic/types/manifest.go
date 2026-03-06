@@ -311,7 +311,7 @@ type Container struct {
 	StartParams         []StartParams   `json:"startParams"`
 	Volumes             []Volumes       `json:"volumes"`
 	Shells              []Shell         `json:"shells"`
-	RequirePvc          bool            `json:"requirePvc"` // repo.go mockchild 应用 赋给值
+	// RequirePvc          bool            `json:"requirePvc"` // repo.go mockchild 应用 赋给值
 }
 
 // IsPrivileged 返回Container是否有特权
@@ -448,6 +448,7 @@ type InstallFormula struct {
 	Required    bool          `json:"required"`
 	RequirePvc  bool          `json:"requirepvc"`
 	StartParams []StartParams `json:"start_params"`
+	Volumes     []Volumes     `json:"volumes"`
 }
 
 // backend start

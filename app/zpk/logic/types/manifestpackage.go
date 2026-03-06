@@ -199,7 +199,7 @@ func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bo
 		RequireLimit:             requireLimit,
 		VolumeMounts:             p.GetVolumeMounts("%PVCNAME%", releaseName, nil),
 		Volumes:                  p.GetVolumes("%PVCNAME%"),
-		InstallFormulas:          p.InstallFormulas,
+		// InstallFormulas:          p.InstallFormulas,
 		// IsUpgrade: p,
 
 		// DependsOns:         p.Manifest.DependsOnes,
