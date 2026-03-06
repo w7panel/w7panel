@@ -1,45 +1,40 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 # Binaries for programs and plugins
+# Dependency directories (remove the comment below to include it)
+# Go workspace file
+# If you prefer the allow list template instead of the deny list, see community template:
+# Output of the go coverage tool, specifically when used with LiteIDE
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+# vendor/
+**/.DS_Store
+*.dll
+*.dylib
 *.exe
 *.exe~
-*.dll
-*.so
-*.dylib
-
-# Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-.idea
-./runtime
-runtime/http.pid
-runtime/** 
-runtime/main
-*__debug
-vendor/** 
-vendor
-./kodata/schema
-__debug**
-*/debug**
+*.so
 */__debug**
+*/debug**
+*__debug
 ./kodata/assets/**
-/kodata/index.yaml
 ./kodata/index.yaml
+./kodata/schema
+./runtime
+.DS_Store
+._.DS_Store
+.idea
 /kodata/assets
 /kodata/assets/*
+/kodata/index.yaml
 /kodata/microapp/**
 /kodata/plugins/webdav/*
 /node_modules/*
-node_modules
-.DS_Store
-._.DS_Store
-.DS_Store
-._.DS_Store
-**/.DS_Store
+__debug**
+go.work
 kubeconfig.yaml
+node_modules
+runtime/** 
+runtime/http.pid
+runtime/main
+vendor
+vendor/** 
