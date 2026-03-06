@@ -60,9 +60,7 @@ func (m *Manifest) MenuLabels() map[string]string {
 	return result
 }
 func (m *Manifest) requrirePvc() bool {
-	if m.Platform.Container.RequirePvc {
-		return true
-	}
+
 	volumes := m.Platform.Container.Volumes
 	for _, volume := range volumes {
 		if volume.Type == "diskStorage" {
