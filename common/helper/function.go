@@ -560,7 +560,7 @@ func WaitForNamedCacheSync(controllerName string, stopCh <-chan struct{}, cacheS
 func SelfImage() string {
 	version, ok := os.LookupEnv("HELM_VERSION")
 	if !ok {
-		version = "1.0.107"
+		version = "1.0.123"
 	}
 	baseImage, ok1 := os.LookupEnv("IMAGE_REPO")
 	if !ok1 {

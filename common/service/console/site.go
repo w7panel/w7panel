@@ -52,7 +52,7 @@ func RegisterSiteZpk(token, releaseName, host string) (appSecret *AppSecret, err
 
 }
 
-func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, namespace string) (err error) {
+func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, namespace string, containerName string) (err error) {
 	patchData := `{
 		"spec": {
 			"template": {
@@ -76,7 +76,7 @@ func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, na
 			}
 		}
 	}`
-	patchData = fmt.Sprintf(patchData, deploymentName, appSecret.AppId, appSecret.AppSecret)
+	patchData = fmt.Sprintf(patchData, containerName, appSecret.AppId, appSecret.AppSecret)
 	//deployment 修改env
 	//patch deployment
 

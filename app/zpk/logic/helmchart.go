@@ -118,7 +118,7 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	// 正常应该 完全交给helm 外部不干预 只提供PVC_NAME
 	// 目前因为subPath问题，需要直接传volumes volumeMounts
 	// 子应用无法获取原始volume volumes 配置
-	// 
+	//
 	if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
 		jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
 		if err != nil {
@@ -156,6 +156,8 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	labels := packageApp.GetLabels()
 	anno := packageApp.GetAnnotations()
 	shellCmd := "/ko-app/k8s-offline helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
+	shellCmd += " --set " + "global.panel.image=" + helper.SelfImage()
+	shellCmd += " --set " + "global.panel.thirdparty-cd-token=" + packageApp.ThirdpartyCDToken
 	atomic := false
 	set := fillHelmSet(packageApp, "", []string{"HELM_ATOMIC", "DOMAIN_URL"}, false) //pvc 站点管理 会新建一个名字出来
 
