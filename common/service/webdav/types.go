@@ -270,6 +270,27 @@ func (fs *PermissionFileSystem) handleSpecialFile(ofile *OFile, fullPath string)
 }
 
 func (fs *PermissionFileSystem) readLinkTarget(fullPath, target string) ([]byte, error) {
+	// 验证符号链接目标是否在容器根目录内，防止路径穿越
+	resolvedTarget, err := filepath.EvalSymlinks(fullPath)
+	if err != nil {
+		// 如果无法解析符号链接（如目标不存在），回退到原有逻辑
+		slog.Debug("cannot resolve symlink, fallback to original logic", "path", fullPath, "error", err)
+	} else {
+		// 清理路径并验证是否在容器根目录内
+		resolvedTarget = filepath.Clean(resolvedTarget)
+		rootDir := filepath.Clean(fs.RootDir)
+
+		// 使用 filepath.Join 处理相对路径后验证
+		if !strings.HasPrefix(resolvedTarget, rootDir) {
+			slog.Warn("symlink escapes container root - blocked",
+				"link", fullPath,
+				"target", target,
+				"resolved", resolvedTarget,
+				"root", rootDir)
+			return nil, fmt.Errorf("symlink target escapes container root: %s", target)
+		}
+	}
+
 	if isSpecialDir(filepath.Dir(target)) {
 		return fs.readSpecialFileContent(target)
 	}
@@ -317,7 +338,19 @@ func (fs *PermissionFileSystem) Stat(ctx context.Context, name string) (os.FileI
 		var symlinkTarget string
 		if isSymlink && fs.RootDir != "" {
 			fullPath := filepath.Join(fs.RootDir, name)
-			symlinkTarget, _ = os.Readlink(fullPath)
+			resolvedTarget, err := filepath.EvalSymlinks(fullPath)
+			if err == nil {
+				resolvedTarget = filepath.Clean(resolvedTarget)
+				rootDir := filepath.Clean(fs.RootDir)
+				if strings.HasPrefix(resolvedTarget, rootDir) {
+					symlinkTarget, _ = os.Readlink(fullPath)
+				} else {
+					slog.Warn("symlink escapes container root in Stat - blocked",
+						"link", fullPath,
+						"resolved", resolvedTarget,
+						"root", rootDir)
+				}
+			}
 		}
 		return &fileInfoWithPermission{fi, sysStat, symlinkTarget, isSymlink}, nil
 	}
