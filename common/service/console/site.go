@@ -35,6 +35,23 @@ func RegisterSite(token, releaseName, host string) (appSecret *AppSecret, err er
 	return cdClient.CreateSite(host, releaseName)
 }
 
+func RegisterSiteZpk(token, releaseName, host string) (appSecret *AppSecret, err error) {
+	cdClient := NewConsoleCdClient(token)
+	data := map[string]string{
+		"offlineUrl": "https://" + host,
+		"sn":         releaseName,
+	}
+	license, err := cdClient.CreateLicenseSiteZpk(data)
+	if err != nil {
+		return nil, err
+	}
+	return &AppSecret{
+		AppId:     license.AppId,
+		AppSecret: license.AppSecret,
+	}, nil
+
+}
+
 func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, namespace string) (err error) {
 	patchData := `{
 		"spec": {
