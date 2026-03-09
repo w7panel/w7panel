@@ -60,6 +60,7 @@ func (m *Manifest) MenuLabels() map[string]string {
 	return result
 }
 func (m *Manifest) requrirePvc() bool {
+
 	volumes := m.Platform.Container.Volumes
 	for _, volume := range volumes {
 		if volume.Type == "diskStorage" {
@@ -308,6 +309,7 @@ type Container struct {
 	StartParams         []StartParams   `json:"startParams"`
 	Volumes             []Volumes       `json:"volumes"`
 	Shells              []Shell         `json:"shells"`
+	// RequirePvc          bool            `json:"requirePvc"` // repo.go mockchild 应用 赋给值
 }
 
 // IsPrivileged 返回Container是否有特权
@@ -425,16 +427,26 @@ type Version struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 type Data struct {
-	Manifest    string            `json:"manifest"`
-	Version     Version           `json:"version"`
-	ZipURL      string            `json:"zip_url"`
-	HelmUrl     string            `json:"helm_url"`
-	OciURL      string            `json:"oci_url"`
-	WebZipURL   map[string]string `json:"webzip_url"`
-	ReleaseName string            `json:"app_name"` //控制台接口用这个字段
-	DeployItems []DeployItem      `json:"deploy_items"`
-	IconUrl     string            `json:"icon_url"`
-	Ticket      string            `json:"ticket"`
+	Manifest        string            `json:"manifest"`
+	Version         Version           `json:"version"`
+	ZipURL          string            `json:"zip_url"`
+	HelmUrl         string            `json:"helm_url"`
+	OciURL          string            `json:"oci_url"`
+	WebZipURL       map[string]string `json:"webzip_url"`
+	ReleaseName     string            `json:"app_name"` //控制台接口用这个字段
+	DeployItems     []DeployItem      `json:"deploy_items"`
+	IconUrl         string            `json:"icon_url"`
+	Ticket          string            `json:"ticket"`
+	InstallFormulas []InstallFormula  `json:"install_formulas"`
+}
+
+type InstallFormula struct {
+	Name        string        `json:"name"`
+	Title       string        `json:"title"`
+	Required    bool          `json:"required"`
+	RequirePvc  bool          `json:"requirepvc"`
+	StartParams []StartParams `json:"start_params"`
+	Volumes     []Volumes     `json:"volumes"`
 }
 
 // backend start

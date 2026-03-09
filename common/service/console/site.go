@@ -35,7 +35,24 @@ func RegisterSite(token, releaseName, host string) (appSecret *AppSecret, err er
 	return cdClient.CreateSite(host, releaseName)
 }
 
-func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, namespace string) (err error) {
+func RegisterSiteZpk(token, releaseName, host string) (appSecret *AppSecret, err error) {
+	cdClient := NewConsoleCdClient(token)
+	data := map[string]string{
+		"offlineUrl": "https://" + host,
+		"sn":         releaseName,
+	}
+	license, err := cdClient.CreateLicenseSiteZpk(data)
+	if err != nil {
+		return nil, err
+	}
+	return &AppSecret{
+		AppId:     license.AppId,
+		AppSecret: license.AppSecret,
+	}, nil
+
+}
+
+func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, namespace string, containerName string) (err error) {
 	patchData := `{
 		"spec": {
 			"template": {
@@ -59,7 +76,7 @@ func PatchAppId(client *k8s.Sdk, appSecret *AppSecret, deploymentName string, na
 			}
 		}
 	}`
-	patchData = fmt.Sprintf(patchData, deploymentName, appSecret.AppId, appSecret.AppSecret)
+	patchData = fmt.Sprintf(patchData, containerName, appSecret.AppId, appSecret.AppSecret)
 	//deployment 修改env
 	//patch deployment
 

@@ -11,6 +11,7 @@ import (
 	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"gitee.com/we7coreteam/k8s-offline/common/service/console"
+	"github.com/barkimedes/go-deepcopy"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -208,6 +209,7 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 		DeployItems:        zpkInfo.Data.DeployItems,
 		IconUrl:            zpkInfo.Data.IconUrl,
 		Ticket:             zpkInfo.Data.Ticket,
+		InstallFormulas:    zpkInfo.Data.InstallFormulas,
 	}
 
 	// if p.HelmUrl != "" {
@@ -273,7 +275,29 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 	}
 	if isParent {
 		p.RequireInstall = true
+	}
+	if isParent && p.HelmUrl == "" { //旧版才加载子应用
 		_ = self.LoadDependsByPackage(p)
+	}
+	p.Children = make(map[string]*types.ManifestPackage)
+	// LoadDependsByPackage 接口权限问题 改为使用InstallFormulas 全部返回 所以需要mock 子应用manifest
+	for _, formula := range p.InstallFormulas {
+		if formula.Name == p.Manifest.Application.Identifie {
+			continue
+		}
+		target, err := deepcopy.Anything(p)
+		if err != nil {
+			continue
+		}
+		copyPkg := target.(*types.ManifestPackage)
+		copyPkg.Manifest.Application.Identifie = formula.Name
+		copyPkg.Manifest.Application.Name = formula.Title
+		copyPkg.RequireInstall = formula.Required
+		// copyPkg.Manifest.Platform.Container.RequirePvc = formula.RequirePvc
+		copyPkg.Manifest.Platform.Container.StartParams = formula.StartParams
+		copyPkg.Manifest.Platform.Container.Volumes = formula.Volumes
+
+		p.Children[formula.Name] = copyPkg
 	}
 
 	return p, nil

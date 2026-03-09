@@ -40,6 +40,7 @@ func (c Site) Configure(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&sitero.Host, "host", "", "域名")
 	cmd.Flags().StringVar(&sitero.ReleaseName, "releaseName", "", "安装name")
 	cmd.Flags().StringVar(&sitero.DeploymentName, "deploymentName", "", "deployment名字")
+	// cmd.Flags().StringVar(&sitero.ContainerName, "containerName", "", "deployment名字")
 	cmd.Flags().StringVar(&sitero.Namespace, "namespace", "", "namespace")
 }
 
@@ -119,7 +120,7 @@ func (c Site) registerSite() {
 
 	slog.Info("注册站点成功", "secret", secret)
 	sdk := k8s.NewK8sClientInner()
-	err = console.PatchAppId(sdk, secret, sitero.DeploymentName, sitero.Namespace)
+	err = console.PatchAppId(sdk, secret, sitero.DeploymentName, sitero.Namespace, sitero.DeploymentName) //云应用containerName 和 deploymentName 一致
 	if err != nil {
 		slog.Error("更新appid失败", "err", err)
 		os.Exit(1)

@@ -65,11 +65,12 @@ var (
 	// ConsoleApi                     = "http://172.16.1.126:9004"
 	ConsoleCDBaseApi                = consoleApi + "/api/thirdparty-cd"
 	ConsoleCDK8sOfflineApi          = consoleApi + "/api/thirdparty-cd/k8s-offline"
-	ConsoleCDTokenConvert           = consoleApi + "/api/thirdparty-cd/token-convert"                // 转换token接口
-	ConsoleCDTokenRefresh           = consoleApi + "/api/thirdparty-cd/token/refresh"                // 刷新token接口
-	ConsoleCDPanelOrderApi          = consoleApi + "/api/thirdparty-cd/k8s-offline/order"            // 站点授权订单接口
-	ConsoleCDPanelPrepareProductApi = consoleApi + "/api/thirdparty-cd/k8s-offline/prepare"          // 站点授权准备产品接口
-	ConsoleCDPanelLicenseSiteApi    = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register" // 站点授权创建站点接口
+	ConsoleCDTokenConvert           = consoleApi + "/api/thirdparty-cd/token-convert"                    // 转换token接口
+	ConsoleCDTokenRefresh           = consoleApi + "/api/thirdparty-cd/token/refresh"                    // 刷新token接口
+	ConsoleCDPanelOrderApi          = consoleApi + "/api/thirdparty-cd/k8s-offline/order"                // 站点授权订单接口
+	ConsoleCDPanelPrepareProductApi = consoleApi + "/api/thirdparty-cd/k8s-offline/prepare"              // 站点授权准备产品接口
+	ConsoleCDPanelLicenseSiteApi    = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register"     // 站点授权创建站点接口
+	ConsoleCDPanelLicenseSiteZpkApi = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register-zpk" // 制品库创建站点接口
 	ConsoleCDPanelResourceApi       = consoleApi + "/api/thirdparty-cd/k8s-offline/panel/resource"
 	ConsoleCDPanelResourceApiSdk    = consoleApi + "/api/thirdparty-cd/sdk/k8s-offline/panel/resource"
 	ConsoleCDPanelOpenidConvertApi  = consoleApi + "/api/thirdparty-cd/k8s-offline/openid-to-cd-token"
@@ -87,7 +88,8 @@ func SetConsoleApi(api string) {
 	ConsoleCDK8sOfflineApi = consoleApi + "/api/thirdparty-cd/k8s-offline"
 	ConsoleCDPanelOrderApi = consoleApi + "/api/thirdparty-cd/k8s-offline/order"
 	ConsoleCDPanelPrepareProductApi = consoleApi + "/api/thirdparty-cd/k8s-offline/prepare"
-	ConsoleCDPanelLicenseSiteApi = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register" // 站点授权创建站点接口
+	ConsoleCDPanelLicenseSiteApi = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register"        // 站点授权创建站点接口
+	ConsoleCDPanelLicenseSiteZpkApi = consoleApi + "/api/thirdparty-cd/k8s-offline/license/register-zpk" // 制品库创建站点接口
 	ConsoleCDPanelResourceApi = consoleApi + "/api/thirdparty-cd/k8s-offline/panel/resource"
 	ConsoleCDPanelResourceApiSdk = consoleApi + "/api/thirdparty-cd/sdk/k8s-offline/panel/resource"
 	ConsoleCDPanelOpenidConvertApi = consoleApi + "/api/thirdparty-cd/k8s-offline/openid-to-cd-token" // 转换openid到cd token接口
@@ -297,6 +299,21 @@ func (c *ConsoleCdClient) CreateLicenseSite(urlValues map[string]string) (*Licen
 	result := &License{}
 	err2 := &ConsoleError{}
 	response, err := c.client.R().SetAuthToken(c.token).SetFormData(urlValues).SetResult(result).SetError(err2).Post(ConsoleCDPanelLicenseSiteApi)
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode() > 399 {
+		slog.Warn("CreateLicenseSite error", "statusCode", response.StatusCode(), "response", response.String())
+		return nil, response.Error().(error)
+	}
+	return result, nil
+}
+
+// 制品库创建站点接口
+func (c *ConsoleCdClient) CreateLicenseSiteZpk(urlValues map[string]string) (*License, error) {
+	result := &License{}
+	err2 := &ConsoleError{}
+	response, err := c.client.R().SetAuthToken(c.token).SetFormData(urlValues).SetResult(result).SetError(err2).Post(ConsoleCDPanelLicenseSiteZpkApi)
 	if err != nil {
 		return nil, err
 	}

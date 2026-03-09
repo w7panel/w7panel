@@ -108,7 +108,17 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 	for _, env := range packageApp.Manifest.Platform.Container.Env {
 		set += " --set " + childName + env.Name + "='" + env.Value + "'"
 	}
+
+	if packageApp.PvcName != "" {
+		// set += " --set PVC_NAME=" + (packageApp.PvcName)
+		set += " --set " + childName + "PVC_NAME=" + (packageApp.PvcName)
+	}
+
 	set += " --set " + "replicas=" + strconv.Itoa(int(packageApp.Replicas))
+	// 正常应该 完全交给helm 外部不干预 只提供PVC_NAME
+	// 目前因为subPath问题，需要直接传volumes volumeMounts
+	// 子应用无法获取原始volume volumes 配置
+	//
 	if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
 		jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
 		if err != nil {
@@ -133,13 +143,21 @@ func fillHelmSet(packageApp *types.PackageApp, childName string, ignore []string
 func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp) *batchv1.Job {
 	// releaseName := packageApp.GetReleaseName()
 	releaseName := packageApp.GetReleaseName()
-	if !packageApp.IsHelm() {
-		packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl
+	// if !packageApp.IsHelm() {
+	// packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl
+	// }
+	if packageApp.HelmUrl != "" {
+		packageApp.Manifest.Platform.Helm.ChartName = packageApp.HelmUrl //统一使用新的helmUrl
+		packageApp.Manifest.Platform.Helm.Repository = ""                //
+		packageApp.Manifest.Platform.Helm.Version = ""                   //
+
 	}
 	helmConfig := packageApp.Manifest.Platform.Helm
 	labels := packageApp.GetLabels()
 	anno := packageApp.GetAnnotations()
 	shellCmd := "/ko-app/k8s-offline helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
+	shellCmd += " --set " + "global.panel.image=" + helper.SelfImage()
+	shellCmd += " --set " + "global.panel.thirdparty-cd-token=" + packageApp.ThirdpartyCDToken
 	atomic := false
 	set := fillHelmSet(packageApp, "", []string{"HELM_ATOMIC", "DOMAIN_URL"}, false) //pvc 站点管理 会新建一个名字出来
 

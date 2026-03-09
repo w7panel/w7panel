@@ -67,15 +67,16 @@ func (z *Install) createHelmJob(myPack *types.PackageApp, shellType types.ShellT
 		DeployStatus: v1alpha1.StatusDeploying,
 	}
 	if shellJob != nil {
-		shellInfo := v1alpha1.ResourceInfo{
-			Name:         shellJob.Name,
-			Namespace:    myPack.GetNamespace(),
-			Kind:         "Job",
-			ApiVersion:   "batch/v1",
-			DeployStatus: v1alpha1.StatusDeploying,
-			DeployTitle:  shell.GetTitle(),
-		}
-		installResult.ResourceList = append(installResult.ResourceList, shellInfo)
+		// 新版制品库 已经自带了helm job
+		// shellInfo := v1alpha1.ResourceInfo{
+		// 	Name:         shellJob.Name,
+		// 	Namespace:    myPack.GetNamespace(),
+		// 	Kind:         "Job",
+		// 	ApiVersion:   "batch/v1",
+		// 	DeployStatus: v1alpha1.StatusDeploying,
+		// 	DeployTitle:  shell.GetTitle(),
+		// }
+		// installResult.ResourceList = append(installResult.ResourceList, shellInfo)
 	}
 	return installResult, jobs, nil
 }
