@@ -36,7 +36,7 @@ $:
     - runner:
         cpus: 8
       docker:
-        build: .ide/Dockerfile
+        image: docker.cnb.cool/i0358/kbcli-helper:ide
       services:
         - vscode
         - docker
