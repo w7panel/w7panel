@@ -24,6 +24,7 @@ type DeployItem struct {
 	IsServiceExpire bool   `json:"isServiceExpire"`
 	IsDemoExpire    bool   `json:"isDemoExpire"`
 }
+
 type ManifestPackage struct {
 	Manifest                 Manifest                    `json:"manifest"`
 	ZpkUrl                   string                      `json:"zpkUrl"`
@@ -40,6 +41,7 @@ type ManifestPackage struct {
 	DeployItems              []DeployItem                `json:"deployItems"`
 	IconUrl                  string                      `json:"iconUrl"`
 	Ticket                   string                      `json:"ticket"`
+	InstallFormulas          []InstallFormula            `json:"install_formulas"`
 }
 
 func (p *ManifestPackage) GetChartAnnotations(releaseName string) map[string]string {
@@ -160,6 +162,7 @@ type PackageAddConfig struct {
 	VolumeMounts             []corev1.VolumeMount `json:"volumesMounts"`
 	Volumes                  []corev1.Volume      `json:"volumes"`
 	IsUpgrade                bool                 `json:"isUpgrade"`
+	InstallFormulas          []InstallFormula     `json:"installFormulas"`
 }
 
 func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bool) PackageAddConfig {
@@ -196,6 +199,7 @@ func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bo
 		RequireLimit:             requireLimit,
 		VolumeMounts:             p.GetVolumeMounts("%PVCNAME%", releaseName, nil),
 		Volumes:                  p.GetVolumes("%PVCNAME%"),
+		// InstallFormulas:          p.InstallFormulas,
 		// IsUpgrade: p,
 
 		// DependsOns:         p.Manifest.DependsOnes,
@@ -211,6 +215,9 @@ func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bo
 			//根据DeployName 获取上次的安装参数
 			suffix := getSuffix(releaseName)
 			result.DeployName = GetDeployName(p.Manifest.Application.Identifie, suffix)
+			if p.Manifest.IsOnce() { // fix 获取上次安装参数的问题
+				result.DeployName = GetIdentifieName(p.Manifest.Application.Identifie)
+			}
 		}
 	}
 	if p.Manifest.IsHelm() {

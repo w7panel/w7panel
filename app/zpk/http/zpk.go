@@ -275,7 +275,7 @@ func (self Zpk) Install(http *gin.Context) {
 		return
 	}
 
-	completeUrl := "http://" + http.Request.Host + "/api/v1/zpk/build-image-success?namespace=" + params.Namespace + "&releaseName=" + releaseName +
+	completeUrl := "http://" + http.Request.Host + "/panel-api/v1/zpk/build-image-success?namespace=" + params.Namespace + "&releaseName=" + releaseName +
 		"&domainHost=" + params.IngressHost + "&deploymentName=" + packageApps.Root.GetName() + "&thirdpartyCDToken=" + params.ThirdpartyCDToken + "&api-token=" + token
 
 	packageApps.Root.InstallOption.BuildImageSuccessUrl = completeUrl

@@ -33,13 +33,10 @@ func LoginByServiceAccount(client *k8s.Sdk, sa *v1.ServiceAccount, seconds int64
 		}
 	}
 	// if refreshCdToken {
-	err := console.RefreshCDTokenUseOpenid(sa.Name)
-	if err != nil {
-		slog.Warn("刷新CDToken失败", "err", err)
-	}
+
 	// }
 
-	_, err = RefreshK3kUser(k3kUser, client, updateK3kUser)
+	_, err := RefreshK3kUser(k3kUser, client, updateK3kUser)
 	if err != nil {
 		return "", false, err
 	}
@@ -65,6 +62,13 @@ func LoginByServiceAccount(client *k8s.Sdk, sa *v1.ServiceAccount, seconds int64
 	} else {
 		go SignLastLoginTime(client, k3kUser)
 	}
+	//刷新控制台token
+	go func() {
+		err := console.RefreshCDTokenUseOpenid(sa.Name)
+		if err != nil {
+			slog.Warn("刷新CDToken失败", "err", err)
+		}
+	}()
 
 	return token, isK3kUser, nil
 }

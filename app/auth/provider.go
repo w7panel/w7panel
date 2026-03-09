@@ -22,6 +22,7 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 	console.RegisterCommand(new(app.Register))
 	console.RegisterCommand(new(app.Cluster))
 	console.RegisterCommand(new(app.Site))
+	console.RegisterCommand(new(app.SiteZpk))
 	console.RegisterCommand(new(app.CreateInnerDb))
 	console.RegisterCommand(new(app.Unzip))
 
@@ -38,7 +39,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 
 		localApiGroup := engine.Group("/panel-api/v1/auth").Use(middleware.Cors{}.Process)
 		{
-			localApiGroup.POST("/login", controller2.Auth{}.Login)
+			// localApiGroup.POST("/login", controller2.Auth{}.Login)
 			localApiGroup.POST("/register", controller2.Auth{}.Register)
 			// localApiGroup.POST("/console/k3k-register", middleware.Auth{}.Process, controller2.Auth{}.RegisterUseUid)
 			// localApiGroup.POST("/refresh-token", middleware.Auth{}.Process, controller2.Auth{}.RefreshToken) //废弃

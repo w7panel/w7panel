@@ -205,6 +205,11 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		//临时兼容旧版api
 		engine.Any("/k8s/v1/namespaces/:namespace/services/:name/proxy-no/*path", middleware.ProxyNoAuth{}.Process, controller2.Proxy{}.ProxyNoAuthService)
 
+		// engine.POST("/panel-api/v1/files/upload-agent/:pid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Upload)
+		// engine.POST("/panel-api/v1/files/download-agent/:pid/download", middleware.Auth{}.Process, controller2.Webdav{}.Download)
+		// engine.POST("/panel-api/v1/files/upload-agent/:pid/subagent/:subpid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Upload)
+		// engine.POST("/panel-api/v1/files/download-agent/:pid/subagent/:subpid/upload", middleware.Auth{}.Process, controller2.Webdav{}.Download)
+
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/compress", middleware.Auth{}.Process, controller2.CompressAgent{}.Compress)
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/extract", middleware.Auth{}.Process, controller2.CompressAgent{}.Extract)
 		engine.POST("/panel-api/v1/files/compress-agent/:pid/subagent/:subpid/compress", middleware.Auth{}.Process, controller2.CompressAgent{}.Compress)
@@ -217,14 +222,16 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 
 		engine.GET("/panel-api/v1/kubeconfig", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.Kubeconfig)
 		engine.Any("/panel-api/v1/s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process)
+		engine.Any("s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process) //s3fakeserver 不支持多路径
 
 		// 安全的未授权接口 - 只返回必要的公开字段
 		engine.GET("/panel-api/v1/noauth/site/beian", controller2.Site{}.Beian)
 		engine.GET("/panel-api/v1/noauth/site/k3k-config", controller2.Site{}.K3kConfig)
 		engine.GET("/panel-api/v1/noauth/site/init-user", controller2.Site{}.InitUser)
+		engine.GET("/panel-api/v1/noauth/site/lianxi", controller2.Site{}.Lianxi)
 
 		engine.GET("/panel-api/v1/microapp/top", middleware.Auth{}.Process, controller2.MicroApp{}.List)                     //获取microapp列表
-		engine.GET("/panel-api/v1/microapp/:name/proxy/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyMicroApp) //获取microapp列表
+		engine.Any("/panel-api/v1/microapp/:name/proxy/*path", middleware.Auth{}.Process, controller2.Proxy{}.ProxyMicroApp) //microapp proxy
 
 	})
 }
