@@ -68,10 +68,12 @@ func (lr *LimitRangeQuota) IsCpuMemoryBandWidthChange(lr2 *LimitRangeQuota) bool
 		lrHardCpu := lr.GetHardCpu()
 		lrHardMemory := lr.GetHardMemory()
 		lrHardBd := lr.GetBandWidth()
+		lrHardStorage := lr.GetHardSysRequestStorage()
 		lr2HardCpu := lr2.GetHardCpu()
 		lr2HardMemory := lr2.GetHardMemory()
 		lr2HardBd := lr2.GetBandWidth()
-		if lrHardCpu.Cmp(*lr2HardCpu) != 0 || lrHardMemory.Cmp(*lr2HardMemory) != 0 || lrHardBd.Cmp(lr2HardBd) != 0 {
+		lr2Storage := lr2.GetHardSysRequestStorage()
+		if lrHardCpu.Cmp(*lr2HardCpu) != 0 || lrHardMemory.Cmp(*lr2HardMemory) != 0 || lrHardBd.Cmp(lr2HardBd) != 0 || lrHardStorage.Cmp(*lr2Storage) != 0 {
 			return true
 		}
 	}

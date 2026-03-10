@@ -21,6 +21,7 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 	p.RegisterHttpRoutes(httpServer)
 
 	console.RegisterCommand(new(consolezpk.HelmCmd))
+	console.RegisterCommand(new(consolezpk.HelmCheckCmd))
 	console.RegisterCommand(new(consolezpk.MetricsUpgrade))
 
 }
