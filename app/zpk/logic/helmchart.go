@@ -186,22 +186,22 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 		if packageApp.IngressSeletorName != "" {
 			shellCmd += " --set ingressSelectorName=" + (packageApp.IngressSeletorName)
 		}
-		if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
-			jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
-			if err != nil {
-				slog.Error("helm install job", "error", err)
-			} else {
-				shellCmd += " --set-json 'volumeMounts=" + jsonstr + "'"
-			}
-		}
-		if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
-			jsonstr, err := helper.ToJson(packageApp.GetVolumes())
-			if err != nil {
-				slog.Error("helm install job", "error", err)
-			} else {
-				shellCmd += " --set-json 'volumes=" + jsonstr + "'"
-			}
-		}
+		// if packageApp.GetVolumeMounts() != nil && len(packageApp.GetVolumeMounts()) > 0 {
+		// 	jsonstr, err := helper.ToJson(packageApp.GetVolumeMounts())
+		// 	if err != nil {
+		// 		slog.Error("helm install job", "error", err)
+		// 	} else {
+		// 		shellCmd += " --set-json 'volumeMounts=" + jsonstr + "'"
+		// 	}
+		// }
+		// if packageApp.GetVolumes() != nil && len(packageApp.GetVolumes()) > 0 {
+		// 	jsonstr, err := helper.ToJson(packageApp.GetVolumes())
+		// 	if err != nil {
+		// 		slog.Error("helm install job", "error", err)
+		// 	} else {
+		// 		shellCmd += " --set-json 'volumes=" + jsonstr + "'"
+		// 	}
+		// }
 		shellCmd += " --set 'backend_identifier=" + packageApp.GetName() + "'"
 		shellCmd += " --set 'backend_identifie=" + packageApp.GetName() + "'"
 	}
