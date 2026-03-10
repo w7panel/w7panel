@@ -220,6 +220,10 @@ func (p *ManifestPackage) ToPackageAddConfig(releaseName string, requireLimit bo
 			}
 		}
 	}
+	if p.HelmUrl != "" || p.Manifest.IsHelm() { //helm应用volume是个黑盒
+		result.VolumeMounts = []corev1.VolumeMount{}
+		result.Volumes = []corev1.Volume{}
+	}
 	if p.Manifest.IsHelm() {
 		result.RequireLimit = false
 	}
