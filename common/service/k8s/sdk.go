@@ -414,19 +414,19 @@ func (self *Sdk) ToMetricsClient() (*metricsclient.Clientset, error) {
 }
 
 func (self *Sdk) ToSigClient() (sigclient.Client, error) {
-	startTime := time.Now()
+	// startTime := time.Now()
 
-	toRestStart := time.Now()
+	// toRestStart := time.Now()
 	config, err := self.ToRESTConfig()
-	slog.Info("[PERF] Sdk.ToSigClient - ToRESTConfig took %v", "duration", time.Since(toRestStart))
+	// slog.Info("[PERF] Sdk.ToSigClient - ToRESTConfig took %v", "duration", time.Since(toRestStart))
 	if err != nil {
 		return nil, err
 	}
 
-	newClientStart := time.Now()
+	// newClientStart := time.Now()
 	result, err := sigclient.New(config, sigclient.Options{Scheme: scheme})
-	slog.Info("[PERF] Sdk.ToSigClient - sigclient.New took %v", "duration", time.Since(newClientStart))
-	slog.Info("[PERF] Sdk.ToSigClient total time %v", "duration", time.Since(startTime))
+	// slog.Info("[PERF] Sdk.ToSigClient - sigclient.New took %v", "duration", time.Since(newClientStart))
+	// slog.Info("[PERF] Sdk.ToSigClient total time %v", "duration", time.Since(startTime))
 	return result, err
 }
 
