@@ -257,6 +257,9 @@ func (z *Install) persistGroup(group *v1alpha1.AppGroup) error {
 	oldVersion := fetchGroup.Spec.Version
 	fetchGroup.Spec = group.Spec
 	keepAnnoKey := []string{"w7.cc/domains", "w7.cc/ports", "w7.cc/default-domain", "w7.cc/create-svc"}
+	if fetchGroup.Annotations == nil {
+		fetchGroup.Annotations = map[string]string{}
+	}
 	for k, v := range group.Annotations {
 		if !lo.Contains(keepAnnoKey, k) {
 			fetchGroup.Annotations[k] = v
