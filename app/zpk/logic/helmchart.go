@@ -157,7 +157,7 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	anno := packageApp.GetAnnotations()
 	shellCmd := "/ko-app/k8s-offline helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
 	shellCmd += " --set " + "global.panel.image=" + helper.SelfImage()
-	shellCmd += " --set " + "global.panel.thirdparty-cd-token=" + packageApp.ThirdpartyCDToken
+	shellCmd += " --set " + "global.panel.thirdpartyCdToken=" + packageApp.ThirdpartyCDToken
 	atomic := false
 	set := fillHelmSet(packageApp, "", []string{"HELM_ATOMIC", "DOMAIN_URL"}, false) //pvc 站点管理 会新建一个名字出来
 
