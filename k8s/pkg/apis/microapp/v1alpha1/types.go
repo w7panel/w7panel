@@ -98,6 +98,7 @@ type Menu struct {
 	IsDefault    int    `json:"is_default,omitempty"`
 	Location     string `json:"location,omitempty"`
 	Title        string `json:"title"`
+	Parent       string `json:"parent,omitempty"`
 }
 
 type Bindings struct {
