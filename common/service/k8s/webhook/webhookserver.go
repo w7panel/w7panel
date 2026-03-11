@@ -148,6 +148,8 @@ func (m *ResourceMutator) Handle(ctx context.Context, req admission.Request) adm
 		return admission.Allowed("不需要修改的资源类型")
 	case "ServiceAccount":
 		return m.handleServiceAccount(ctx, req)
+	case "PersistentVolumeClaim": //扩容资源时候 删除pod
+		return m.handlePvc(ctx, req)
 	default:
 		return admission.Allowed("不需要修改的资源类型")
 	}

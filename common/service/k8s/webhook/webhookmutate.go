@@ -169,6 +169,14 @@ func getDefaultOperations() []admissionregistrationv1.RuleWithOperations {
 				Resources:   []string{"storageclasses"},
 			},
 		},
+		{
+			Operations: []admissionregistrationv1.OperationType{"UPDATE"},
+			Rule: admissionregistrationv1.Rule{
+				APIGroups:   []string{""},
+				APIVersions: []string{"v1"},
+				Resources:   []string{"persistentvolumeclaims"},
+			},
+		},
 	}
 }
 
