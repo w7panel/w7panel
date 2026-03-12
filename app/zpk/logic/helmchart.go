@@ -154,7 +154,7 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	}
 	helmConfig := packageApp.Manifest.Platform.Helm
 	labels := packageApp.GetLabels()
-	anno := packageApp.GetAnnotations()
+	// anno := packageApp.GetAnnotations()
 	shellCmd := "/ko-app/k8s-offline helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
 	shellCmd += " --set " + "global.panel.image=" + helper.SelfImage()
 	shellCmd += " --set " + "global.panel.thirdPartyCDToken=" + packageApp.ThirdpartyCDToken
@@ -220,16 +220,16 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 		labelstr += " --labels " + k + "='" + v + "'"
 	}
 	annostr := ""
-	for k, v := range anno {
-		// 注解字段异常导致安装失败
-		// if v == "" || k == "" {
-		// 	continue
-		// }
-		if k == "w7.cc/shells" { //临时处理
-			continue
-		}
-		annostr += " --anno " + k + "=\"" + v + "\""
-	}
+	// for k, v := range anno {
+	// 	// 注解字段异常导致安装失败
+	// 	// if v == "" || k == "" {
+	// 	// 	continue
+	// 	// }
+	// 	if k == "w7.cc/shells" { //临时处理
+	// 		continue
+	// 	}
+	// 	// annostr += " --anno " + k + "=\"" + v + "\"" //helm 安装anno
+	// }
 	if len(set) > 0 {
 		shellCmd += set
 	}

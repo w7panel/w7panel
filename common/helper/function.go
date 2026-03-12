@@ -1144,3 +1144,42 @@ func ToJson(b interface{}) (string, error) {
 	}
 	return string(json), nil
 }
+
+func HelmValflattenMap(config map[string]interface{}) map[string]string {
+	result := map[string]string{}
+	var flattenMap func(prefix string, value interface{})
+	flattenMap = func(prefix string, value interface{}) {
+		switch v := value.(type) {
+		case map[string]interface{}:
+			for k, val := range v {
+				newKey := k
+				if prefix != "" {
+					newKey = prefix + "." + k
+				}
+				flattenMap(newKey, val)
+			}
+		case []interface{}:
+			for i, val := range v {
+				newKey := prefix + "." + strconv.Itoa(i)
+				flattenMap(newKey, val)
+			}
+		case string:
+			result[prefix] = v
+		case int:
+			result[prefix] = strconv.Itoa(v)
+		case float64:
+			result[prefix] = strconv.FormatFloat(v, 'f', -1, 64)
+		case bool:
+			result[prefix] = strconv.FormatBool(v)
+		case nil:
+			result[prefix] = ""
+		default:
+			result[prefix] = ""
+		}
+	}
+
+	for key, value := range config {
+		flattenMap(key, value)
+	}
+	return result
+}
