@@ -61,3 +61,6 @@ k8s-offline qx-upgrade
 
 echo "域名解析配置"
 k8s-offline domain-config
+
+echo "升级站点管理"
+k8s-offline sitemanager-upgrade

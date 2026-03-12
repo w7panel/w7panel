@@ -3,6 +3,8 @@ echo "不再执行升级"
 if [ "${K3K_MODE}" == "virtual" ]; then
 kubectl delete ing/ing-k3k-agent -n default --ignore-not-found
 fi 
+
+
 # if [ "${K3K_MODE}" == "virtual" ]; then
 # kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f - <<EOF
 # kind: Ingress
@@ -70,3 +72,6 @@ spec:
 EOF
            
 fi
+
+echo "升级站点管理"
+k8s-offline sitemanager-upgrade
