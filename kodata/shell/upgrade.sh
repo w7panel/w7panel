@@ -43,9 +43,12 @@ kubectl patch wasmplugin w7-white-domain -n higress-system --type=merge -p '{"sp
 echo "API示例代码"
 kubectl apply -f $KO_DATA_PATH/yaml/code
 
-echo "创建创始人权限，新增某些菜单权限" 
+echo "create权限 不使用apply" 
 # kubectl get configmap k3k.permission.founder >/dev/null 2>&1 || kubectl apply -f $KO_DATA_PATH/yaml/k3k.permission.founder.yaml --server-side
 kubectl create -f $KO_DATA_PATH/yaml/permission || echo "已存在"
+
+# 创始人直接替换
+kubectl apply -f $KO_DATA_PATH/yaml/permission/k3k.permission.founder.yaml
 
 echo "卸载异常面板"
 k8s-offline uninstall-store-panel
