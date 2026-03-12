@@ -27,5 +27,7 @@ spec:
               value: {{ .Release.Namespace }}     
             - name: HELM_VERSION
               value: {{ .Values.image.tag | default .Chart.AppVersion }}
+            - name: SERVICE_ACCOUNT_NAME
+              value: {{ .Release.Name }}     
       restartPolicy: Never
   backoffLimit: 4
