@@ -284,6 +284,10 @@ func ToK3kPod(k3kUser *K3kUser) *corev1.Pod {
 			Name:  "PANEL_TOKEN",
 			Value: helper.RandomString(32),
 		},
+		{
+			Name:  "IMAGE_REPO",
+			Value: os.Getenv("IMAGE_REPO"),
+		},
 	}
 	root := true
 	pod := &corev1.Pod{
