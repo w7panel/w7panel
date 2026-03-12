@@ -75,6 +75,11 @@ func (a *AppGroupApi) GetAppGroupList(namespace string) (*appv1.AppGroupList, er
 	return a.clientset.AppgroupV1alpha1().AppGroups(namespace).List(a.sdk.Ctx, metav1.ListOptions{})
 }
 
+func (a *AppGroupApi) GetAppGroupListByLabel(namespace string, labelSelector string) (*appv1.AppGroupList, error) {
+	// return a.lister.AppGroups(namespace).List(la)
+	return a.clientset.AppgroupV1alpha1().AppGroups(namespace).List(a.sdk.Ctx, metav1.ListOptions{LabelSelector: labelSelector})
+}
+
 func (a *AppGroupApi) GetAppGroupListByIdentifie(namespace string, identifie string) (*appv1.AppGroupList, error) {
 	// return a.lister.AppGroups(namespace).List(la)
 	return a.clientset.AppgroupV1alpha1().AppGroups(namespace).List(a.sdk.Ctx, metav1.ListOptions{LabelSelector: "w7.cc/identifie=" + identifie})
