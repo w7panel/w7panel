@@ -221,7 +221,7 @@ func (t *K8sToken) K3kMode() string {
 // k8stoken.go 如果是集群用户返回普通用户角色，因为auth.go要根据role限制请求
 func (t *K8sToken) Role() string {
 	if t.IsK3kCluster() {
-		return "normal"
+		return "founder" //为了兼容站点管理 临时改为founder
 	}
 	s, err := t.GetAudience()
 	if err != nil {
