@@ -279,6 +279,7 @@ require (
 	github.com/ulikunitz/xz v0.5.12
 	github.com/we7coreteam/w7-rangine-go/v2 v2.0.2
 	go.eigsys.de/gin-cachecontrol/v2 v2.3.0
+	go.etcd.io/bbolt v1.4.3
 	golang.org/x/time v0.11.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb
 	gopkg.in/yaml.v2 v2.4.0

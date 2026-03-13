@@ -17,6 +17,7 @@ import (
 	"gitee.com/we7coreteam/k8s-offline/app/application/http/controller"
 	"gitee.com/we7coreteam/k8s-offline/app/auth"
 	"gitee.com/we7coreteam/k8s-offline/app/k3k"
+	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry"
 	metrics2 "gitee.com/we7coreteam/k8s-offline/app/metrics"
 	"gitee.com/we7coreteam/k8s-offline/app/zpk"
 	helper2 "gitee.com/we7coreteam/k8s-offline/common/helper"
@@ -182,6 +183,7 @@ func main() {
 	new(metrics2.Provider).Register(httpServer, newApp.GetConsole())
 	new(zpk.Provider).Register(httpServer, newApp.GetConsole())
 	new(k3k.Provider).Register(httpServer, newApp.GetConsole())
+	new(k3sregistry.Provider).Register(httpServer, newApp.GetConsole())
 
 	// NoRoute 必须在所有 Provider 注册之后
 	httpServer.RegisterRouters(

@@ -72,6 +72,8 @@ spec:
 EOF
            
 fi
+# "microapp升级过需要更新crd"
+kubectl apply -f $KO_DATA_PATH/crds --server-side
 
 echo "升级站点管理"
 k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_php --is-agent=true

@@ -92,6 +92,12 @@ s3:
 pyroscope:
   enabled: ${PYROSCOPE_ENABLED-false}
   server_address: ${PYROSCOPE_SERVER_ADDRESS-http://172.16.1.126:4040}
+k3s-registry:
+  enabled: ${K3S_REGISTRY_ENABLED-false} # 是否启用 K3s 本地镜像仓库功能
+  containerd_socket: ${K3S_CONTAINERD_SOCKET-/run/k3s/containerd/containerd.sock} # containerd socket 路径
+  data_dir: ${K3S_DATA_DIR-/var/lib/rancher/k3s/agent/containerd} # 数据目录
+  runtime_dir: ${K3S_RUNTIME_DIR-/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io} # Runtime 目录
+  agent_dir: ${K3S_AGENT_DIR-/var/lib/rancher/k3s/agent} # Agent 目录
 
 webhook:
   enabled: ${WEBHOOK_ENABLED-false}
