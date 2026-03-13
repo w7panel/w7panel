@@ -260,13 +260,17 @@ func (z *Install) persistGroup(group *v1alpha1.AppGroup) error {
 	if fetchGroup.Annotations == nil {
 		fetchGroup.Annotations = map[string]string{}
 	}
-	for k, v := range group.Annotations {
-		if !lo.Contains(keepAnnoKey, k) {
-			fetchGroup.Annotations[k] = v
+	keepAv := map[string]string{}
+	for k, v := range fetchGroup.Annotations {
+		if lo.Contains(keepAnnoKey, k) {
+			keepAv[k] = v
 		}
 	}
 	//更新中的版本
 	fetchGroup.Annotations = group.Annotations
+	for k, v := range keepAv {
+		fetchGroup.Annotations[k] = v
+	}
 	fetchGroup.Labels = group.Labels
 
 	fetchGroup.Spec.Version = oldVersion
@@ -301,10 +305,20 @@ func (z *Install) CreateOrUpdateGroup(namespace, name string, items []v1alpha1.D
 	if group != nil {
 		group3 := helm.ToAppGroup(z.pk.Root, items)
 		keepAnnoKey := []string{"w7.cc/domains", "w7.cc/ports", "w7.cc/default-domain", "w7.cc/create-svc"}
-		for k, v := range group3.Annotations {
-			if !lo.Contains(keepAnnoKey, k) {
-				group.Annotations[k] = v
+		// for k, v := range group3.Annotations {
+		// 	if !lo.Contains(keepAnnoKey, k) {
+		// 		group.Annotations[k] = v
+		// 	}
+		// }
+		keepAv := map[string]string{}
+		for k, v := range group.Annotations {
+			if lo.Contains(keepAnnoKey, k) {
+				keepAv[k] = v
 			}
+		}
+		group.Annotations = group3.Annotations
+		for k, v := range keepAv {
+			group.Annotations[k] = v
 		}
 		oldVersion := group.Spec.Version
 		group.Spec = group3.Spec
