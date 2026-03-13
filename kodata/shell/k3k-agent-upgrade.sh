@@ -74,4 +74,8 @@ EOF
 fi
 
 echo "升级站点管理"
-k8s-offline sitemanager-upgrade
+k8s-offline sitemanager-upgrade --version=1.0.0 --identifie=w7_php 
+k8s-offline sitemanager-upgrade --version=1.0.0 --identifie=w7_go
+k8s-offline sitemanager-upgrade --version=1.0.0 --identifie=w7_nodejs 
+k8s-offline sitemanager-upgrade --version=1.0.0 --identifie=w7_python
+k8s-offline sitemanager-upgrade --version=1.0.0 --identifie=w7_sitemanager
