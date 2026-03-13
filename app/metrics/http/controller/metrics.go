@@ -497,7 +497,7 @@ func (self Metrics) VmOperatorInstalled(http *gin.Context) {
 	isVirtual := k8stoken.IsVirtual()
 	sdk := rootSdk.Sdk
 	result := &MetricsInstall{
-		BaseUrl:   "/k8s/v1/namespaces/w7-system/services/vmsingle-vm-operator-k8s-offline-metrics-single:8429/proxy/",
+		BaseUrl:   "/k8s-proxy/v1/namespaces/w7-system/services/vmsingle-vm-operator-k8s-offline-metrics-single:8429/proxy/",
 		Installed: false,
 		Namespace: namespace,
 	}
