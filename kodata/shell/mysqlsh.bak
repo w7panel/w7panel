@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# 检查是否存在用于root权限的环境变量
+if [ -z "$MYSQL_ROOT_USERNAME" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+    echo "缺少root权限"
+    exit 1
+fi
+
+# 构建用于以root权限登录MySQL的命令参数
+mysql_root_login="-u$MYSQL_ROOT_USERNAME -p$MYSQL_ROOT_PASSWORD -h$HOST"
+
+# 测试 root 用户能否成功连接数据库
+TEST_CONNECTION_CMD="SHOW DATABASES;"
+if ! mysql $mysql_root_login -e "$TEST_CONNECTION_CMD" > /dev/null 2>&1; then
+    echo "使用 root 权限连接 MySQL 失败，请检查 MYSQL_ROOT_USERNAME 和 MYSQL_ROOT_PASSWORD 是否正确"
+    exit 1
+fi
+
+# 如果存在DB_USERNAME和DB_PASSWORD环境变量，则创建用户并授权
+if [ -n "$DB_USERNAME" ] && [ -n "$DB_PASSWORD" ]; then
+    # 创建用户并指定密码加密方式为mysql_native_password
+    CREATE_USER_CMD="CREATE USER '$DB_USERNAME'@'%' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD';"
+    mysql $mysql_root_login -e "$CREATE_USER_CMD"
+    if [ $? -eq 0 ]; then
+        echo "成功创建用户 $DB_USERNAME"
+        # 授予新用户所有权限
+        GRANT_PRIVILEGES_CMD="GRANT ALL PRIVILEGES ON *.* TO '$DB_USERNAME'@'%' WITH GRANT OPTION;"
+        mysql $mysql_root_login -e "$GRANT_PRIVILEGES_CMD"
+        if [ $? -eq 0 ]; then
+            echo "已成功授予用户 $DB_USERNAME 所有权限"
+            # 刷新权限使设置生效
+            FLUSH_PRIVILEGES_CMD="FLUSH PRIVILEGES;"
+            mysql $mysql_root_login -e "$FLUSH_PRIVILEGES_CMD"
+            echo "权限刷新成功"
+        else
+            echo "授予用户 $DB_USERNAME 所有权限失败"
+        fi
+    else
+        echo "创建用户 $DB_USERNAME 失败"
+    fi
+fi
+
+# 如果存在DB_NAME环境变量，则创建数据库
+if [ -n "$DB_NAME" ]; then
+    CREATE_DB_CMD="CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+    mysql $mysql_root_login -e "$CREATE_DB_CMD"
+    if [ $? -eq 0 ]; then
+        echo "成功创建数据库 $DB_NAME"
+    else
+        echo "创建数据库 $DB_NAME 失败"
+    fi
+fi
