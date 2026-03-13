@@ -8,12 +8,12 @@ metadata:
 spec:
   frontendUrl: /ui/microapp/{{ .Release.Name }}/index.html
 #   releaseName: {{ .Release.Name }}
-  backendUrl: /k8s/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no
+  backendUrl: /panel-api/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no
   config:
     props:
       username: "admin"
       password: {{ .Values.bootstrapPassword }}
-      backendUrl: "/k8s/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no"
+      backendUrl: "/panel-api/v1/namespaces/{{ .Release.Namespace }}/services/{{ include "gpustack.fullname" . }}/proxy-no"
       workerToken: {{ .Release.Name }}
       serverUrl: "http://{{ include "gpustack.fullname" . }}.{{ .Release.Namespace }}.svc"
       group: {{ .Release.Name }}

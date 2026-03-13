@@ -955,9 +955,9 @@ func (p *PackageApp) GetMicroAppProps() map[string]string {
 func (p *PackageApp) GetBackendUrl() string {
 	port := p.GetFirstPort()
 	if port == 80 || port == 0 {
-		return "/k8s/v1/namespaces/default/services/" + p.GetName() + "/proxy-no"
+		return "/panel-api/v1/namespaces/default/services/" + p.GetName() + "/proxy-no"
 	}
-	return "/k8s/v1/namespaces/default/services/" + p.GetName() + ":" + strconv.Itoa(int(port)) + "/proxy-no"
+	return "/panel-api/v1/namespaces/default/services/" + p.GetName() + ":" + strconv.Itoa(int(port)) + "/proxy-no"
 }
 
 func (p *PackageApp) GetFrontendUrl() string {
