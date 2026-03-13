@@ -63,4 +63,8 @@ echo "域名解析配置"
 k8s-offline domain-config
 
 # echo "升级站点管理"
-# k8s-offline sitemanager-upgrade
+# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_php --is-agent=false
+# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_go --is-agent=false
+# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_nodejs --is-agent=false
+# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_python --is-agent=false
+# k8s-offline sitemanager-upgrade --version=1.0.25 --identifie=w7_sitemanager --is-agent=false
