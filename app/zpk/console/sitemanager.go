@@ -22,6 +22,7 @@ type SiteManagerCmd struct {
 type sitemanagerOption struct {
 	version     string
 	releaseName string
+	isAgent     bool
 	identifie   string
 }
 
@@ -34,6 +35,7 @@ func (c SiteManagerCmd) GetName() string {
 func (c SiteManagerCmd) Configure(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&sOp.version, "version", "", "version")
 	cmd.Flags().StringVar(&sOp.identifie, "identifie", "", "安装的名称")
+	cmd.Flags().StringVar(&sOp.isAgent, "is-agent", "", "是否子集群")
 }
 
 // go run main.go sitemanager-upgrade --version=1.1.0 --identifie=w7_php
@@ -101,6 +103,10 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 			option := types.InstallOption{
 				Identifie: sOp.identifie,
 				EnvKv:     envs,
+			}
+			if sOp.isAgent {
+				// 初次安装不是按helm安装 更新按helm更新 历史安装参数丢失
+				option.PvcName = "default-volume"
 			}
 			options := []types.InstallOption{option}
 			packageApps := types.NewPackage(mPackage, options, releaseName, strings.ToLower(helper.RandomString(5)), namespace,
