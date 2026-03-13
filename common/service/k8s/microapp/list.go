@@ -34,7 +34,6 @@ func ListTop(t string) (*microapp.MicroAppList, error) {
 			if item.RoleCount() > 1 || item.Labels["microapp.w7.cc/from"] == "root" {
 				newList.Items = append(newList.Items, item)
 			}
-
 		}
 	})
 
