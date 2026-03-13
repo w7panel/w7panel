@@ -19,17 +19,24 @@ import (
 type SiteManagerCmd struct {
 	console2.Abstract
 }
+type sitemanagerOption struct {
+	version     string
+	releaseName string
+	identifie   string
+}
+
+var sOp = sitemanagerOption{}
 
 func (c SiteManagerCmd) GetName() string {
 	return "sitemanager-upgrade"
 }
 
 func (c SiteManagerCmd) Configure(cmd *cobra.Command) {
-
-	// cmd.MarkFlagRequired("identifie")
+	cmd.Flags().StringVar(&sOp.version, "version", "", "version")
+	cmd.Flags().StringVar(&sOp.identifie, "identifie", "", "安装的名称")
 }
 
-// go run main.go helm-check --version=1.16.0 --releaseName=w7-zpkv2 --namespace=default
+// go run main.go sitemanager-upgrade --version=1.1.0 --identifie=w7_php
 // 和 shell 配合 存在 exit 1 否则 0
 func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 
@@ -37,13 +44,13 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 	helmApi := k8s.NewHelm(sdk)
 	api, err := appgroup.NewAppGroupApi(sdk)
 	if err != nil {
-		slog.Error("not find sitemanager api", "error", err)
+		slog.Error("not find sitemanager api", "error", err, "identifie", sOp.identifie)
 		os.Exit(1)
 		return
 	}
-	list, err := api.GetAppGroupListByIdentifie("", "w7-sitemanager")
+	list, err := api.GetAppGroupListByIdentifie("", strings.ReplaceAll(sOp.identifie, "_", "-"))
 	if err != nil {
-		slog.Error("not found sitemanager", "error", err)
+		slog.Error("not found sitemanager", "error", err, "identifie", sOp.identifie)
 		os.Exit(1)
 		return
 	}
@@ -64,7 +71,7 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 	// }
 
 	for _, item := range list.Items {
-		compare := semver.Compare("v"+item.Spec.Version, "v1.0.19")
+		compare := semver.Compare("v"+item.Spec.Version, "v"+sOp.version)
 		if compare < 0 {
 			releaseName := item.Name
 			namespace := item.Namespace
@@ -92,7 +99,7 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 				envs = append(envs, env)
 			}
 			option := types.InstallOption{
-				Identifie: "w7_sitemanager",
+				Identifie: sOp.identifie,
 				EnvKv:     envs,
 			}
 			options := []types.InstallOption{option}
@@ -104,6 +111,7 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 			if err != nil {
 				slog.Error("upgrade sitemanager err", "releasename", releaseName)
 			}
+			slog.Info("upgrade sitemanager success", "releaseName", releaseName, "namespace", namespace)
 			// slog.Info("upgrading sitemanager", "releaseName", releaseName, "namespace", namespace, "currentVersion", item.Spec.Version)
 			// info, err := helmApi.Info(releaseName, namespace)
 			// if err != nil {
@@ -119,6 +127,6 @@ func (c SiteManagerCmd) Handle(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	slog.Info("sitemanager upgrade completed")
+	slog.Info("sitemanager upgrade command success")
 
 }
