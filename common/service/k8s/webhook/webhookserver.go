@@ -101,8 +101,8 @@ type DomainWhiteListItem struct {
 [2025-08-20 02:36:16.770]       [ERROR] default user info 处理 admission 请求   {"user": {"username":"system:serviceaccount:default:admin","uid":"9a7aedab-a56b-4742-af51-ff22b2dc8d6d","groups":["system:serviceaccounts","system:serviceaccounts:default","system:authenticated"],"extra":{"authentication.kubernetes.io/credential-id":["JTI=543f2783-1bf9-4b3d-b5ed-ced864a24ad2"]}}}
 */
 func (m *ResourceMutator) Handle(ctx context.Context, req admission.Request) admission.Response {
-	slog.Error("处理 admission 请求", slog.String("kind", req.Kind.Kind), slog.String("namespace", req.Namespace), slog.String("name", req.Name),
-		slog.String("user", req.UserInfo.Username), slog.String("kindGroup", req.Kind.Group))
+	// slog.Error("处理 admission 请求", slog.String("kind", req.Kind.Kind), slog.String("namespace", req.Namespace), slog.String("name", req.Name),
+	// 	slog.String("user", req.UserInfo.Username), slog.String("kindGroup", req.Kind.Group))
 	// slog.Error("user info 处理 admission 请求", "user", req.UserInfo)
 	// 根据资源类型调用不同的处理函数
 	switch req.Kind.Kind {
