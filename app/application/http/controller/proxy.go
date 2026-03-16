@@ -372,8 +372,11 @@ func (self Proxy) ProxyMicroApp(gin *gin.Context) {
 	// 	self.JsonResponseWithServerError(gin, errors.New("无权限访问"))
 	// 	return
 	// }
+	// ZZZ
 	if microAppObj.IsFromRoot() || !k3kuser.IsClusterUser() {
-
+		if helper.IsK3kVirtual() { //转发到子集群pod后 强制设置成founder
+			role = "founder"
+		}
 		proxy := microapp.NewMicroAppProxy(microAppObj, k3kuser.IsClusterUser(), role)
 		revert, err := proxy.Proxy(path)
 		if err != nil {
@@ -383,6 +386,7 @@ func (self Proxy) ProxyMicroApp(gin *gin.Context) {
 		revert.ServeHTTP(gin.Writer, gin.Request)
 		return
 	}
+	// --->panel--->sub-cluster--->microapp--->回到ZZZ 处
 	if k3kuser.IsClusterUser() {
 
 		k8stoken := k8s.NewK8sToken(token)
