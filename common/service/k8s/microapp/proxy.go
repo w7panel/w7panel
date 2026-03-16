@@ -26,7 +26,13 @@ func (m *MicroAppProxy) Proxy(path string) (*httputil.ReverseProxy, error) {
 
 	roleConfig, ok := m.Spec.ConfigV2.Props.RoleConfig[m.role]
 	if !ok {
-		return nil, errors.New("not found proxy role config")
+		if m.isClusterUser && !m.MicroApp.IsFromRoot() {
+			m.role = "founder" // 创始人角色有歧义 站点管理是创始人角色 集群用户是普通用户
+		}
+		roleConfig, ok = m.Spec.ConfigV2.Props.RoleConfig[m.role]
+		if !ok {
+			return nil, errors.New("not found proxy role config")
+		}
 	}
 	proxyServer := roleConfig.ServerUrl
 	headers := roleConfig.ProxyRequest.Headers

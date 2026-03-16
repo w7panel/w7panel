@@ -373,9 +373,7 @@ func (self Proxy) ProxyMicroApp(gin *gin.Context) {
 	// 	return
 	// }
 	if microAppObj.IsFromRoot() || !k3kuser.IsClusterUser() {
-		if helper.IsK3kVirtual() {
-			role = "founder"
-		}
+
 		proxy := microapp.NewMicroAppProxy(microAppObj, k3kuser.IsClusterUser(), role)
 		revert, err := proxy.Proxy(path)
 		if err != nil {
