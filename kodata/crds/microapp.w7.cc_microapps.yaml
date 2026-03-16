@@ -69,6 +69,7 @@ spec:
                         - do
                         - title
                         type: object
+                        x-kubernetes-map-type: atomic
                       type: array
                     name:
                       type: string
@@ -82,6 +83,7 @@ spec:
                   - name
                   - title
                   type: object
+                  x-kubernetes-map-type: atomic
                 nullable: true
                 type: array
               config:
