@@ -391,9 +391,9 @@ func (u *k3kUser) ToArray() map[string]string {
 }
 
 func (u *k3kUser) GetRole() string {
-	if u.IsClusterUser() { //子集群用户默认是founder fix站点管理
-		return "founder"
-	}
+	// if u.IsClusterUser() { //子集群用户默认是founder fix站点管理
+	// 	return "founder"
+	// }
 	role, ok := u.Annotations[W7_ROLE]
 	if ok {
 		return role
