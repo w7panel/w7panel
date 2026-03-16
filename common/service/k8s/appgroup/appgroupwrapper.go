@@ -51,11 +51,11 @@ func (g *appgroupWrapper) AddStatusItem(item v1alpha1.AppGroupItemStatus) {
 		g.changed = true
 
 	}
-	for i, v := range g.Status.Items {
-		if i == 0 && v.Title != "" && v.Kind != "Job" {
-			g.Spec.Title = v.Title
-		}
-	}
+	// for i, v := range g.Status.Items {
+	// 	if i == 0 && v.Title != "" && v.Kind != "Job" {
+	// 		g.Spec.Title = v.Title
+	// 	}
+	// }
 	g.FixDeployItem(item)
 	if g.parent != nil {
 		g.parent.AddStatusItem(item)

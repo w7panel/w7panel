@@ -71,6 +71,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       type: array
+                      x-kubernetes-list-type: atomic
                     name:
                       type: string
                     status:
@@ -86,6 +87,7 @@ spec:
                   x-kubernetes-map-type: atomic
                 nullable: true
                 type: array
+                x-kubernetes-list-type: atomic
               config:
                 properties:
                   props:

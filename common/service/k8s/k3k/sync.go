@@ -540,7 +540,7 @@ func SyncDownStatic(name, zpkurl string) error {
 func SyncMicroApp() error {
 	if helper.IsK3kVirtual() {
 		//面板代理 ingress 同步到主集群
-		return SyncHttp(NewSyncObject("default", "default"), "sync-microapp")
+		return SyncHttp(NewSyncObject(os.Getenv("K3K_NAME"), os.Getenv("K3K_NAMESPACE")), "sync-microapp")
 	}
 	return nil
 }
