@@ -796,10 +796,8 @@ func ProxyUrl(proxyUrl string, path string, host string, headers map[string]stri
 		req.URL.Scheme = remote.Scheme
 		req.URL.Host = remote.Host //
 		req.Host = remote.Host     //2个host有区别
-		if headers != nil {
-			for k, v := range headers {
-				req.Header.Add(k, v)
-			}
+		for k, v := range headers {
+			req.Header.Add(k, v)
 		}
 		if host != "" {
 			// req.URL.Host = host
