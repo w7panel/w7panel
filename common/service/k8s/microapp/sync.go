@@ -2,6 +2,7 @@ package microapp
 
 import (
 	"log/slog"
+	"strings"
 
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
@@ -47,7 +48,8 @@ func Sync(k3kName, k3kNs string) error {
 	// 删除多余的
 	for _, item := range clientList.Items {
 		if item.Labels["microapp.w7.cc/from"] == "root" {
-			_, has := rootItemsKeyBy[item.Name+"-root"]
+			rootMicroName := strings.ReplaceAll(item.Name, "-root", "")
+			_, has := rootItemsKeyBy[rootMicroName]
 			if !has {
 				err = delMicroApp(clientsdk, &item)
 				if err != nil {
