@@ -359,8 +359,13 @@ func (self Proxy) ProxyMicroApp(gin *gin.Context) {
 	}
 	err = sigclient.Get(client.Ctx, types.NamespacedName{Name: name, Namespace: k3kuser.GetNamespace()}, microAppObj)
 	if err != nil {
-		self.JsonResponseWithServerError(gin, err)
-		return
+		// 检查是否是root
+		err = sigclient.Get(client.Ctx, types.NamespacedName{Name: name + "-root", Namespace: k3kuser.GetNamespace()}, microAppObj)
+		if err != nil {
+			self.JsonResponseWithServerError(gin, err)
+			return
+		}
+
 	}
 	role := k3kuser.GetRole()
 	// if role != "founder" && role != "admin" {
