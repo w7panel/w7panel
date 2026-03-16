@@ -62,6 +62,7 @@ type Props struct {
 	// +k8s:optional
 	// +optional
 	// +nullable
+	// +structType=atomic
 	RoleConfig RoleConfig `json:"roleConfig,omitempty"`
 }
 
@@ -69,6 +70,7 @@ type MicroAppConfig2 struct {
 	// +k8s:optional
 	// +optional
 	// +nullable
+	// +structType=atomic
 	Props Props `json:"props,omitempty"`
 }
 
@@ -83,6 +85,7 @@ type MicroAppSpec struct {
 	// +k8s:optional
 	// +optional
 	// +nullable
+	// +structType=atomic
 	ConfigV2    MicroAppConfig2 `json:"config-v2,omitempty"`
 	Description string          `json:"description,omitempty"`
 	// +k8s:optional

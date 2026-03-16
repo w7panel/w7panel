@@ -123,8 +123,11 @@ spec:
                           type: object
                         nullable: true
                         type: object
+                        x-kubernetes-map-type: atomic
                     type: object
+                    x-kubernetes-map-type: atomic
                 type: object
+                x-kubernetes-map-type: atomic
               description:
                 type: string
               framework:
