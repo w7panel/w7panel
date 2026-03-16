@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -27,12 +28,12 @@ func NewRegistryLogic() *RegistryLogic {
 		metaStore, err := metadata.NewBoltStore("/tmp/k3s-registry/metadata.db")
 		if err != nil {
 			// 记录错误但不中断
-			fmt.Printf("Warning: failed to create metadata store: %v\n", err)
+			slog.Error("Failed to create metadata store", "error", err)
 		}
 
 		blobStore, err := content.NewBlobStore("/tmp/k3s-registry/blobs")
 		if err != nil {
-			fmt.Printf("Warning: failed to create blob store: %v\n", err)
+			slog.Error("Failed to create blob store", "error", err)
 		}
 
 		registryLogicInstance = &RegistryLogic{
