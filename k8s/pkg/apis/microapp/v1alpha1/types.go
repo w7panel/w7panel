@@ -91,6 +91,7 @@ type MicroAppSpec struct {
 	// +k8s:optional
 	// +optional
 	// +nullable
+	// +listType=atomic
 	Bindings []Bindings `json:"bindings,omitempty"`
 }
 
@@ -111,10 +112,11 @@ type Bindings struct {
 	IsDefaultRegister int    `json:"is_default_register,omitempty"`
 	Location          string `json:"location,omitempty"`
 	Support           string `json:"support,omitempty"`
-	Menu              []Menu `json:"menu,omitempty"`
-	Name              string `json:"name"`
-	Status            int    `json:"status,omitempty"`
-	Title             string `json:"title"`
+	// +listType=atomic
+	Menu   []Menu `json:"menu,omitempty"`
+	Name   string `json:"name"`
+	Status int    `json:"status,omitempty"`
+	Title  string `json:"title"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
