@@ -94,6 +94,7 @@ type MicroAppSpec struct {
 	Bindings []Bindings `json:"bindings,omitempty"`
 }
 
+// +structType=atomic
 type Menu struct {
 	Displayorder int    `json:"displayorder,omitempty"`
 	Do           string `json:"do"`
@@ -104,6 +105,7 @@ type Menu struct {
 	Parent       string `json:"parent,omitempty"`
 }
 
+// +structType=atomic
 type Bindings struct {
 	Framework         string `json:"framework,omitempty"`
 	IsDefaultRegister int    `json:"is_default_register,omitempty"`

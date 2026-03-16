@@ -1,7 +1,6 @@
 package microapp
 
 import (
-	"errors"
 	"log/slog"
 
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
@@ -18,8 +17,8 @@ func Sync(k3kName, k3kNs string) error {
 		return err
 	}
 	currentRole, ok := sa.Annotations["w7.cc/role"]
-	if !ok {
-		return errors.New("sync microapp role is empty")
+	if !ok || currentRole == "" {
+		currentRole = "normal"
 	}
 	k3kConfig := k8s.NewK3kConfig(k3kName, k3kNs, helper.GetApiServerHost(k3kNs))
 	root := k8s.NewK8sClient()
@@ -47,7 +46,7 @@ func Sync(k3kName, k3kNs string) error {
 	// 删除多余的
 	for _, item := range clientList.Items {
 		if item.Labels["microapp.w7.cc/from"] == "root" {
-			_, has := rootItemsKeyBy[item.Name]
+			_, has := rootItemsKeyBy[item.Name+"-root"]
 			if !has {
 				err = delMicroApp(clientsdk, &item)
 				if err != nil {
