@@ -1,0 +1,81 @@
+apiVersion: microapp.w7.cc/v1alpha1
+kind: MicroApp
+metadata:
+    annotations:
+        kubectl.kubernetes.io/last-applied-configuration: >
+            {"apiVersion":"microapp.w7.cc/v1alpha1","kind":"MicroApp","metadata":{"annotations":{"meta.helm.sh/release-name":"kb-test-behjmmkt","meta.helm.sh/release-namespace":"default"},"creationTimestamp":"2026-03-16T02:49:12Z","generation":1,"labels":{"app.kubernetes.io/managed-by":"Helm","role.w7.cc/founder":"true","role.w7.cc/normal":"true","w7.cc/identifie":"kb-test"},"name":"kb-test-behjmmkt2","namespace":"default","resourceVersion":"13340800","uid":"0028ec1a-3d49-4101-9535-697e9374efed"},"spec":{"bindings":[{"framework":"vue2","is_default_register":1,"location":"left","menu":[{"do":"#/","is_default":1,"location":"normal","title":"数据库"},{"do":"#/addons","is_default":1,"location":"normal","title":"扩展"}],"name":"founder","status":1,"support":"thirdparty_cd","title":"创始人"},{"framework":"vue2","is_default_register":1,"location":"left","menu":[{"do":"#/","is_default":1,"location":"normal","title":"数据库"}],"name":"normal","status":1,"support":"thirdparty_cd","title":"普通用户"}],"frontendUrl":"/ui/microapp/kb-test-behjmmkt/index.html","title":"kb_test"}}
+        meta.helm.sh/release-name: kb-test-behjmmkt
+        meta.helm.sh/release-namespace: default
+    creationTimestamp: '2026-03-16T02:49:12Z'
+    generation: 1
+    labels:
+        app.kubernetes.io/managed-by: Helm
+        role.w7.cc/founder: 'true'
+        role.w7.cc/normal: 'true'
+        w7.cc/identifie: kb-test
+    name: kb-test-behjmmkt2
+    namespace: default
+    resourceVersion: '13342044'
+    uid: 0028ec1a-3d49-4101-9535-697e9374efed
+spec:
+    config-v2:
+        props:
+            roleConfig:
+                founder:
+                    frontend_props:
+                        group: kb-test-behjmmkt
+                        test: aa
+                        test2: bbcc
+                        url: /panel-api/v1/microapp/kb-test-behjmmkt/proxy
+                    load_mode: static_hosting
+                    proxy_request:
+                        headers:
+                            api-key: xiynhhelxg
+                        query:
+                            api-key: xiynhhelxg
+                    serverUrl: http://kb-test-behjmmkt.default.svc.cluster.local:8080
+                normal:
+                    frontend_props:
+                        group: kb-test-behjmmkt
+                        url: /panel-api/v1/microapp/kb-test-behjmmkt/proxy
+                    load_mode: static_hosting
+                    proxy_request:
+                        headers:
+                            api-key: xiynhhelxg
+                    serverUrl: http://kb-test-behjmmkt.default.svc.cluster.local:8080
+    bindings:
+        -
+            framework: vue2
+            is_default_register: 1
+            location: left
+            menu:
+                -
+                    do: '#/'
+                    is_default: 1
+                    location: normal
+                    title: 数据库
+                -
+                    do: '#/addons'
+                    is_default: 1
+                    location: normal
+                    title: 扩展
+            name: founder
+            status: 1
+            support: thirdparty_cd
+            title: 创始人
+        -
+            framework: vue2
+            is_default_register: 1
+            location: left
+            menu:
+                -
+                    do: '#/'
+                    is_default: 1
+                    location: normal
+                    title: 数据库
+            name: normal
+            status: 1
+            support: thirdparty_cd
+            title: 普通用户
+    frontendUrl: /ui/microapp/kb-test-behjmmkt/index.html
+    title: kb_test
