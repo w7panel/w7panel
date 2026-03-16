@@ -32,7 +32,9 @@ spec:
       tolerations:
       - 
         operator: Exists
-        effect: NoSchedule        
+        effect: NoSchedule   
+      - key: node.kubernetes.io/storage
+        effect: NoSchedule       
       containers:
         - name: k8s-offline-ds
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

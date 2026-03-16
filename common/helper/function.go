@@ -1014,7 +1014,7 @@ func IpCity(ipaddr string) (string, error) {
 
 	searcher, err := xdb.NewWithFileOnly(version, dbPath)
 	if err != nil {
-		slog.Error("Failed to create searcher", "error", err)
+		// slog.Error("Failed to create searcher", "error", err)
 		// fmt.Printf("failed to create searcher: %s\n", err.Error())
 		return "", err
 	}
