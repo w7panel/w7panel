@@ -1112,6 +1112,10 @@ func GetToken(ctx *gin.Context) string {
 	if apiToken != "" {
 		return apiToken
 	}
+	xtoken := ctx.Request.Header.Get("x-w7panel-token")
+	if xtoken != "" {
+		return xtoken
+	}
 	auth := ctx.Request.Header.Get("AuthorizationX")
 	if auth == "" || !strings.Contains(auth, " ") {
 		auth = ctx.Request.Header.Get("Authorization")
