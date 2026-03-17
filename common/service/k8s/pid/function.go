@@ -122,18 +122,16 @@ func bytesToPid(data []byte) (int, error) {
 	return pidInt, nil
 }
 
-func GetContainerPid(findPod *corev1.Pod, fromPod *corev1.Pod, containerId string, nscener bool, rootSdk *k8s.Sdk) (int, error) {
-	if fromPod == nil {
-		return GetPid(findPod, containerId, nscener, rootSdk)
-	}
-	pid, err := getAnnotationPodPid(fromPod)
+func GetContainerPid(pod *corev1.Pod, containerId string, nscener bool, sdk *k8s.Sdk) (int, error) {
+
+	pid, err := getAnnotationPodPid(pod)
 	if err != nil {
 		slog.Error("getAnnotationPodPid", "err", err)
 	}
 	if err == nil && pid != 0 {
 		return pid, nil
 	}
-	return GetPid(findPod, containerId, nscener, rootSdk)
+	return GetPid(pod, containerId, nscener, sdk)
 }
 
 func getAnnotationPodPid(pod *corev1.Pod) (int, error) {
@@ -161,4 +159,13 @@ func getAnnotationPodPid(pod *corev1.Pod) (int, error) {
 		return pidInt, nil
 	}
 	return 0, errors.New("error found annotion pid")
+}
+
+func checkPodRunning(pod *corev1.Pod) error {
+	if len(pod.Status.ContainerStatuses) > 0 {
+		if (pod.Status.ContainerStatuses[0].State.Running == nil) && (pod.Status.ContainerStatuses[0].State.Terminated != nil) {
+			return errors.New("cluster pod is not running")
+		}
+	}
+	return nil
 }

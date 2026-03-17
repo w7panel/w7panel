@@ -521,6 +521,18 @@ func (c *SdkClient) ReturnOrderFinish(k3kName string, sn string) (*LastReturnOrd
 	return order, err
 }
 
+func (c *SdkClient) CreateSiteFromPanel(url, siteIdentifie string) (*License, error) {
+	order := &License{}
+	params := map[string]string{
+		// "clusterId": clusterId,
+		"url":            url,
+		"site_identifie": siteIdentifie,
+		// "orderSn": sn,
+	}
+	_, err := c.Post(order, "/api/thirdparty-cd/k8s-offline/sdk/license/register-from-w7panel", params)
+	return order, err
+}
+
 func (c *SdkClient) CreatePanelOrder(urlValues url.Values) (*PayResult, error) {
 	result := &PayResult{}
 	response, err := c.getReq().SetFormDataFromValues(urlValues).SetResult(result).Post("/api/thirdparty-cd/k8s-offline/sdk/panel/create-order")

@@ -15,6 +15,10 @@ type podFind struct {
 	client *kubernetes.Clientset
 }
 
+func newPodFind(root, client *kubernetes.Clientset) *podFind {
+	return &podFind{root: root, client: client}
+}
+
 func (f *podFind) GetVirtualClusterNodePod(namespace, hostIp string) (*corev1.Pod, error) {
 	nodes, err := f.client.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
 	if err != nil {
@@ -61,4 +65,17 @@ func (f *podFind) getRootClusterDaemonPodList() (*corev1.PodList, error) {
 		return nil, err
 	}
 	return daemonsetPods, nil
+}
+
+func (f *podFind) GetFromPod(fromPodName, namespace string, isVirtual bool) (*corev1.Pod, error) {
+	if fromPodName == "" {
+		return nil, fmt.Errorf("fromPodName is empty")
+	}
+	if namespace == "" {
+		namespace = "default"
+	}
+	if isVirtual {
+		return f.client.CoreV1().Pods(namespace).Get(context.Background(), fromPodName, metav1.GetOptions{})
+	}
+	return f.root.CoreV1().Pods(namespace).Get(context.Background(), fromPodName, metav1.GetOptions{})
 }

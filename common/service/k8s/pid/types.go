@@ -17,3 +17,6 @@ type PidParam struct {
 	FromPodName          string `form:"podName"`       //原始pod名
 	FromPodContainerName string `form:"containerName"` //原始pod container名
 }
+
+type PidResult struct {
+}

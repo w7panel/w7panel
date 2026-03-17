@@ -35,13 +35,14 @@ func RegisterSite(token, releaseName, host string) (appSecret *AppSecret, err er
 	return cdClient.CreateSite(host, releaseName)
 }
 
-func RegisterSiteZpk(token, releaseName, host string) (appSecret *AppSecret, err error) {
-	cdClient := NewConsoleCdClient(token)
-	data := map[string]string{
-		"offlineUrl": "https://" + host,
-		"sn":         releaseName,
+func RegisterSiteZpk(host, identifie string) (appSecret *AppSecret, err error) {
+
+	sdkClient, err := NewDefaultSdkClient()
+	if err != nil {
+		slog.Error("RegisterSiteZpk error", "err", err)
 	}
-	license, err := cdClient.CreateLicenseSiteZpk(data)
+
+	license, err := sdkClient.CreateSiteFromPanel("https://"+host, identifie)
 	if err != nil {
 		return nil, err
 	}
