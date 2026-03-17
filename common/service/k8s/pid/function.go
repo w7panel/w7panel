@@ -15,6 +15,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+// webhook 入口获取pid
 func LoadPid(pod *corev1.Pod) error {
 	//如果是主集群 转发请求到agent节点获取pid
 	sdk := k8s.NewK8sClient()

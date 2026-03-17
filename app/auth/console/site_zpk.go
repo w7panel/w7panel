@@ -52,7 +52,7 @@ func (c SiteZpk) Handle(cmd *cobra.Command, args []string) {
 
 // 检查TLS握手是否成功
 func (c SiteZpk) registerSite() {
-	os.Setenv("USER_AGENT", "we7test-beta")
+
 	slog.Info("证书验证成功，开始注册站点...")
 	secret, err := console.RegisterSiteZpk(siteroZpk.Host, siteroZpk.SiteIdentifie)
 	if err != nil {
