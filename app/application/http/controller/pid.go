@@ -13,5 +13,8 @@ type Pid struct {
 }
 
 func (self Pid) List(http *gin.Context) {
-	
+
+}
+
+func (self Pid) EtcPasswd(http *gin.Context) {
 }
