@@ -19,12 +19,13 @@ type siteZpkOption struct {
 	ThirdPartyCDToken string
 	Host              string
 	ReleaseName       string
+	SiteIdentifie     string
 	AppName           string
 	ContainerName     string
 	Namespace         string
 }
 
-// ./runtime/main site:register-zpk --thirdPartyCDToken=qEINzTKqtPUYKi7f --host=w7job.test.w7.com --releaseName=app-nfohievs0w --AppName=w7-pros-28692-app-nfohievs0w --namespace=default
+// ./runtime/main site:register-zpk --thirdPartyCDToken=qEINzTKqtPUYKi7f --host=w7job.test.w7.com --releaseName=app-nfohievs0w --appName=w7-pros-28692-app-nfohievs0w --namespace=default
 var siteroZpk = siteZpkOption{}
 
 func (c SiteZpk) GetName() string {
@@ -35,6 +36,7 @@ func (c SiteZpk) Configure(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&siteroZpk.ThirdPartyCDToken, "thirdPartyCDToken", "", "交付系统token")
 	cmd.Flags().StringVar(&siteroZpk.Host, "host", "", "域名")
 	cmd.Flags().StringVar(&siteroZpk.ReleaseName, "releaseName", "", "安装name")
+	cmd.Flags().StringVar(&siteroZpk.SiteIdentifie, "siteIdentifie", "", "站点标识")
 	cmd.Flags().StringVar(&siteroZpk.AppName, "appName", "", "deployment名字")
 	cmd.Flags().StringVar(&siteroZpk.ContainerName, "containerName", "", "containerName名字")
 	cmd.Flags().StringVar(&siteroZpk.Namespace, "namespace", "", "namespace")
@@ -50,8 +52,9 @@ func (c SiteZpk) Handle(cmd *cobra.Command, args []string) {
 
 // 检查TLS握手是否成功
 func (c SiteZpk) registerSite() {
+	os.Setenv("USER_AGENT", "we7test-beta")
 	slog.Info("证书验证成功，开始注册站点...")
-	secret, err := console.RegisterSiteZpk(siteroZpk.ThirdPartyCDToken, siteroZpk.ReleaseName, siteroZpk.Host)
+	secret, err := console.RegisterSiteZpk(siteroZpk.Host, siteroZpk.SiteIdentifie)
 	if err != nil {
 		slog.Error("注册站点失败", "err", err)
 		os.Exit(1)

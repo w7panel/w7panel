@@ -348,3 +348,7 @@ func getTokenSaName(token string) (string, *jwtv5.NumericDate) {
 	}
 	return serviceaccountName, expireData
 }
+
+func (t *K8sToken) GetToken() string {
+	return t.token
+}

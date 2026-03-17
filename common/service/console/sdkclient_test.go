@@ -19,6 +19,20 @@ func TestCreateProductOrder(t *testing.T) {
 	t.Log(info)
 }
 
+func TestCreatePanelSite(t *testing.T) {
+	os.Setenv("USER_AGENT", "we7test-beta")
+	os.Setenv("LOCAL_MOCK", "1")
+	sdkClient, err := NewDefaultSdkClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	info, err := sdkClient.CreateSiteFromPanel("https://test.cc", "aaaa")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(info)
+}
+
 func TestCreateProductOrder1(t *testing.T) {
 	os.Setenv("USER_AGENT", "we7test-beta")
 	sdkClient, err := NewDefaultSdkClient()
