@@ -75,9 +75,9 @@ fi
 # "microapp升级过需要更新crd"
 kubectl apply -f $KO_DATA_PATH/crds --server-side
 
-echo "升级站点管理"
-k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_php --is-agent=true
-k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_go --is-agent=true
-k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_nodejs --is-agent=true
-k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_python --is-agent=true
-k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_sitemanager --is-agent=true
+# echo "升级站点管理"
+# k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_php --is-agent=true
+# k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_go --is-agent=true
+# k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_nodejs --is-agent=true
+# k8s-offline sitemanager-upgrade --version=1.0.26 --identifie=w7_python --is-agent=true
+# k8s-offline sitemanager-upgrade --version=1.0.25 --identifie=w7_sitemanager --is-agent=true
