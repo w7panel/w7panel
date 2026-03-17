@@ -69,6 +69,7 @@ func patchRootMicroApp(sdk *k8s.Sdk, origin *microapp.MicroApp, role string) err
 		item.SetResourceVersion("")
 		item.SetUID("")
 		// 移除不属于当前角色的权限配置信息
+		item.Spec.Bindings = origin.Spec.Bindings
 		item.Spec.Bindings = lo.Filter(item.Spec.Bindings, func(bindings microapp.Bindings, index int) bool {
 			return bindings.Name == role
 		})
