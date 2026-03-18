@@ -1191,5 +1191,5 @@ func PanelInnerUrl() string {
 	if ns == "" {
 		ns = "default"
 	}
-	return "http://" + ServiceAccountName() + "." + ns + ".svc"
+	return "http://" + ServiceAccountName() + "." + ns + ".svc:8000"
 }

@@ -8,7 +8,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -355,16 +354,16 @@ func ToK3kPod(k3kUser *K3kUser) *corev1.Pod {
 						Privileged: &root,
 					},
 					ImagePullPolicy: corev1.PullAlways,
-					Resources: corev1.ResourceRequirements{
-						Requests: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("0"),
-							corev1.ResourceMemory: resource.MustParse("0"),
-						},
-						Limits: corev1.ResourceList{
-							corev1.ResourceCPU:    resource.MustParse("250m"),
-							corev1.ResourceMemory: resource.MustParse("100Mi"),
-						},
-					},
+					// Resources: corev1.ResourceRequirements{
+					// 	Requests: corev1.ResourceList{
+					// 		corev1.ResourceCPU:    resource.MustParse("0"),
+					// 		corev1.ResourceMemory: resource.MustParse("0"),
+					// 	},
+					// 	Limits: corev1.ResourceList{
+					// 		corev1.ResourceCPU:    resource.MustParse("250m"),
+					// 		corev1.ResourceMemory: resource.MustParse("100Mi"),
+					// 	},
+					// },
 					Ports: []corev1.ContainerPort{
 						{
 							ContainerPort: 8000,
