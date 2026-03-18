@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
 	"gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -79,7 +78,7 @@ func DownStatic(appgroup *v1alpha1.AppGroup) {
 		return
 	}
 	if strings.Contains(frontTypeStr, "thirdparty_cd") {
-		go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
+		// go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
 		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
 	}
 }
