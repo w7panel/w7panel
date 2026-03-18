@@ -75,10 +75,15 @@ func DownStaticGo(zpkurl, name string) {
 	go fetchWebZipAndDownload(zpkurl, name)
 }
 func fetchWebZipAndDownload(zpkUrl string, releaseName string) error {
-	resp, err := helper.RetryHttpClient().R().Get(zpkUrl)
+	req := helper.RetryHttpClient().R()
+	// if version != "" {
+	// 	req.SetQueryParam("cur_version", version)
+	// }
+	resp, err := req.Get(zpkUrl)
 	if err != nil {
 		return err
 	}
+
 	defer resp.RawBody().Close()
 	if resp.StatusCode() != http.StatusOK {
 		return errors.New(resp.String())
