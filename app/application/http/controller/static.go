@@ -14,7 +14,8 @@ type Static struct {
 func (self Static) StaticInfo(http *gin.Context) {
 	identifie := http.Param("identifie")
 	version := http.Query("version")
-	status := appgroup.DownStaticStatus(identifie, version)
+	releaseName := http.Query("releaseName")
+	status := appgroup.DownStaticStatus(identifie, version, releaseName)
 	self.JsonResponseWithoutError(http, gin.H{
 		"status": status,
 	})
