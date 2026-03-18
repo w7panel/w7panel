@@ -8,5 +8,5 @@ import (
 func TestDownStatic(t *testing.T) {
 
 	os.Setenv("MICROAPP_PATH", "/home/workspace/w7panel/kodata/microapp")
-	fetchWebZipAndDownload("http://zpk.w7.cc/zpk/respo/info/w7_sitemanager", "w7-sitemanager-ipjjizit", "1.0.25")
+	fetchWebZipAndDownload("http://zpk.w7.cc/zpk/respo/info/w7_zpkv2", "w7-zpkv2", "1.0.25")
 }
