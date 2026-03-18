@@ -62,7 +62,9 @@ func (c SiteZpkHttp) registerSite() {
 	mapdata["namespace"] = siteroZpkHttp.Namespace
 	mapdata["releaseName"] = siteroZpkHttp.ReleaseName
 	mapdata["siteIdentifie"] = siteroZpkHttp.SiteIdentifie
-	res, err := req.SetFormData(mapdata).Post(siteroZpkHttp.PanelUrl + "/panel-api/v1/auth/console/register-zpk-site")
+	url := siteroZpkHttp.PanelUrl + "/panel-api/v1/auth/console/register-zpk-site"
+	slog.Info("register site", "url", url)
+	res, err := req.SetFormData(mapdata).Post(url)
 	slog.Info("register site", "statusCode", res.StatusCode(), "response", res.String())
 	if err != nil {
 		slog.Error("resiter site error", "error", err)

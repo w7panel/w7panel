@@ -1185,3 +1185,11 @@ func HelmValflattenMap(config map[string]interface{}) map[string]string {
 	}
 	return result
 }
+
+func PanelInnerUrl() string {
+	ns := os.Getenv("HELM_NAMESPACE")
+	if ns == "" {
+		ns = "default"
+	}
+	return "http://" + ServiceAccountName() + "." + ns + ".svc"
+}
