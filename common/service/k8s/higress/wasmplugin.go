@@ -18,7 +18,8 @@ var bfck = false
 
 // 是否需要备案检测
 func NeedCheckBeian() bool {
-	return bfck
+	return false //子集群pod 获取不到备案信息
+	// return bfck
 }
 
 func LoadBkConfig() (*v1alpha1.WasmPlugin, error) {
@@ -40,6 +41,7 @@ func CheckHost(host string) error {
 	plugin, err := LoadBkConfig()
 	if err != nil {
 		slog.Error("load bk config error", "error", err)
+		return err
 	}
 	config := plugin.Spec.DefaultConfig
 	val, ok := config.Fields["white_domains"]
