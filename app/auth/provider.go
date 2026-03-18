@@ -22,6 +22,7 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 	console.RegisterCommand(new(app.Register))
 	console.RegisterCommand(new(app.Cluster))
 	console.RegisterCommand(new(app.Site))
+	console.RegisterCommand(new(app.SiteZpkHttp))
 	console.RegisterCommand(new(app.SiteZpk))
 	console.RegisterCommand(new(app.CreateInnerDb))
 	console.RegisterCommand(new(app.Unzip))
@@ -64,6 +65,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.POST("/console/import-cert", middleware.Auth{}.Process /*middleware.Proxy{}.Process, */, controller2.Console{}.ImportCert)
 			localApiGroup.POST("/console/verify-cert", middleware.Auth{}.Process /*middleware.Proxy{}.Process, */, controller2.Console{}.VerifyCert)
 			localApiGroup.POST("/console/import-cert-console", middleware.Auth{}.Process /*middleware.Proxy{}.Process, */, controller2.Console{}.ImportCertConsole)
+			localApiGroup.POST("/console/register-zpk-site", controller2.Site{}.RegisterZpkSite)
 		}
 	})
 }

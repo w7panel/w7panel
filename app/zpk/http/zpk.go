@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic"
 	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
@@ -291,7 +292,7 @@ func (self Zpk) Install(http *gin.Context) {
 		packageApps.Root.Parent = parent
 	}
 	install := logic.NewInstall(client, packageApps)
-
+	helper.Set(releaseName, installId, time.Minute*30) //site.go 注册站点 installId 要匹配
 	err = install.InstallOrUpgrade(releaseName, namespace)
 	if err != nil {
 		// panic(err)
