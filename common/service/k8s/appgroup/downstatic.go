@@ -60,7 +60,7 @@ const (
 
 func DownStaticStatus(identifie, version string) string {
 	identifie = strings.ReplaceAll(identifie, "_", "-")
-	cacheKey := "static-download-" + identifie + version
+	cacheKey := staticDownloadCacheKey + identifie + version
 	val, ok := helper.Get(cacheKey)
 	if !ok {
 		return NO_DOWN
@@ -246,7 +246,7 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 			// os.Stat(microappPath + "/" + k)
 
 			kName := strings.ReplaceAll(k, "_", "-")
-			helper.Set("static-download-"+kName+"-"+version, DOWNLOADING, time.Hour*24) //
+			helper.Set(staticDownloadCacheKey+kName+"-"+version, DOWNLOADING, time.Hour*24) //
 			err := os.Mkdir(microappPath, os.ModePerm)
 			if err != nil {
 				slog.Error("创建目录失败", "error", err)
@@ -285,7 +285,7 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 			}
 			// 清理临时 zip 文件
 			os.Remove(tempZipFile)
-			helper.Set("static-download-"+kName+version, DOWNLOAD_SUCCESS, time.Hour*24)
+			helper.Set(staticDownloadCacheKey+kName+version, DOWNLOAD_SUCCESS, time.Hour*24)
 		}
 	}
 	return nil
