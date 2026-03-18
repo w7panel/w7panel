@@ -182,6 +182,8 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.POST("/k3s/env/gogc", middleware.Auth{}.Process, controller2.K3s{}.GoGcToggle)
 			localApiGroup.GET("/kubeblocks/installjobyaml", middleware.Auth{}.Process, controller2.KubeBlocks{}.InstallJobYaml)
 			localApiGroup.POST("/kubeblocks/install", middleware.Auth{}.Process, controller2.KubeBlocks{}.Install)
+			localApiGroup.GET("/static/:identifie/status", middleware.Auth{}.Process, controller2.Static{}.StaticInfo)
+			localApiGroup.POST("/static/:namespace/download/:name", middleware.Auth{}.Process, controller2.Static{}.Download)
 
 		}
 		gpuGroup := engine.Group("/panel-api/v1/gpu").Use(middleware.Auth{}.Process, middleware.Proxy{}.Process)

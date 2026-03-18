@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
 	"gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -52,10 +51,23 @@ type Data struct {
 	ReleaseName string `json:"app_name"` //控制台接口用这个字段
 }
 
-func DownAppGroupName(appgroup *v1alpha1.AppGroup) {
+const (
+	staticDownloadCacheKey = "static-download-"
+	DOWNLOADING            = "downloading"      //下载中
+	DOWNLOAD_SUCCESS       = "download_success" //下载成功
+	NO_DOWN                = "no_download"      //未下载
+)
 
+func DownStaticStatus(identifie, version string) string {
+	identifie = strings.ReplaceAll(identifie, "_", "-")
+	cacheKey := "static-download-" + identifie + version
+	val, ok := helper.Get(cacheKey)
+	if !ok {
+		return NO_DOWN
+	}
+	return val.(string)
 }
-func downStatic(appgroup *v1alpha1.AppGroup) {
+func DownStatic(appgroup *v1alpha1.AppGroup) {
 	downEnv := os.Getenv("STATIC_DOWN_ENABLED")
 	if downEnv != "true" {
 		slog.Info("静态资源下载未开启")
@@ -66,7 +78,7 @@ func downStatic(appgroup *v1alpha1.AppGroup) {
 		return
 	}
 	if strings.Contains(frontTypeStr, "thirdparty_cd") {
-		go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
+		// go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
 		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
 	}
 }
@@ -232,6 +244,9 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 		// 下载静态资源包
 		for k, url := range webzipUrl {
 			// os.Stat(microappPath + "/" + k)
+
+			kName := strings.ReplaceAll(k, "_", "-")
+			helper.Set("static-download-"+kName+"-"+version, DOWNLOADING, time.Hour*24) //
 			err := os.Mkdir(microappPath, os.ModePerm)
 			if err != nil {
 				slog.Error("创建目录失败", "error", err)
@@ -242,13 +257,13 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 				slog.Error("创建目录失败", "error", err)
 				// continue
 			}
-			err = os.Mkdir(microappPath+"/"+k+"/"+version, os.ModePerm) // 创建版本目录，如果不存在则创建 ingore err
+			err = os.Mkdir(microappPath+"/"+kName+"/"+version, os.ModePerm) // 创建版本目录，如果不存在则创建 ingore err
 			if err != nil {
 				slog.Error("创建目录失败", "error", err)
 				// continue
 			}
 			// 下载 zip 到临时文件
-			tempZipFile := microappPath + "/" + k + ".zip"
+			tempZipFile := microappPath + "/" + kName + ".zip"
 			err = downloadZipFile(url, tempZipFile)
 			if err != nil {
 				slog.Error("下载静态资源包失败", "error", err)
@@ -270,6 +285,7 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 			}
 			// 清理临时 zip 文件
 			os.Remove(tempZipFile)
+			helper.Set("static-download-"+kName+version, DOWNLOAD_SUCCESS, time.Hour*24)
 		}
 	}
 	return nil
