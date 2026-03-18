@@ -178,7 +178,7 @@ func (z *Install) NeedHelmInstall() bool {
 }
 
 func (z *Install) Install(name, namespace string) error {
-	go downStatic(z.pk.Root)
+	// go downStatic(z.pk.Root)
 	if z.NeedHelmInstall() {
 		//为啥helm 单独走一条线， 如果helmjob 当作一个helmchart安装的花，导致helm更新时候判断currentRelease只有一个job,比对不出来需要更新的资源
 		//导致pvc每次都重建 数据丢失
@@ -212,7 +212,6 @@ func (z *Install) Install(name, namespace string) error {
 }
 
 func (z *Install) Upgrade(name, namespace string) error {
-	go downStatic(z.pk.Root)
 	if z.NeedHelmInstall() {
 		return z.InstallUseJob(name, namespace, types.ShellUpgrade)
 	}

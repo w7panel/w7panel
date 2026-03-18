@@ -45,8 +45,8 @@ spec:
             name: http
             # readOnly: true
           env: 
-          - name: GOGC
-            value: "10"
+          # - name: GOGC
+          #   value: "10"
           - name: REGISTRY_WATCH
             value: "true"     
           - name: IS_AGENT
