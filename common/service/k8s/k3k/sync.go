@@ -116,7 +116,7 @@ func SyncHttp(obj SyncObjectInterface, path string) error {
 	urlvalues.Add("k3kName", os.Getenv("K3K_NAME"))
 	urlvalues.Add("k3kNamespace", os.Getenv("K3K_NAMESPACE"))
 	urlvalues.Add("k3kMode", os.Getenv("K3K_MODE"))
-	urlvalues.Add("version", os.Getenv("K3K_MODE"))
+	// urlvalues.Add("version", os.Getenv("K3K_MODE"))
 
 	slog.Info("sync start", "urlvalues", urlvalues)
 

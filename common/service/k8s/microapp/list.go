@@ -64,7 +64,7 @@ func patchRootMicroApp(sdk *k8s.Sdk, origin *microapp.MicroApp, role string) err
 	item := origin.DeepCopy()
 	item.Name = item.Name + "-root" //防止同名
 	// itemCopy := item.DeepCopy()
-	_, err = controllerutil.CreateOrUpdate(sdk.Ctx, sigclient, item, func() error {
+	_, err = controllerutil.CreateOrPatch(sdk.Ctx, sigclient, item, func() error {
 		item.Labels["microapp.w7.cc/from"] = "root"
 		item.SetResourceVersion("")
 		item.SetUID("")
