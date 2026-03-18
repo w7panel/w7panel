@@ -452,8 +452,8 @@ func (c *SdkClient) Post(result interface{}, url string, params map[string]strin
 	}
 
 	if response.StatusCode() > 299 {
-		slog.Warn("sdk get error", "statusCode", response.StatusCode(), "response", response.String())
-		return nil, errors.New("sdk get error" + response.String())
+		slog.Warn("sdk get error2", "statusCode", response.StatusCode(), "response", response.String())
+		return nil, errResult
 	}
 	return result, err
 }

@@ -25,7 +25,7 @@ type siteZpkOption struct {
 	Namespace         string
 }
 
-// ./runtime/main site:register-zpk --thirdPartyCDToken=qEINzTKqtPUYKi7f --host=w7job.test.w7.com --releaseName=app-nfohievs0w --appName=w7-pros-28692-app-nfohievs0w --namespace=default
+// ./runtime/main site:register-zpk --thirdPartyCDToken=qEINzTKqtPUYKi7f --siteIdentifie=test.txt --host=w7job.test.w7.com --releaseName=app-nfohievs0w --appName=w7-pros-28692-app-nfohievs0w --namespace=default
 var siteroZpk = siteZpkOption{}
 
 func (c SiteZpk) GetName() string {
