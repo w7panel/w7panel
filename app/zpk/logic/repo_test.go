@@ -127,3 +127,13 @@ func TestUrl(t *testing.T) {
 	}
 	assert.Equal(t, "ai_ollamaui", u.Path)
 }
+
+// deploy://console/7201/17995
+func TestLoadRepo(t *testing.T) {
+	repo := NewRepo("deploy://console/7201/17995", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..", "")
+	manifest, err := repo.Load()
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(manifest.Manifest.Application.Identifie) /// w7_pros_28694
+}
