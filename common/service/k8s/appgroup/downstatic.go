@@ -52,6 +52,9 @@ type Data struct {
 	ReleaseName string `json:"app_name"` //控制台接口用这个字段
 }
 
+func DownAppGroupName(appgroup *v1alpha1.AppGroup) {
+
+}
 func downStatic(appgroup *v1alpha1.AppGroup) {
 	downEnv := os.Getenv("STATIC_DOWN_ENABLED")
 	if downEnv != "true" {
@@ -64,21 +67,18 @@ func downStatic(appgroup *v1alpha1.AppGroup) {
 	}
 	if strings.Contains(frontTypeStr, "thirdparty_cd") {
 		go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
-		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name)
+		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
 	}
 }
-func DownStatic(zpkurl, name string) error {
-	return fetchWebZipAndDownload(zpkurl, name)
-}
 
-func DownStaticGo(zpkurl, name string) {
-	go fetchWebZipAndDownload(zpkurl, name)
+func DownStaticGo(zpkurl, name, version string) {
+	go fetchWebZipAndDownload(zpkurl, name, version)
 }
-func fetchWebZipAndDownload(zpkUrl string, releaseName string) error {
+func fetchWebZipAndDownload(zpkUrl string, releaseName, version string) error {
 	req := helper.RetryHttpClient().R()
-	// if version != "" {
-	// 	req.SetQueryParam("cur_version", version)
-	// }
+	if version != "" {
+		req.SetQueryParam("cur_version", version)
+	}
 	resp, err := req.Get(zpkUrl)
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func fetchWebZipAndDownload(zpkUrl string, releaseName string) error {
 	webzipUrl := zpkInfo.Data.WebZipURL
 	microappPath := os.Getenv("MICROAPP_PATH") //facade.Config.GetString("static.microapp_path")
 	if len(webzipUrl) > 0 {
-		DownStaticMap(webzipUrl, releaseName, microappPath)
+		downStaticMap(webzipUrl, releaseName, microappPath, version)
 	}
 	return nil
 	// if zpkInfo.Data.Manifest.V <= 1 {
@@ -227,7 +227,7 @@ func extractZipToDir(zipPath, destDir string) error {
 	return nil
 }
 
-func DownStaticMap(webzipUrl map[string]string, releaseName, microappPath string) error {
+func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, version string) error {
 	if len(webzipUrl) > 0 {
 		// 下载静态资源包
 		for k, url := range webzipUrl {
@@ -242,80 +242,53 @@ func DownStaticMap(webzipUrl map[string]string, releaseName, microappPath string
 				slog.Error("创建目录失败", "error", err)
 				// continue
 			}
-			err = downStaticFile(url, microappPath+"/"+releaseName+"/"+k+".zip")
+			err = os.Mkdir(microappPath+"/"+k+"/"+version, os.ModePerm) // 创建版本目录，如果不存在则创建 ingore err
+			if err != nil {
+				slog.Error("创建目录失败", "error", err)
+				// continue
+			}
+			// 下载 zip 到临时文件
+			tempZipFile := microappPath + "/" + k + ".zip"
+			err = downloadZipFile(url, tempZipFile)
 			if err != nil {
 				slog.Error("下载静态资源包失败", "error", err)
 				continue
 			}
+			// 解压到 releaseName 目录
+			err = extractZipToDir(tempZipFile, microappPath+"/"+releaseName)
+			if err != nil {
+				slog.Error("解压静态资源包失败", "error", err)
+				os.Remove(tempZipFile)
+				continue
+			}
+			// 解压到 version 目录
+			err = extractZipToDir(tempZipFile, microappPath+"/"+k+"/"+version)
+			if err != nil {
+				slog.Error("解压静态资源包失败", "error", err)
+				os.Remove(tempZipFile)
+				continue
+			}
+			// 清理临时 zip 文件
+			os.Remove(tempZipFile)
 		}
 	}
 	return nil
 }
 
-// 下载文件到指定目录
-func downStaticFile(url string, zipfile string) error {
-	// Download the file
+// downloadZipFile 下载 zip 文件到指定路径（不解压）
+func downloadZipFile(url string, zipfile string) error {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	defer os.Remove(zipfile)
-
-	// Create the zip file
 	zipFile, err := os.Create(zipfile)
 	if err != nil {
 		return err
 	}
 	defer zipFile.Close()
 
-	// Save the downloaded content to zip file
 	_, err = io.Copy(zipFile, resp.Body)
-	if err != nil {
-		return err
-	}
-
-	// Open the zip file for reading
-	zipReader, err := zip.OpenReader(zipfile)
-	if err != nil {
-		return err
-	}
-	defer zipReader.Close()
-
-	// Extract each file from the zip archive
-	for _, file := range zipReader.File {
-		filePath := filepath.Join(filepath.Dir(zipfile), file.Name)
-
-		if file.FileInfo().IsDir() {
-			os.MkdirAll(filePath, os.ModePerm)
-			continue
-		}
-
-		if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-			return err
-		}
-
-		dstFile, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
-		if err != nil {
-			return err
-		}
-
-		fileInArchive, err := file.Open()
-		if err != nil {
-			dstFile.Close()
-			return err
-		}
-
-		if _, err := io.Copy(dstFile, fileInArchive); err != nil {
-			fileInArchive.Close()
-			dstFile.Close()
-			return err
-		}
-
-		fileInArchive.Close()
-		dstFile.Close()
-	}
-
-	return nil
+	return err
 }

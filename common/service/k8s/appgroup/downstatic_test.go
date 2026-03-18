@@ -1,11 +1,12 @@
 package appgroup
 
 import (
+	"os"
 	"testing"
 )
 
 func TestDownStatic(t *testing.T) {
 
-	// os.Setenv("MICROAPP_PATH", "/home/workspace/k8s-offline/kodata/microapp")
-	// fetchWebZipAndDownload("https://zpk.w7.cc/zpk/respo/info/w7_cdncache", "w7-cdncache-xraavren")
+	os.Setenv("MICROAPP_PATH", "/home/workspace/w7panel/kodata/microapp")
+	fetchWebZipAndDownload("http://zpk.w7.cc/zpk/respo/info/w7_sitemanager", "w7-sitemanager-ipjjizit", "1.0.25")
 }

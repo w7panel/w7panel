@@ -43,8 +43,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env: 
-          - name: GOGC
-            value: "10"
+          # - name: GOGC
+          #   value: "10"
           - name: HELM_NAMESPACE
             valueFrom:
               fieldRef:
