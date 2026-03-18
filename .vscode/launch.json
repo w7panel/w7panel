@@ -6,6 +6,7 @@
             "env": {
                 "KO_DATA_PATH": "./kodata",
                 "LONGHORN_MOCK": "true",
+                "MICROAPP_PATH": "./kodata/microapp",
                 "LOCAL_MOCK": "false",
                 "REGISTRY_WATCH": "true",
                 "NODE_NAME": "server1",
