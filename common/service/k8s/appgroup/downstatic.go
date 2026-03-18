@@ -291,7 +291,7 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 			// 解压到 version 目录
 
 			// 清理临时 zip 文件
-			os.Remove(tempZipFile)
+			defer os.Remove(tempZipFile)
 			helper.Set(staticDownloadCacheKey+kName+version, DOWNLOAD_SUCCESS, time.Hour*24)
 		}
 	}
