@@ -267,7 +267,7 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 			}
 
 			// 下载 zip 到临时文件
-			tempZipFile := microappPath + "/" + kName + ".zip"
+			tempZipFile := os.TempDir() + "/" + helper.RandomString(15) + ".zip"
 			err = downloadZipFile(url, tempZipFile)
 			if err != nil {
 				slog.Error("下载静态资源包失败", "error", err)
