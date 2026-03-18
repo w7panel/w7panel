@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"gitee.com/we7coreteam/k8s-offline/common/helper"
+	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
 	"gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
@@ -78,7 +79,7 @@ func DownStatic(appgroup *v1alpha1.AppGroup) {
 		return
 	}
 	if strings.Contains(frontTypeStr, "thirdparty_cd") {
-		// go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
+		go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
 		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
 	}
 }
@@ -257,11 +258,14 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 				slog.Error("创建目录失败", "error", err)
 				// continue
 			}
-			err = os.Mkdir(microappPath+"/"+kName+"/"+version, os.ModePerm) // 创建版本目录，如果不存在则创建 ingore err
-			if err != nil {
-				slog.Error("创建目录失败", "error", err)
-				// continue
+			if version != "" {
+				err = os.Mkdir(microappPath+"/"+kName+"/"+version, os.ModePerm) // 创建版本目录，如果不存在则创建 ingore err
+				if err != nil {
+					slog.Error("创建目录失败", "error", err)
+					// continue
+				}
 			}
+
 			// 下载 zip 到临时文件
 			tempZipFile := microappPath + "/" + kName + ".zip"
 			err = downloadZipFile(url, tempZipFile)
@@ -276,13 +280,16 @@ func downStaticMap(webzipUrl map[string]string, releaseName, microappPath, versi
 				os.Remove(tempZipFile)
 				continue
 			}
-			// 解压到 version 目录
-			err = extractZipToDir(tempZipFile, microappPath+"/"+k+"/"+version)
-			if err != nil {
-				slog.Error("解压静态资源包失败", "error", err)
-				os.Remove(tempZipFile)
-				continue
+			if version != "" {
+				err = extractZipToDir(tempZipFile, microappPath+"/"+k+"/"+version)
+				if err != nil {
+					slog.Error("解压静态资源包失败", "error", err)
+					os.Remove(tempZipFile)
+					continue
+				}
 			}
+			// 解压到 version 目录
+
 			// 清理临时 zip 文件
 			os.Remove(tempZipFile)
 			helper.Set(staticDownloadCacheKey+kName+version, DOWNLOAD_SUCCESS, time.Hour*24)

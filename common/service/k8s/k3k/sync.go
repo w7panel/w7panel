@@ -61,6 +61,7 @@ type SyncObjectInterface interface {
 type SyncObject struct {
 	Name      string
 	Namespace string
+	Version   string
 }
 
 type K3kSync struct {
@@ -69,6 +70,7 @@ type K3kSync struct {
 	K3kName          string `form:"k3kName"`
 	K3kNamespace     string `form:"k3kNamespace"`
 	K3kMode          string `form:"k3kMode"`
+	Verion           string `form:"version"`
 }
 
 func (k *K3kSync) DeepCopy() *K3kSync {
@@ -78,6 +80,7 @@ func (k *K3kSync) DeepCopy() *K3kSync {
 		K3kName:          k.K3kName,
 		K3kNamespace:     k.K3kNamespace,
 		K3kMode:          k.K3kMode,
+		Verion:           k.Verion,
 	}
 }
 
@@ -90,6 +93,9 @@ func (obj *SyncObject) GetName() string {
 }
 func (obj *SyncObject) GetNamespace() string {
 	return obj.Namespace
+}
+func (obj *SyncObject) GetVersion() string {
+	return obj.Version
 }
 
 // SyncHttp 函数将同步对象数据到 HTTP 服务器
@@ -110,6 +116,7 @@ func SyncHttp(obj SyncObjectInterface, path string) error {
 	urlvalues.Add("k3kName", os.Getenv("K3K_NAME"))
 	urlvalues.Add("k3kNamespace", os.Getenv("K3K_NAMESPACE"))
 	urlvalues.Add("k3kMode", os.Getenv("K3K_MODE"))
+	urlvalues.Add("version", os.Getenv("K3K_MODE"))
 
 	slog.Info("sync start", "urlvalues", urlvalues)
 

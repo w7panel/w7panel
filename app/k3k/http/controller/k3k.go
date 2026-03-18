@@ -8,6 +8,7 @@ import (
 
 	"gitee.com/we7coreteam/k8s-offline/common/service"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/appgroup"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/microapp"
@@ -312,7 +313,7 @@ func (self K3k) SyncDownStatic(http *gin.Context) {
 		return
 	}
 	slog.Error("同步down-static")
-	// appgroup.DownStaticGo(params.VirtualNamespace, params.VirtualName)
+	appgroup.DownStaticGo(params.VirtualNamespace, params.VirtualName, "")
 	self.JsonSuccessResponse(http)
 	return
 }

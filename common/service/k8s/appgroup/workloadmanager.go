@@ -396,7 +396,7 @@ func (d *WorkloadManager) HandleAppGroup(group *v1alpha1.AppGroup, delete bool, 
 	}
 
 	if isInit {
-		// DownStatic(group)
+		DownStatic(group)
 	}
 
 	return nil
