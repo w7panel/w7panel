@@ -19,4 +19,6 @@ type PidParam struct {
 }
 
 type PidResult struct {
+	Pid    int `json:"pid"`
+	SubPid int `json:"subPid"`
 }

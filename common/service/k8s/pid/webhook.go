@@ -21,7 +21,7 @@ func WebHookPid(pod *corev1.Pod) {
 		if ok && annoContainerId == containerId {
 			return
 		}
-		err := LoadPid(pod)
+		_, err := LoadPid(pod)
 		if err != nil {
 			slog.Error("load pid error", "error", err)
 		}
