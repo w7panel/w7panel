@@ -5,24 +5,27 @@ import (
 )
 
 type pid struct {
-	rootSdk   *k8s.Sdk
-	clientSdk *k8s.Sdk
-	isVirtual bool
+	rootSdk          *k8s.Sdk
+	clientSdk        *k8s.Sdk
+	isVirtual        bool
+	virtualNamespace string
 }
 
 func NewPid(token string) (*pid, error) {
 	tokenObj := k8s.NewK8sToken(token)
 	var client *k8s.Sdk
+	ns := "default"
 	if tokenObj.IsK3kCluster() {
 		clientSdk, err := k8s.NewK8sClient().Channel(token)
 		if err != nil {
 			return nil, err
 		}
 		client = clientSdk
+		ns = tokenObj.GetNamespace()
 	}
 	root := k8s.NewK8sClient()
 
-	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: tokenObj.IsK3kCluster()}, nil
+	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: tokenObj.IsK3kCluster(), virtualNamespace: ns}, nil
 }
 
 func NewPidTest(saName string) (*pid, error) {
@@ -38,7 +41,7 @@ func NewPidTest(saName string) (*pid, error) {
 		client = clientSdk
 		isVirtual = true
 	}
-	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: isVirtual}, nil
+	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: isVirtual, virtualNamespace: "k3k-" + saName}, nil
 }
 
 // 不能在子集群执行
@@ -48,7 +51,7 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 	if p.isVirtual {
 
 		podfindApi := newPodFind(p.rootSdk.ClientSet, p.clientSdk.ClientSet)
-		clusterPod, err := podfindApi.GetVirtualClusterNodePod(param.Namespace, param.HostIp)
+		clusterPod, err := podfindApi.GetVirtualClusterNodePod(param.Namespace, p.virtualNamespace)
 		if err != nil {
 			return nil, err
 		}
