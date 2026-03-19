@@ -1,6 +1,8 @@
 package pid
 
 import (
+	"log/slog"
+
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 )
 
@@ -48,10 +50,11 @@ func NewPidTest(saName string) (*pid, error) {
 func (p *pid) Handle(param PidParam) (*PidResult, error) {
 	pid := 1 //节点文件管理默认1
 	subPid := 0
+	proxyIp := ""
 	if p.isVirtual {
 
 		podfindApi := newPodFind(p.rootSdk.ClientSet, p.clientSdk.ClientSet)
-		clusterPod, err := podfindApi.GetVirtualClusterNodePod(param.Namespace, p.virtualNamespace)
+		clusterPod, err := podfindApi.GetVirtualClusterNodePod(p.virtualNamespace, param.HostIp)
 		if err != nil {
 			return nil, err
 		}
@@ -59,10 +62,21 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 		if err != nil {
 			return nil, err
 		}
-		clusterPodPid, err := LoadPid(clusterPod)
+		// clusterPod.Status.HostIP 就是主集群pod ip
+		daemonsetPod, err := p.rootSdk.GetDaemonsetAgentPod(p.rootSdk.GetNamespace(), clusterPod.Status.HostIP)
+		if err != nil {
+			slog.Error("get  daemonsetPod err", "err", err)
+			return nil, err
+		}
+		err = checkPodRunning(daemonsetPod)
 		if err != nil {
 			return nil, err
 		}
+		clusterPodPid, err := GetContainerPid(daemonsetPod, clusterPod, param.ContainerId, false, p.rootSdk)
+		if err != nil {
+			return nil, err
+		}
+
 		pid = clusterPodPid
 		if param.ContainerId != "" && param.FromPodName != "" {
 			//为啥前端传containerId 为了获取pid, 后期因要从annnatation获取pid缓存, 所以需要查询k3kInnerPod
@@ -70,7 +84,7 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 			if err != nil {
 				return nil, err
 			}
-			k3kInnerPodPid, err := GetContainerPid(clusterPod, k3kInnerPod, param.ContainerId, false, p.clientSdk)
+			k3kInnerPodPid, err := GetContainerPid(clusterPod, k3kInnerPod, param.ContainerId, false, p.rootSdk) //必须rootsdk
 			if err != nil {
 				return nil, err
 			}
@@ -79,21 +93,29 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 	} else {
 		podfindApi := newPodFind(p.rootSdk.ClientSet, p.rootSdk.ClientSet)
 		if param.ContainerId != "" && param.FromPodName != "" {
+
+			daemonsetPod, err := p.rootSdk.GetDaemonsetAgentPod(p.rootSdk.GetNamespace(), param.HostIp)
+			if err != nil {
+				slog.Error("get  daemonsetPod err", "err", err)
+				return nil, err
+			}
 			//为啥前端传containerId 为了获取pid, 后期因要从annnatation获取pid缓存, 所以需要查询k3kInnerPod
 			rootPod, err := podfindApi.GetFromPod(param.FromPodName, param.Namespace, true)
 			if err != nil {
 				return nil, err
 			}
-			rootPid, err := LoadPid(rootPod)
+			rootPid, err := GetContainerPid(daemonsetPod, rootPod, param.ContainerId, false, p.rootSdk)
 			if err != nil {
 				return nil, err
 			}
 			pid = rootPid
+			proxyIp = daemonsetPod.Status.PodIP
 		}
 	}
 	return &PidResult{
-		Pid:    pid,
-		SubPid: subPid,
+		Pid:     pid,
+		SubPid:  subPid,
+		ProxyIp: proxyIp,
 	}, nil
 
 }

@@ -4,7 +4,7 @@ import "testing"
 
 func TestHandle(t *testing.T) {
 
-	containerId := "containerd://7cf41ad10677cdd49ef421acef26eda6bd9e2b17caedb0b8d1f3bfecdf90e1bb"
+	containerId := "containerd://1db837210dfcfe3f069c5ca3ac44b26f90a7a704a8571ef69dc666332d68cc1e"
 	pidParams := PidParam{
 		Namespace:            "default",
 		HostIp:               "10.42.0.211",
