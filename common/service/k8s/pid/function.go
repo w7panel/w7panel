@@ -16,19 +16,19 @@ import (
 )
 
 // webhook 入口获取pid
-func LoadPid(pod *corev1.Pod) error {
+func LoadPid(pod *corev1.Pod) (int, error) {
 	//如果是主集群 转发请求到agent节点获取pid
 	sdk := k8s.NewK8sClient()
 	sigClient, err := sdk.ToSigClient()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	if len(pod.Status.ContainerStatuses) == 0 {
-		return fmt.Errorf("not found pod containerId")
+		return 0, fmt.Errorf("not found pod containerId")
 	}
 	if pod.Status.ContainerStatuses[0].Ready == false {
-		return fmt.Errorf("cluster pod is not running")
+		return 0, fmt.Errorf("cluster pod is not running")
 	}
 	containerId := pod.Status.ContainerStatuses[0].ContainerID
 	if helper.IsChildAgent() {
@@ -38,12 +38,12 @@ func LoadPid(pod *corev1.Pod) error {
 			output, err := exec.Command("crictl", cmd...).Output()
 			if err != nil {
 				slog.Error("run cmd err", "err", err)
-				return err
+				return 0, err
 			}
 			pid, err := bytesToPid(output)
 			if err != nil {
 				slog.Error("bytesToPid", "err", err)
-				return err
+				return 0, err
 			}
 
 			controllerutil.CreateOrPatch(sdk.Ctx, sigClient, pod, func() error {
@@ -54,7 +54,7 @@ func LoadPid(pod *corev1.Pod) error {
 				pod.Annotations["w7.cc/container-id"] = containerId
 				return nil
 			})
-			return nil
+			return pid, nil
 		}
 		if helper.IsK3kShared() {
 			// 使用的主集群pod 不需要处理
@@ -63,12 +63,12 @@ func LoadPid(pod *corev1.Pod) error {
 		daemonsetPod, err := sdk.GetDaemonsetAgentPod(sdk.GetNamespace(), pod.Status.HostIP)
 		if err != nil {
 			slog.Error("get  daemonsetPod err", "err", err)
-			return err
+			return 0, err
 		}
 		if (len(pod.Status.ContainerStatuses) > 0) && containerId != "" {
 			pid, err := GetPid(daemonsetPod, containerId, true, sdk.Sdk)
 			if err != nil {
-				return err
+				return 0, err
 			}
 			controllerutil.CreateOrPatch(sdk.Ctx, sigClient, pod, func() error {
 				if pod.Annotations == nil {
@@ -78,9 +78,10 @@ func LoadPid(pod *corev1.Pod) error {
 				pod.Annotations["w7.cc/container-id"] = containerId
 				return nil
 			})
+			return pid, nil
 		}
 	}
-	return nil
+	return 0, errors.New("not found pid")
 	//如果是子集群 直接通过当前shell获取
 }
 func GetPid(findPod *corev1.Pod, containerId string, nscener bool, sdk *k8s.Sdk) (int, error) {
@@ -123,7 +124,7 @@ func bytesToPid(data []byte) (int, error) {
 	return pidInt, nil
 }
 
-func GetContainerPid(pod *corev1.Pod, containerId string, nscener bool, sdk *k8s.Sdk) (int, error) {
+func GetContainerPid(agentPod *corev1.Pod, pod *corev1.Pod, containerId string, nscener bool, sdk *k8s.Sdk) (int, error) {
 
 	pid, err := getAnnotationPodPid(pod)
 	if err != nil {
@@ -132,7 +133,7 @@ func GetContainerPid(pod *corev1.Pod, containerId string, nscener bool, sdk *k8s
 	if err == nil && pid != 0 {
 		return pid, nil
 	}
-	return GetPid(pod, containerId, nscener, sdk)
+	return GetPid(agentPod, containerId, nscener, sdk)
 }
 
 func getAnnotationPodPid(pod *corev1.Pod) (int, error) {
