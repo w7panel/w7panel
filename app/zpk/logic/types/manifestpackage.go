@@ -253,6 +253,11 @@ func (p *ManifestPackage) GetChildren(moduleName string) (child *ManifestPackage
 	if moduleName == p.Manifest.Application.Identifie {
 		return p
 	}
+	//fix 微擎商业 授权 免费
+	if moduleName == "w7_pros_28692" || moduleName == "w7_pros_28693" || moduleName == "w7_pros_28694" {
+		return p
+	}
+
 	child, ok := p.Children[(moduleName)]
 	if !ok {
 		return nil
