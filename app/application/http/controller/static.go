@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"strings"
+
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/appgroup"
 	"github.com/gin-gonic/gin"
@@ -25,12 +27,19 @@ func (self Static) Download(http *gin.Context) {
 	name := http.Param("name")
 	namespace := http.Param("namespace")
 	token := http.MustGet("k8s_token").(string)
+
+	rootSdk := k8s.NewK8sClient().Sdk
 	sdk, err := k8s.NewK8sClient().Channel(token)
 	if err != nil {
 		self.JsonResponseWithServerError(http, err)
 		return
 	}
-	appgroupObj, err := appgroup.GetAppgroupUseSdk(name, namespace, sdk)
+	useSdk := sdk
+	if strings.Contains(name, "-root") {
+		name = strings.ReplaceAll(name, "-root", "")
+		useSdk = rootSdk //使用root sdk
+	}
+	appgroupObj, err := appgroup.GetAppgroupUseSdk(name, namespace, useSdk)
 	if err != nil {
 		self.JsonResponseWithServerError(http, err)
 		return
