@@ -5,25 +5,49 @@ import (
 )
 
 type pid struct {
-	k8stoken *k8s.K8sToken
+	rootSdk   *k8s.Sdk
+	clientSdk *k8s.Sdk
+	isVirtual bool
 }
 
-func NewPid(token string) *pid {
+func NewPid(token string) (*pid, error) {
 	tokenObj := k8s.NewK8sToken(token)
-	return &pid{k8stoken: tokenObj}
+	var client *k8s.Sdk
+	if tokenObj.IsK3kCluster() {
+		clientSdk, err := k8s.NewK8sClient().Channel(token)
+		if err != nil {
+			return nil, err
+		}
+		client = clientSdk
+	}
+	root := k8s.NewK8sClient()
+
+	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: tokenObj.IsK3kCluster()}, nil
+}
+
+func NewPidTest(saName string) (*pid, error) {
+	root := k8s.NewK8sClient()
+	var client *k8s.Sdk
+	isVirtual := false
+	if saName != "" {
+		k3kConfig := k8s.NewK3kConfig(saName, "k3k-"+saName, "http://test.cc")
+		clientSdk, err := root.GetK3kClusterSdkByConfig(k3kConfig)
+		if err != nil {
+			return nil, err
+		}
+		client = clientSdk
+		isVirtual = true
+	}
+	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: isVirtual}, nil
 }
 
 // 不能在子集群执行
 func (p *pid) Handle(param PidParam) (*PidResult, error) {
-	root := k8s.NewK8sClient()
 	pid := 1 //节点文件管理默认1
 	subPid := 0
-	if p.k8stoken.IsVirtual() {
-		client, err := k8s.NewK8sClient().Channel(p.k8stoken.GetToken())
-		if err != nil {
-			return nil, err
-		}
-		podfindApi := newPodFind(root.ClientSet, client.ClientSet)
+	if p.isVirtual {
+
+		podfindApi := newPodFind(p.rootSdk.ClientSet, p.clientSdk.ClientSet)
 		clusterPod, err := podfindApi.GetVirtualClusterNodePod(param.Namespace, param.HostIp)
 		if err != nil {
 			return nil, err
@@ -43,14 +67,14 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 			if err != nil {
 				return nil, err
 			}
-			k3kInnerPodPid, err := GetContainerPid(clusterPod, k3kInnerPod, param.ContainerId, false, client)
+			k3kInnerPodPid, err := GetContainerPid(clusterPod, k3kInnerPod, param.ContainerId, false, p.clientSdk)
 			if err != nil {
 				return nil, err
 			}
 			subPid = k3kInnerPodPid
 		}
 	} else {
-		podfindApi := newPodFind(root.ClientSet, root.ClientSet)
+		podfindApi := newPodFind(p.rootSdk.ClientSet, p.rootSdk.ClientSet)
 		if param.ContainerId != "" && param.FromPodName != "" {
 			//为啥前端传containerId 为了获取pid, 后期因要从annnatation获取pid缓存, 所以需要查询k3kInnerPod
 			rootPod, err := podfindApi.GetFromPod(param.FromPodName, param.Namespace, true)
