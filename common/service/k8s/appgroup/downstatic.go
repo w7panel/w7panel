@@ -100,7 +100,7 @@ func DownStatic(appgroup *v1alpha1.AppGroup) {
 	}
 	if strings.Contains(frontTypeStr, "thirdparty_cd") {
 		// go k3k.SyncDownStatic(appgroup.Name, appgroup.Spec.ZpkUrl)
-		go fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
+		fetchWebZipAndDownload(appgroup.Spec.ZpkUrl, appgroup.Name, appgroup.Spec.Version)
 	}
 }
 
