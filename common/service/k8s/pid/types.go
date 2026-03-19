@@ -19,6 +19,7 @@ type PidParam struct {
 }
 
 type PidResult struct {
-	Pid    int `json:"pid"`
-	SubPid int `json:"subPid"`
+	Pid     int    `json:"pid"`
+	SubPid  int    `json:"subPid"`
+	ProxyIp string `json:"proxyIp"`
 }
