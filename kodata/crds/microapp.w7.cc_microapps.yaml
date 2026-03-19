@@ -69,7 +69,6 @@ spec:
                         - do
                         - title
                         type: object
-                        x-kubernetes-map-type: atomic
                       type: array
                       x-kubernetes-list-type: atomic
                     name:
@@ -84,10 +83,8 @@ spec:
                   - name
                   - title
                   type: object
-                  x-kubernetes-map-type: atomic
                 nullable: true
                 type: array
-                x-kubernetes-list-type: atomic
               config:
                 properties:
                   props:
@@ -127,7 +124,6 @@ spec:
                           type: object
                         nullable: true
                         type: object
-                        x-kubernetes-map-type: atomic
                     type: object
                     x-kubernetes-map-type: atomic
                 type: object
