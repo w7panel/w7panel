@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	zpktypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk/types"
 	"github.com/samber/lo"
+	"github.com/w7panel/w7panel/common/helper"
+	zpktypes "github.com/w7panel/w7panel/common/service/k8s/zpk/types"
 	corev1 "k8s.io/api/core/v1"
 )
 

@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 

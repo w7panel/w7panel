@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"github.com/gin-gonic/gin"
 	pinyin "github.com/mozillazg/go-pinyin"
+	"github.com/w7panel/w7panel/common/helper"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 
 	// "github.com/we7coreteam/w7-rangine-go/v2/src/core/helper"

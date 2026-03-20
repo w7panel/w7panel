@@ -22,9 +22,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned"
-	gpuclass "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/informers/externalversions/gpuclass"
-	internalinterfaces "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/informers/externalversions/internalinterfaces"
+	versioned "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned"
+	gpuclass "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/informers/externalversions/gpuclass"
+	internalinterfaces "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/informers/externalversions/internalinterfaces"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

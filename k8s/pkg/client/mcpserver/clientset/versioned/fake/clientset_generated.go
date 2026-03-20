@@ -18,10 +18,10 @@ limitations under the License.
 package fake
 
 import (
-	applyconfiguration "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/applyconfiguration"
-	clientset "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned"
-	mcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
-	fakemcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1/fake"
+	applyconfiguration "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/applyconfiguration"
+	clientset "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned"
+	mcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
+	fakemcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

@@ -20,7 +20,7 @@ package externalversions
 import (
 	fmt "fmt"
 
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/mcpserver/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/mcpserver/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )

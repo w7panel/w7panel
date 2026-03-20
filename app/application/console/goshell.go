@@ -5,8 +5,8 @@ import (
 	"log"
 	"log/slog"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/shell"
 	"github.com/spf13/cobra"
+	"github.com/w7panel/w7panel/common/service/k8s/shell"
 	console2 "github.com/we7coreteam/w7-rangine-go/v2/src/console"
 )
 

@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/mcpserver/v1alpha1"
-	mcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/applyconfiguration/mcpserver/v1alpha1"
-	typedmcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/mcpserver/v1alpha1"
+	mcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/applyconfiguration/mcpserver/v1alpha1"
+	typedmcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
 	gentype "k8s.io/client-go/gentype"
 )
 

@@ -18,7 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	mcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/mcpserver/v1alpha1"
+	mcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/mcpserver/v1alpha1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	listers "k8s.io/client-go/listers"
 	cache "k8s.io/client-go/tools/cache"

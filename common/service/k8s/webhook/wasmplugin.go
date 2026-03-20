@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/higress"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/higress/client/pkg/apis/extensions/v1alpha1"
+	"github.com/w7panel/w7panel/common/service/k8s/higress"
+	"github.com/w7panel/w7panel/common/service/k8s/higress/client/pkg/apis/extensions/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 

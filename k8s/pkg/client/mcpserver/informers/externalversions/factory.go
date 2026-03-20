@@ -22,9 +22,9 @@ import (
 	sync "sync"
 	time "time"
 
-	versioned "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned"
-	internalinterfaces "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/informers/externalversions/internalinterfaces"
-	mcpserver "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/informers/externalversions/mcpserver"
+	versioned "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned"
+	internalinterfaces "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/informers/externalversions/internalinterfaces"
+	mcpserver "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/informers/externalversions/mcpserver"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

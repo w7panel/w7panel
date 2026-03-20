@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 	v1 "k8s.io/api/core/v1"
 	ktypes "k8s.io/apimachinery/pkg/types"
 )

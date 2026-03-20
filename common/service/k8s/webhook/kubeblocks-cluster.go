@@ -4,8 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/appgroup"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/appgroup"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 

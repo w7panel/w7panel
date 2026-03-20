@@ -4,9 +4,9 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
+	"github.com/w7panel/w7panel/common/helper"
 )
 
 var tokenCache = make(map[string]int64)

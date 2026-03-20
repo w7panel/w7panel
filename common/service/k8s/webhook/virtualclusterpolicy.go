@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
 	"github.com/rancher/k3k/pkg/apis/k3k.io/v1alpha1"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 

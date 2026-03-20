@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
+	"github.com/w7panel/w7panel/common/helper"
 )
 
 type gpustackApi struct {

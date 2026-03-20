@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/console"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/overselling"
+	"github.com/w7panel/w7panel/common/service/console"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k/overselling"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

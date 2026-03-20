@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/config"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	// "gitee.com/we7coreteam/k8s-offline/common/service/config"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/config"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	// "github.com/w7panel/w7panel/common/service/config"
 )
 
 func TestRefreshUseCdToken(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
+	"github.com/w7panel/w7panel/common/helper"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

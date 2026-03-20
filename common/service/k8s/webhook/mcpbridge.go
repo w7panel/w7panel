@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/higress"
+	"github.com/w7panel/w7panel/common/service/k8s/higress"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 

@@ -3,8 +3,8 @@ package types_test
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic"
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/app/zpk/logic"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
 )
 
 func TestNewPackageApps(t *testing.T) {

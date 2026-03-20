@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/longhorn"
+	"github.com/w7panel/w7panel/common/service/k8s/longhorn"
 	storagev1 "k8s.io/api/storage/v1"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )

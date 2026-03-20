@@ -4,9 +4,9 @@ import (
 	"net/url"
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	zpktypes "gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	zpktypes "github.com/w7panel/w7panel/app/zpk/logic/types"
 )
 
 func TestLoadPackage(t *testing.T) {

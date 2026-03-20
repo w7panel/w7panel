@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/gpu"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/gpu/gpustack"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/metrics"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/gpu"
+	"github.com/w7panel/w7panel/common/service/k8s/gpu/gpustack"
+	"github.com/w7panel/w7panel/common/service/k8s/metrics"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

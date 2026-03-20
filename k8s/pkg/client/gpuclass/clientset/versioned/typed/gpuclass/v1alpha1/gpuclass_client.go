@@ -20,8 +20,8 @@ package v1alpha1
 import (
 	http "net/http"
 
-	gpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/gpuclass/v1alpha1"
-	scheme "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned/scheme"
+	gpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/gpuclass/v1alpha1"
+	scheme "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

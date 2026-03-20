@@ -3,8 +3,8 @@ package controller
 import (
 	"net/http"
 
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/logic"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/app/k3s-registry/logic"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 

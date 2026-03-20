@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/logic"
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/model"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/app/k3s-registry/logic"
+	"github.com/w7panel/w7panel/app/k3s-registry/model"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 

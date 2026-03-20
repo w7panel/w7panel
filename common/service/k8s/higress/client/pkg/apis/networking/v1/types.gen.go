@@ -17,7 +17,7 @@
 package v1
 
 import (
-	networkingv1 "gitee.com/we7coreteam/k8s-offline/common/service/k8s/higress/api/networking/v1"
+	networkingv1 "github.com/w7panel/w7panel/common/service/k8s/higress/api/networking/v1"
 	v1alpha1 "istio.io/api/meta/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

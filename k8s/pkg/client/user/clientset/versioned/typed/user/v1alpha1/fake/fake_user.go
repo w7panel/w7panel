@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/user/v1alpha1"
-	userv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/applyconfiguration/user/v1alpha1"
-	typeduserv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/clientset/versioned/typed/user/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/user/v1alpha1"
+	userv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/user/applyconfiguration/user/v1alpha1"
+	typeduserv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/user/clientset/versioned/typed/user/v1alpha1"
 	gentype "k8s.io/client-go/gentype"
 )
 

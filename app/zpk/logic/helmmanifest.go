@@ -3,8 +3,8 @@ package logic
 import (
 	"sync"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	zpktypes "gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	zpktypes "github.com/w7panel/w7panel/app/zpk/logic/types"
 )
 
 type manifestsingleton struct {

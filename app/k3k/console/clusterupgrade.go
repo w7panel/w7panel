@@ -3,9 +3,9 @@ package console
 import (
 	"log/slog"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/rancher/k3k/pkg/apis/k3k.io/v1alpha1"
 	"github.com/spf13/cobra"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	console2 "github.com/we7coreteam/w7-rangine-go/v2/src/console"
 	sigclient "sigs.k8s.io/controller-runtime/pkg/client"
 )

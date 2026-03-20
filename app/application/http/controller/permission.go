@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/procpath"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/procpath"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 
@@ -135,7 +135,7 @@ type ownerInfo struct {
 
 func parseOwner(owner string) ownerInfo {
 	info := ownerInfo{-1, -1}
-	
+
 	if owner == "" {
 		return info
 	}

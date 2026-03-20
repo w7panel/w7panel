@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/internal/content"
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/internal/metadata"
+	"github.com/w7panel/w7panel/app/k3s-registry/internal/content"
+	"github.com/w7panel/w7panel/app/k3s-registry/internal/metadata"
 )
 
 type RegistryLogic struct {

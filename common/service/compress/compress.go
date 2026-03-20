@@ -11,10 +11,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/procpath"
 	"github.com/bodgit/sevenzip"
 	"github.com/klauspost/pgzip"
 	"github.com/ulikunitz/xz"
+	"github.com/w7panel/w7panel/common/service/procpath"
 )
 
 type Compressor struct {

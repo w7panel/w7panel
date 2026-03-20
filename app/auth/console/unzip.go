@@ -1,8 +1,8 @@
 package console
 
 import (
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"github.com/spf13/cobra"
+	"github.com/w7panel/w7panel/common/helper"
 	console2 "github.com/we7coreteam/w7-rangine-go/v2/src/console"
 )
 

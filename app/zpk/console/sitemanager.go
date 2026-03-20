@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic"
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/appgroup"
 	"github.com/spf13/cobra"
+	"github.com/w7panel/w7panel/app/zpk/logic"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/appgroup"
 	console2 "github.com/we7coreteam/w7-rangine-go/v2/src/console"
 	"golang.org/x/mod/semver"
 )

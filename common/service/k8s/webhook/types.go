@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"os"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	k3kTypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	k3kTypes "github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"

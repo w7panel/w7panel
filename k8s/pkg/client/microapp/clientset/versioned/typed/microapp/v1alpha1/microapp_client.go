@@ -20,8 +20,8 @@ package v1alpha1
 import (
 	http "net/http"
 
-	microappv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/microapp/v1alpha1"
-	scheme "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/microapp/clientset/versioned/scheme"
+	microappv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/microapp/v1alpha1"
+	scheme "github.com/w7panel/w7panel/k8s/pkg/client/microapp/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 

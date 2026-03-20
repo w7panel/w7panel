@@ -11,8 +11,8 @@ import (
 	"os"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"github.com/go-resty/resty/v2"
+	"github.com/w7panel/w7panel/common/helper"
 )
 
 var consoleApi = "https://console.w7.cc"

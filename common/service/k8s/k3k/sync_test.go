@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -82,8 +82,6 @@ func TestSyncChild(t *testing.T) {
 		t.Error(err)
 	}
 }
-
-
 
 //who8-fan-b2-sz-w7-com-tls-secret
 

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s"
 )
 
 func TestCgroup(t *testing.T) {

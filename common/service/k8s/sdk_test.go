@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	"github.com/spf13/cobra"
+	"github.com/w7panel/w7panel/common/helper"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

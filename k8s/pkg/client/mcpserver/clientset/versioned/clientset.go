@@ -21,7 +21,7 @@ import (
 	fmt "fmt"
 	http "net/http"
 
-	mcpserverv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
+	mcpserverv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/mcpserver/clientset/versioned/typed/mcpserver/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

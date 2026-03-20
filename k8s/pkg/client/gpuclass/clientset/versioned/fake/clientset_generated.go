@@ -18,10 +18,10 @@ limitations under the License.
 package fake
 
 import (
-	applyconfiguration "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/applyconfiguration"
-	clientset "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned"
-	gpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1"
-	fakegpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1/fake"
+	applyconfiguration "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/applyconfiguration"
+	clientset "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned"
+	gpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1"
+	fakegpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

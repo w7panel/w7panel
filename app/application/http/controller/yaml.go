@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"io"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/kompose"
+	"github.com/w7panel/w7panel/common/service/k8s/kompose"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s"
 
 	// "github.com/go-openapi/spec"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"

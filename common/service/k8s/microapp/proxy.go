@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http/httputil"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	microapp "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/microapp/v1alpha1"
+	"github.com/w7panel/w7panel/common/helper"
+	microapp "github.com/w7panel/w7panel/k8s/pkg/apis/microapp/v1alpha1"
 )
 
 type MicroAppProxy struct {

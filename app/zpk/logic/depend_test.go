@@ -3,7 +3,7 @@ package logic
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s"
 )
 
 func TestDependEnv_LoadHelmEnv(t *testing.T) {
