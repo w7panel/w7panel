@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/w7panel/w7panel/common/service/k8s"
+	corev1 "k8s.io/api/core/v1"
 )
 
 type pid struct {
@@ -51,6 +52,7 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 	pid := 1 //节点文件管理默认1
 	subPid := 0
 	proxyIp := ""
+	var agentPod *corev1.Pod
 	if p.isVirtual {
 
 		podfindApi := newPodFind(p.rootSdk.ClientSet, p.clientSdk.ClientSet)
@@ -90,15 +92,17 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 			}
 			subPid = k3kInnerPodPid
 		}
+		agentPod = daemonsetPod
+		proxyIp = daemonsetPod.Status.PodIP
 	} else {
 		podfindApi := newPodFind(p.rootSdk.ClientSet, p.rootSdk.ClientSet)
+		daemonsetPod, err := p.rootSdk.GetDaemonsetAgentPod(p.rootSdk.GetNamespace(), param.HostIp)
+		if err != nil {
+			slog.Error("get  daemonsetPod err", "err", err)
+			return nil, err
+		}
 		if param.ContainerId != "" && param.FromPodName != "" {
 
-			daemonsetPod, err := p.rootSdk.GetDaemonsetAgentPod(p.rootSdk.GetNamespace(), param.HostIp)
-			if err != nil {
-				slog.Error("get  daemonsetPod err", "err", err)
-				return nil, err
-			}
 			//为啥前端传containerId 为了获取pid, 后期因要从annnatation获取pid缓存, 所以需要查询k3kInnerPod
 			rootPod, err := podfindApi.GetFromPod(param.FromPodName, param.Namespace, true)
 			if err != nil {
@@ -110,12 +114,15 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 			}
 			pid = rootPid
 			proxyIp = daemonsetPod.Status.PodIP
+
 		}
+		agentPod = daemonsetPod
 	}
 	return &PidResult{
-		Pid:     pid,
-		SubPid:  subPid,
-		ProxyIp: proxyIp,
+		Pid:      pid,
+		SubPid:   subPid,
+		ProxyIp:  proxyIp,
+		AgentPod: agentPod,
 	}, nil
 
 }
