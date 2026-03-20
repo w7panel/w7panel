@@ -7,8 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rancher/k3k/pkg/apis/k3k.io/v1alpha1"
-	"github.com/rancher/k3k/pkg/controller/kubeconfig"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/clientcmd"
@@ -52,7 +50,7 @@ func (s *singleton) GetSdk() *Sdk {
 
 func (s *singleton) ChannelLocal(token string, forceLocal bool) (*Sdk, error) {
 	startTime := time.Now()
-	
+
 	if forceLocal {
 		loadStart := time.Now()
 		result, err := s.loadFromCache(token)
@@ -60,7 +58,7 @@ func (s *singleton) ChannelLocal(token string, forceLocal bool) (*Sdk, error) {
 		log.Printf("[PERF] ChannelLocal total time %v", time.Since(startTime))
 		return result, err
 	}
-	
+
 	channelStart := time.Now()
 	result, err := s.Channel(token)
 	log.Printf("[PERF] ChannelLocal - Channel took %v", time.Since(channelStart))
@@ -71,11 +69,11 @@ func (s *singleton) ChannelLocal(token string, forceLocal bool) (*Sdk, error) {
 func (s *singleton) Channel(token string) (*Sdk, error) {
 	startTime := time.Now()
 	tokenobj := NewK8sToken(token)
-	
+
 	isK3kStart := time.Now()
 	isK3k := tokenobj.IsK3kCluster()
 	log.Printf("[PERF] Channel - IsK3kCluster took %v", time.Since(isK3kStart))
-	
+
 	if isK3k {
 		k3kStart := time.Now()
 		result, err := s.GetK3kClusterSdk(tokenobj)
@@ -83,7 +81,7 @@ func (s *singleton) Channel(token string) (*Sdk, error) {
 		log.Printf("[PERF] Channel total time %v", time.Since(startTime))
 		return result, err
 	}
-	
+
 	cacheStart := time.Now()
 	result, err := s.loadFromCache(token)
 	log.Printf("[PERF] Channel - loadFromCache took %v", time.Since(cacheStart))
@@ -131,14 +129,14 @@ func (s *singleton) GetK3kClusterSdkByConfig(k3kconfig *K3kConfig) (*Sdk, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	getKubeConfigStart := time.Now()
 	kubeconfig, err := GetK3kKubeConfig(sigClient, k3kconfig)
 	log.Printf("[PERF] GetK3kClusterSdkByConfig - GetK3kKubeConfig took %v", time.Since(getKubeConfigStart))
 	if err != nil {
 		return nil, err
 	}
-	
+
 	clientConfigStart := time.Now()
 	clientconfig := clientcmd.NewDefaultClientConfig(*kubeconfig, &clientcmd.ConfigOverrides{})
 	restConfig, err := clientconfig.ClientConfig()
@@ -146,14 +144,14 @@ func (s *singleton) GetK3kClusterSdkByConfig(k3kconfig *K3kConfig) (*Sdk, error)
 	if err != nil {
 		return nil, err
 	}
-	
+
 	newSdkStart := time.Now()
 	sdk, err := NewForRestConfig(restConfig, "default")
 	log.Printf("[PERF] GetK3kClusterSdkByConfig - NewForRestConfig took %v", time.Since(newSdkStart))
 	if err != nil {
 		return nil, err
 	}
-	
+
 	createTokenStart := time.Now()
 	token, err := sdk.CreateTokenRequest(k3kconfig.Name, 7200, []string{})
 	log.Printf("[PERF] GetK3kClusterSdkByConfig - CreateTokenRequest took %v", time.Since(createTokenStart))
@@ -174,14 +172,14 @@ func (s *singleton) GetK3kClusterSdkByConfig(k3kconfig *K3kConfig) (*Sdk, error)
 }
 func (s *singleton) GetK3kClusterSdk(k8stoken *K8sToken) (*Sdk, error) {
 	startTime := time.Now()
-	
+
 	getConfigStart := time.Now()
 	k3kconfig, err := k8stoken.GetK3kConfig()
 	log.Printf("[PERF] GetK3kClusterSdk - GetK3kConfig took %v", time.Since(getConfigStart))
 	if err != nil {
 		return nil, err
 	}
-	
+
 	byConfigStart := time.Now()
 	result, err := s.GetK3kClusterSdkByConfig(k3kconfig)
 	log.Printf("[PERF] GetK3kClusterSdk - GetK3kClusterSdkByConfig took %v", time.Since(byConfigStart))
@@ -194,12 +192,6 @@ func (s *singleton) Clear(k3kName string) {
 	defer s.mu.Unlock()
 	delete(s.sdks, k3kName)
 	delete(s.expires, k3kName)
-}
-
-func extract(ctx context.Context, client client.Client, cluster *v1alpha1.Cluster, hostServerIP string) (*clientcmdapi.Config, error) {
-	cfg := kubeconfig.New()
-	kubeconfig, err := cfg.Generate(ctx, client, cluster, hostServerIP, 443)
-	return kubeconfig, err
 }
 
 // GetK3kKubeConfig 从Kubernetes集群中获取k3k的kubeconfig配置
@@ -218,7 +210,7 @@ func GetK3kKubeConfig(sigClient client.Client, k3kconfig *K3kConfig) (*clientcmd
 
 	secret := &corev1.Secret{}
 	kubeConfigName := "k3k-" + k3kconfig.Name + "-kubeconfig"
-	
+
 	getSecretStart := time.Now()
 	err := sigClient.Get(context.TODO(), types.NamespacedName{Name: kubeConfigName, Namespace: k3kconfig.Namespace}, secret)
 	log.Printf("[PERF] GetK3kKubeConfig - Get Secret took %v", time.Since(getSecretStart))
@@ -230,7 +222,7 @@ func GetK3kKubeConfig(sigClient client.Client, k3kconfig *K3kConfig) (*clientcmd
 	if len(kubeconfigYaml) == 0 {
 		return nil, errors.New("kubeconfig.yaml is empty")
 	}
-	
+
 	loadStart := time.Now()
 	kubeconfig, err := clientcmd.Load(kubeconfigYaml)
 	log.Printf("[PERF] GetK3kKubeConfig - Load kubeconfig took %v", time.Since(loadStart))
