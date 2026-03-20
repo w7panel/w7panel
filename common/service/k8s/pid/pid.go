@@ -108,7 +108,7 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 			if err != nil {
 				return nil, err
 			}
-			rootPid, err := GetContainerPid(daemonsetPod, rootPod, param.ContainerId, false, p.rootSdk)
+			rootPid, err := GetContainerPid(daemonsetPod, rootPod, param.ContainerId, true, p.rootSdk)
 			if err != nil {
 				return nil, err
 			}
