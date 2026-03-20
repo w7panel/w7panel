@@ -566,7 +566,7 @@ func ToShellJob2(manifest K8sResourceInterface, ingress K8sResourceIngressInterf
 	recordApp := []string{}
 	// if manifest.RequireSite() && shellType == "install" { //创建站点会更新版本号
 	if manifest.RequireSite() {
-		cmd := "ko-app/k8s-offline site:register --thirdPartyCDToken=" + cdToken + " --host=" + host + " --releaseName=" + releaseName + " --deploymentName=" + deploymentName + " --namespace=" + namespace
+		cmd := "ko-app/w7panel site:register --thirdPartyCDToken=" + cdToken + " --host=" + host + " --releaseName=" + releaseName + " --deploymentName=" + deploymentName + " --namespace=" + namespace
 		siteC := corev1.Container{
 			Name:  "check-site",
 			Image: helper.SelfImage(),
@@ -628,7 +628,7 @@ func ToShellJob2(manifest K8sResourceInterface, ingress K8sResourceIngressInterf
 	}
 	ok, dbName := manifest.RequireCreateDb()
 	if ok {
-		cmd := "/ko-app/k8s-offline db:create-inner --database=" + dbName + " --namespace=" + namespace
+		cmd := "/ko-app/w7panel db:create-inner --database=" + dbName + " --namespace=" + namespace
 		createDbC := corev1.Container{
 			Name:  "create-db",
 			Image: helper.SelfImage(),
@@ -1082,7 +1082,7 @@ func ToZpkBuildCronJob(opt types.BuildImageInterface, schedule string) *batchv1.
 	return job
 }
 func ToBeianCheckJob(info K8sResourceInterface, host string) *batchv1.Job {
-	shellStr := "ko-app/k8s-offline beian-check --host=" + host
+	shellStr := "ko-app/w7panel beian-check --host=" + host
 	cmd := []string{"/bin/sh", "-c", shellStr}
 	jobName := "beian-job-" + helper.RandomString(8)
 

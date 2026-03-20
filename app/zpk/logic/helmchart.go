@@ -155,7 +155,7 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	helmConfig := packageApp.Manifest.Platform.Helm
 	labels := packageApp.GetLabels()
 	// anno := packageApp.GetAnnotations()
-	shellCmd := "/ko-app/k8s-offline helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
+	shellCmd := "/ko-app/w7panel helmgo --chartName=" + helmConfig.ChartName + " --namespace=" + packageApp.Namespace + " --repository=" + helmConfig.Repository + " --zipUrl=" + packageApp.ZipUrl + " --releaseName=" + releaseName + ""
 	shellCmd += " --set " + "global.panel.image=" + helper.SelfImage()
 	shellCmd += " --set " + "global.panel.thirdPartyCDToken=" + packageApp.ThirdpartyCDToken
 	shellCmd += " --set " + "global.panel.installId=" + packageApp.InstallId

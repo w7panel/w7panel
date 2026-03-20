@@ -51,20 +51,20 @@ kubectl create -f $KO_DATA_PATH/yaml/permission || echo "已存在"
 kubectl apply -f $KO_DATA_PATH/yaml/permission/k3k.permission.founder.yaml
 
 echo "卸载异常面板"
-k8s-offline uninstall-store-panel
+w7panel uninstall-store-panel
 
 echo "新版metrics  "
-k8s-offline metrics:upgrade
+w7panel metrics:upgrade
 
 echo "升级权限菜单"
-k8s-offline qx-upgrade
+w7panel qx-upgrade
 
 echo "域名解析配置"
-k8s-offline domain-config
+w7panel domain-config
 
 # echo "升级站点管理"
-# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_php --is-agent=false
-# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_go --is-agent=false
-# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_nodejs --is-agent=false
-# k8s-offline sitemanager-upgrade --version=1.0.24 --identifie=w7_python --is-agent=false
-# k8s-offline sitemanager-upgrade --version=1.0.25 --identifie=w7_sitemanager --is-agent=false
+# w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_php --is-agent=false
+# w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_go --is-agent=false
+# w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_nodejs --is-agent=false
+# w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_python --is-agent=false
+# w7panel sitemanager-upgrade --version=1.0.25 --identifie=w7_sitemanager --is-agent=false

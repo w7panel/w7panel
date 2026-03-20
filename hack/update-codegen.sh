@@ -24,7 +24,7 @@ CODEGEN_PKG="${CODEGEN_PKG:-"${SCRIPT_ROOT}/"}"
 
 source "${CODEGEN_PKG}/kube_codegen.sh"
 
-THIS_PKG="gitee.com/we7coreteam/k8s-offline"
+THIS_PKG="github.com/w7panel/w7panel"
 
 kube::codegen::gen_helpers \
     --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.go.txt" \
