@@ -59,6 +59,7 @@ func (p *PidResult) ToArray() map[string]string {
 		"webdavBasePath": webdavBasePath,
 		"compressUrl":    compressUrl,
 		"permissionUrl":  permissionUrl,
+		"pwd":            "/",
 		// "users":          users,
 	}
 
