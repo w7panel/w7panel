@@ -3,9 +3,9 @@ package logic
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	helmtypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk/types"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	helmtypes "github.com/w7panel/w7panel/common/service/k8s/zpk/types"
 )
 
 func TestRequireInstall(t *testing.T) {

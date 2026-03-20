@@ -18,8 +18,8 @@ limitations under the License.
 package user
 
 import (
-	internalinterfaces "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/informers/externalversions/internalinterfaces"
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/informers/externalversions/user/v1alpha1"
+	internalinterfaces "github.com/w7panel/w7panel/k8s/pkg/client/user/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/user/informers/externalversions/user/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

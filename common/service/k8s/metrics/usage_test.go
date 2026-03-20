@@ -4,8 +4,8 @@ package metrics
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 )
 
 func TestGetResourceDiskUsage(t *testing.T) {

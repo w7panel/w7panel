@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	resty "github.com/go-resty/resty/v2"
+	"github.com/w7panel/w7panel/common/helper"
 
 	w7 "github.com/w7corp/sdk-open-cloud-go"
 )

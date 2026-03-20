@@ -4,11 +4,11 @@ import (
 
 	// "sync"
 
-	console2 "gitee.com/we7coreteam/k8s-offline/app/metrics/console"
-	controller2 "gitee.com/we7coreteam/k8s-offline/app/metrics/http/controller"
-	"gitee.com/we7coreteam/k8s-offline/common/middleware"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/metrics"
 	"github.com/gin-gonic/gin"
+	console2 "github.com/w7panel/w7panel/app/metrics/console"
+	controller2 "github.com/w7panel/w7panel/app/metrics/http/controller"
+	"github.com/w7panel/w7panel/common/middleware"
+	"github.com/w7panel/w7panel/common/service/k8s/metrics"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/console"
 	httpserver "github.com/we7coreteam/w7-rangine-go/v2/src/http/server"
 	_ "modernc.org/sqlite"

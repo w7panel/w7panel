@@ -20,9 +20,9 @@ package v1alpha1
 import (
 	context "context"
 
-	gpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/gpuclass/v1alpha1"
-	applyconfigurationgpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/applyconfiguration/gpuclass/v1alpha1"
-	scheme "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned/scheme"
+	gpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/gpuclass/v1alpha1"
+	applyconfigurationgpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/applyconfiguration/gpuclass/v1alpha1"
+	scheme "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"

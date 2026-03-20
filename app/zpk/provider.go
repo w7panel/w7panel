@@ -1,12 +1,12 @@
 package zpk
 
 import (
-	consolezpk "gitee.com/we7coreteam/k8s-offline/app/zpk/console"
-	controller "gitee.com/we7coreteam/k8s-offline/app/zpk/http"
-	"gitee.com/we7coreteam/k8s-offline/common/middleware"
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	consolezpk "github.com/w7panel/w7panel/app/zpk/console"
+	controller "github.com/w7panel/w7panel/app/zpk/http"
+	"github.com/w7panel/w7panel/common/middleware"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/console"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 	httpserver "github.com/we7coreteam/w7-rangine-go/v2/src/http/server"

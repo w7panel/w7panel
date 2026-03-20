@@ -3,8 +3,8 @@ package controller
 import (
 	// "github.com/go-openapi/spec"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

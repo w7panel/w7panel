@@ -8,11 +8,11 @@ import (
 	"runtime/debug"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/sa"
-	k3ktypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
 	"github.com/rancher/k3k/k3k-kubelet/translate"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k/sa"
+	k3ktypes "github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"

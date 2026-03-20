@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/procpath"
+	"github.com/w7panel/w7panel/common/service/procpath"
 )
 
 // UserGroupCache 全局 UserGroup 缓存管理器

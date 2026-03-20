@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/config"
-	"gitee.com/we7coreteam/k8s-offline/common/service/console"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/shopspring/decimal"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/config"
+	"github.com/w7panel/w7panel/common/service/console"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )

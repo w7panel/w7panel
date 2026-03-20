@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	helm "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	helm "github.com/w7panel/w7panel/common/service/k8s/zpk"
 	v1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

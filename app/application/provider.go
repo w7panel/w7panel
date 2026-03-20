@@ -5,24 +5,24 @@ import (
 	"os"
 	"time"
 
-	consoleShell "gitee.com/we7coreteam/k8s-offline/app/application/console"
-	controller2 "gitee.com/we7coreteam/k8s-offline/app/application/http/controller"
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/middleware"
-	console2 "gitee.com/we7coreteam/k8s-offline/common/service/console"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	appctl "gitee.com/we7coreteam/k8s-offline/common/service/k8s/appgroup"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/core"
-	gpustack "gitee.com/we7coreteam/k8s-offline/common/service/k8s/gpu/gpustack"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/higress"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/longhorn"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/mcp"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/shell"
-	"gitee.com/we7coreteam/k8s-offline/common/service/registry"
-	"gitee.com/we7coreteam/k8s-offline/common/service/s3"
 	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	consoleShell "github.com/w7panel/w7panel/app/application/console"
+	controller2 "github.com/w7panel/w7panel/app/application/http/controller"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/middleware"
+	console2 "github.com/w7panel/w7panel/common/service/console"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	appctl "github.com/w7panel/w7panel/common/service/k8s/appgroup"
+	"github.com/w7panel/w7panel/common/service/k8s/core"
+	gpustack "github.com/w7panel/w7panel/common/service/k8s/gpu/gpustack"
+	"github.com/w7panel/w7panel/common/service/k8s/higress"
+	"github.com/w7panel/w7panel/common/service/k8s/longhorn"
+	"github.com/w7panel/w7panel/common/service/k8s/mcp"
+	"github.com/w7panel/w7panel/common/service/k8s/shell"
+	"github.com/w7panel/w7panel/common/service/registry"
+	"github.com/w7panel/w7panel/common/service/s3"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/console"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 	httpserver "github.com/we7coreteam/w7-rangine-go/v2/src/http/server"
@@ -145,8 +145,8 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.POST("/mvpid", middleware.Auth{}.Process, controller2.File{}.CpPidFile) //pid文件移动
 			localApiGroup.GET("/exec", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
 			localApiGroup.POST("/exec2", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
-			localApiGroup.GET("/pid", middleware.Auth{}.Process, controller2.PodExec{}.GetAgentPodAndPid) //获取所在pod和pid
-			localApiGroup.GET("/nodepid", middleware.Auth{}.Process, controller2.PodExec{}.GetNodePid)    //获取所在pod和pid
+			localApiGroup.GET("/pid", middleware.Auth{}.Process, controller2.Pid{}.GetPid)             //获取所在pod和pid
+			localApiGroup.GET("/nodepid", middleware.Auth{}.Process, controller2.PodExec{}.GetNodePid) //获取所在pod和pid
 
 			localApiGroup.POST("/yaml", middleware.Auth{}.Process, controller2.Yaml{}.ApplyYamlOld) // 直接提交yaml
 			localApiGroup.PUT("/rollback", middleware.Auth{}.Process, controller2.Yaml{}.Rollback)  // 回滚资源

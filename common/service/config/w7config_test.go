@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s"
 )
 
 func TestW7ConfigRepository_Get(t *testing.T) {

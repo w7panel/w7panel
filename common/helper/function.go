@@ -95,7 +95,7 @@ func GetAppHomeDir() string {
 
 // func CreateZipFromDir(source, target string) error {
 // 	version := module.Version{
-// 		Path:    "gitee.com/we7coreteam/k8s-offline",
+// 		Path:    "github.com/w7panel/w7panel",
 // 		Version: "v0.1.2",
 // 	}
 // 	//判断target 是否存在

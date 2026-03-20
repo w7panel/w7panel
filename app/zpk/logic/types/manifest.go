@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	zpktype "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk"
 	"github.com/samber/lo"
+	"github.com/w7panel/w7panel/common/helper"
+	zpktype "github.com/w7panel/w7panel/common/service/k8s/zpk"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"syscall"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/procpath"
-	webdav1 "gitee.com/we7coreteam/k8s-offline/common/service/webdav"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/procpath"
+	webdav1 "github.com/w7panel/w7panel/common/service/webdav"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 	"golang.org/x/net/webdav"
 )

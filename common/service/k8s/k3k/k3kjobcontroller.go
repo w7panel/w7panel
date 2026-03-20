@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	k3ktypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	k3ktypes "github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"

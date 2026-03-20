@@ -18,8 +18,8 @@ limitations under the License.
 package appgroup
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/appgroup/informers/externalversions/appgroup/v1alpha1"
-	internalinterfaces "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/appgroup/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/appgroup/informers/externalversions/appgroup/v1alpha1"
+	internalinterfaces "github.com/w7panel/w7panel/k8s/pkg/client/appgroup/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to each of this group's versions.

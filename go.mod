@@ -1,4 +1,4 @@
-module gitee.com/we7coreteam/k8s-offline
+module github.com/w7panel/w7panel
 
 go 1.24.4
 

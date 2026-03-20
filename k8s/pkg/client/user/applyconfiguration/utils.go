@@ -18,9 +18,9 @@ limitations under the License.
 package applyconfiguration
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/user/v1alpha1"
-	internal "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/applyconfiguration/internal"
-	userv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/user/applyconfiguration/user/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/user/v1alpha1"
+	internal "github.com/w7panel/w7panel/k8s/pkg/client/user/applyconfiguration/internal"
+	userv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/user/applyconfiguration/user/v1alpha1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	testing "k8s.io/client-go/testing"

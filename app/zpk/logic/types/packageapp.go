@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	helm "gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/zpk/types"
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
 	"github.com/aws/smithy-go/ptr"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	helm "github.com/w7panel/w7panel/common/service/k8s/zpk"
+	"github.com/w7panel/w7panel/common/service/k8s/zpk/types"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 )
 

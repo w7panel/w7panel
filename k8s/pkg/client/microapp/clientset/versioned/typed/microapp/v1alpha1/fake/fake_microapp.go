@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/microapp/v1alpha1"
-	microappv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/microapp/applyconfiguration/microapp/v1alpha1"
-	typedmicroappv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/microapp/clientset/versioned/typed/microapp/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/microapp/v1alpha1"
+	microappv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/microapp/applyconfiguration/microapp/v1alpha1"
+	typedmicroappv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/microapp/clientset/versioned/typed/microapp/v1alpha1"
 	gentype "k8s.io/client-go/gentype"
 )
 

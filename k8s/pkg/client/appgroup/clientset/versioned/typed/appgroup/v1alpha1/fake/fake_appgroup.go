@@ -18,9 +18,9 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
-	appgroupv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/appgroup/applyconfiguration/appgroup/v1alpha1"
-	typedappgroupv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/appgroup/clientset/versioned/typed/appgroup/v1alpha1"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
+	appgroupv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/appgroup/applyconfiguration/appgroup/v1alpha1"
+	typedappgroupv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/appgroup/clientset/versioned/typed/appgroup/v1alpha1"
 	gentype "k8s.io/client-go/gentype"
 )
 

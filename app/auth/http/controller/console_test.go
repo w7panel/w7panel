@@ -3,7 +3,7 @@ package controller
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/console"
+	"github.com/w7panel/w7panel/common/service/console"
 )
 
 func TestConsole_Redirect(t *testing.T) {

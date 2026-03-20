@@ -21,7 +21,7 @@ import (
 	fmt "fmt"
 	http "net/http"
 
-	gpuclassv1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1"
+	gpuclassv1alpha1 "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned/typed/gpuclass/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

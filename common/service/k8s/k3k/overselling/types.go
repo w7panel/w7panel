@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/console"
+	"github.com/w7panel/w7panel/common/service/console"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
@@ -117,10 +117,6 @@ type oversellingUser struct {
 	*corev1.ServiceAccount
 }
 
-
-
 func (a *oversellingUser) IsClusterUser() bool {
 	return a.Labels["w7.cc/user-mode"] == "cluster"
 }
-
-

@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/model"
+	"github.com/w7panel/w7panel/app/k3s-registry/model"
 )
 
 type ContainersLogic struct {

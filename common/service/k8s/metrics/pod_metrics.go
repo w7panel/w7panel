@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metrics "k8s.io/metrics/pkg/client/clientset/versioned"
 )

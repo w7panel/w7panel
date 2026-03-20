@@ -3,10 +3,10 @@ package controller
 import (
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/longhorn"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k"
+	"github.com/w7panel/w7panel/common/service/k8s/longhorn"
 
 	// "github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 

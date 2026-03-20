@@ -20,7 +20,7 @@ package internalinterfaces
 import (
 	time "time"
 
-	versioned "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/clientset/versioned"
+	versioned "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/clientset/versioned"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	cache "k8s.io/client-go/tools/cache"

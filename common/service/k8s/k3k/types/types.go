@@ -3,9 +3,9 @@ package types
 import (
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/patrickmn/go-cache"
 	"github.com/w7corp/sdk-open-cloud-go/service"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/json"

@@ -4,8 +4,8 @@ import (
 
 	// "github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/pid"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s/pid"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 
@@ -24,12 +24,15 @@ func (self Pid) GetPid(http *gin.Context) {
 		self.JsonResponseWithoutError(http, err)
 		return
 	}
-	result, err := pidObj.Handle(params)
+	pidResult, err := pidObj.Handle(params)
 	if err != nil {
 		self.JsonResponseWithoutError(http, err)
 		return
 	}
-	self.JsonResponseWithoutError(http, result.ToArray())
+	result := pidResult.ToArray()
+	result["token"] = token
+
+	self.JsonResponseWithoutError(http, result)
 }
 
 func (self Pid) EtcPasswd(http *gin.Context) {

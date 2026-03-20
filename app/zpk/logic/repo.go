@@ -8,10 +8,10 @@ import (
 	"net/url"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/app/zpk/logic/types"
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/console"
 	"github.com/barkimedes/go-deepcopy"
+	"github.com/w7panel/w7panel/app/zpk/logic/types"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/console"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 

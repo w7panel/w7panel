@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/config"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/config"
+	"github.com/w7panel/w7panel/common/service/k8s"
 )
 
 type mockW7ConfigRepository struct {

@@ -6,11 +6,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/go-resty/resty/v2"
 	longhornV1beta2 "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
 	v1beta2 "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
 	longhornClient "github.com/longhorn/longhorn-manager/k8s/pkg/client/clientset/versioned"
+	"github.com/w7panel/w7panel/common/service/k8s"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

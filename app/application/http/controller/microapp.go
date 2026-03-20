@@ -4,8 +4,8 @@ import (
 
 	// "github.com/we7coreteam/w7-rangine-go/v2/pkg/support/facade"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/microapp"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/common/service/k8s/microapp"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 

@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
+	"github.com/w7panel/w7panel/common/helper"
 	v1 "k8s.io/api/core/v1"
 )
 

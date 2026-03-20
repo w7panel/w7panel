@@ -4,8 +4,8 @@ package sa
 import (
 	"testing"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
-	k3ktypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	"github.com/w7panel/w7panel/common/service/k8s"
+	k3ktypes "github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

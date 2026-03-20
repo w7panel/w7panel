@@ -3,8 +3,8 @@ package types
 import (
 	"context"
 
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s"
 	"github.com/rancher/k3k/pkg/apis/k3k.io/v1alpha1"
+	"github.com/w7panel/w7panel/common/service/k8s"
 
 	// _ "github.com/rancher/k3k/pkg/apis/k3k.io/v1alpha1"
 

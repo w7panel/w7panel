@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/url"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	v1alpha1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
+	"github.com/w7panel/w7panel/common/helper"
+	v1alpha1 "github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
 )
 
 func NeedNotifyInstalled(group *v1alpha1.AppGroup) bool {

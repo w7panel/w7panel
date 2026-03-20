@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	k3ktypes "gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k/types"
+	k3ktypes "github.com/w7panel/w7panel/common/service/k8s/k3k/types"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"

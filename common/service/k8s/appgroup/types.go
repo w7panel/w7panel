@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"time"
 
-	"gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
-	appv1 "gitee.com/we7coreteam/k8s-offline/k8s/pkg/apis/appgroup/v1alpha1"
+	"github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
+	appv1 "github.com/w7panel/w7panel/k8s/pkg/apis/appgroup/v1alpha1"
 	"golang.org/x/time/rate"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"

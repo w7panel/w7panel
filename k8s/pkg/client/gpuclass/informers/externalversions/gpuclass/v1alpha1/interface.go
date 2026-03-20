@@ -18,7 +18,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	internalinterfaces "gitee.com/we7coreteam/k8s-offline/k8s/pkg/client/gpuclass/informers/externalversions/internalinterfaces"
+	internalinterfaces "github.com/w7panel/w7panel/k8s/pkg/client/gpuclass/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

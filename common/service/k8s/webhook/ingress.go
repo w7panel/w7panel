@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"gitee.com/we7coreteam/k8s-offline/common/helper"
-	"gitee.com/we7coreteam/k8s-offline/common/service/k8s/k3k"
-	ingApi "gitee.com/we7coreteam/k8s-offline/common/service/k8s/webhook/ingress"
+	"github.com/w7panel/w7panel/common/helper"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k"
+	ingApi "github.com/w7panel/w7panel/common/service/k8s/webhook/ingress"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

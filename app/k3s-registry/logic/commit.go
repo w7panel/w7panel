@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/model"
+	"github.com/w7panel/w7panel/app/k3s-registry/model"
 )
 
 type CommitLogic struct {
@@ -14,7 +14,7 @@ type CommitLogic struct {
 
 var (
 	commitLogicInstance *CommitLogic
-	commitOnce         sync.Once
+	commitOnce          sync.Once
 )
 
 // NewCommitLogic 创建 Commit 逻辑实例
@@ -29,8 +29,8 @@ func NewCommitLogic() *CommitLogic {
 func (l *CommitLogic) Run(ctx context.Context, containerID string, req model.CommitRequest) (*model.CommitResponse, error) {
 	resp := &model.CommitResponse{
 		NewImage: req.NewTag,
-		Digest:    fmt.Sprintf("sha256:%s", generateUUID()),
-		Size:      0,
+		Digest:   fmt.Sprintf("sha256:%s", generateUUID()),
+		Size:     0,
 	}
 
 	// 1. [可选] 执行命令

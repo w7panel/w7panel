@@ -1,9 +1,9 @@
 package k3sregistry
 
 import (
-	"gitee.com/we7coreteam/k8s-offline/app/k3s-registry/http/controller"
-	"gitee.com/we7coreteam/k8s-offline/common/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/w7panel/w7panel/app/k3s-registry/http/controller"
+	"github.com/w7panel/w7panel/common/middleware"
 	"github.com/we7coreteam/w7-rangine-go/v2/pkg/support/console"
 	httpserver "github.com/we7coreteam/w7-rangine-go/v2/src/http/server"
 )
