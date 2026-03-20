@@ -29,6 +29,14 @@ type PidResult struct {
 	SubPid   int    `json:"subPid"`
 	ProxyIp  string `json:"proxyIp"`
 	AgentPod *corev1.Pod
+	Pwd      string `json:"pwd"`
+}
+
+type PidCacheItem struct {
+	podName     string
+	namespace   string
+	containerId string
+	pid         int
 }
 
 func (p *PidResult) ToArray() map[string]string {
@@ -59,7 +67,7 @@ func (p *PidResult) ToArray() map[string]string {
 		"webdavBasePath": webdavBasePath,
 		"compressUrl":    compressUrl,
 		"permissionUrl":  permissionUrl,
-		"pwd":            "/",
+		"pwd":            p.Pwd,
 		// "users":          users,
 	}
 

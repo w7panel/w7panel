@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/terminal"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -14,6 +15,11 @@ type pid struct {
 	virtualNamespace string
 }
 
+// var pidCache *helper.MemoryCache
+
+//	func init() {
+//		pidCache = helper.NewMemoryCache()
+//	}
 func NewPid(token string) (*pid, error) {
 	tokenObj := k8s.NewK8sToken(token)
 	var client *k8s.Sdk
@@ -47,6 +53,10 @@ func NewPidTest(saName string) (*pid, error) {
 	return &pid{rootSdk: root.Sdk, clientSdk: client, isVirtual: isVirtual, virtualNamespace: "k3k-" + saName}, nil
 }
 
+// func cacheKey(pod *corev1.Pod) string {
+// 	return helper.Set(cacheKey(pod), pod.Status.PodIP)
+// }
+
 // 不能在子集群执行
 func (p *pid) Handle(param PidParam) (*PidResult, error) {
 	pid := 1 //节点文件管理默认1
@@ -74,6 +84,8 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 		if err != nil {
 			return nil, err
 		}
+		// clusterPodKey := cacheKey(clusterPod)
+		// val, ok := pidCache.Get(clusterPodKey)
 		clusterPodPid, err := GetContainerPid(daemonsetPod, clusterPod, param.ContainerId, false, p.rootSdk)
 		if err != nil {
 			return nil, err
@@ -113,16 +125,41 @@ func (p *pid) Handle(param PidParam) (*PidResult, error) {
 				return nil, err
 			}
 			pid = rootPid
-			proxyIp = daemonsetPod.Status.PodIP
 
 		}
 		agentPod = daemonsetPod
+		proxyIp = daemonsetPod.Status.PodIP
+
+	}
+	pwd := "/"
+	if param.FromPodName != "" && param.FromPodContainerName != "" {
+		pwd1, err := p.GetPwd(param)
+		if err != nil {
+			pwd = "/"
+		} else {
+			pwd = pwd1
+		}
 	}
 	return &PidResult{
 		Pid:      pid,
 		SubPid:   subPid,
 		ProxyIp:  proxyIp,
 		AgentPod: agentPod,
+		Pwd:      pwd,
 	}, nil
 
+}
+
+func (self *pid) GetPwd(params PidParam) (string, error) {
+	session := terminal.NewTerminalSession(nil)
+	defer session.Close()
+	sdk := self.rootSdk
+	if self.isVirtual {
+		sdk = self.clientSdk
+	}
+	err := sdk.RunExec(session, params.Namespace, params.FromPodName, params.FromPodContainerName, []string{"pwd"}, false)
+	if err != nil {
+		return "", err
+	}
+	return string(session.GetWriterBytes()), nil
 }
