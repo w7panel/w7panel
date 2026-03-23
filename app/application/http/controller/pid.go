@@ -30,7 +30,7 @@ func (self Pid) GetPid(http *gin.Context) {
 		return
 	}
 	result := pidResult.ToArray()
-	result["token"] = token
+	result["webdavToken"] = token
 
 	self.JsonResponseWithoutError(http, result)
 }
