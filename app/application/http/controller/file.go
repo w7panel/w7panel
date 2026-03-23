@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"log/slog"
@@ -107,7 +109,7 @@ func (self File) Upload(http *gin.Context) {
 
 // UploadChunk 分片上传
 func (self File) UploadChunk(http *gin.Context) {
-	baseDir := os.TempDir()
+	baseDir := facade.GetConfig().GetString("s3.base_dir")
 	chunkDir := filepath.Join(baseDir, ".chunks") // 临时分片存储目录
 
 	// 解析表单
@@ -150,10 +152,9 @@ func (self File) UploadChunk(http *gin.Context) {
 	}
 
 	// 计算文件 MD5 作为分片目录
-	// fileMD5 := md5.Sum([]byte(identifier + fileName))
-	// fileMD5Str := hex.EncodeToString(fileMD5[:])
-	// fileMD5Str := identifier
-	userChunkDir := filepath.Join(chunkDir, identifier)
+	fileMD5 := md5.Sum([]byte(identifier + fileName))
+	fileMD5Str := hex.EncodeToString(fileMD5[:])
+	userChunkDir := filepath.Join(chunkDir, fileMD5Str)
 
 	// 创建分片目录
 	if err := os.MkdirAll(userChunkDir, 0755); err != nil {
@@ -216,7 +217,7 @@ func (self File) UploadChunk(http *gin.Context) {
 
 // CheckChunk 检查分片是否已上传
 func (self File) CheckChunk(http *gin.Context) {
-	baseDir := os.TempDir()
+	baseDir := facade.GetConfig().GetString("s3.base_dir")
 	chunkDir := filepath.Join(baseDir, ".chunks")
 
 	type ParamsValidate struct {
@@ -233,9 +234,9 @@ func (self File) CheckChunk(http *gin.Context) {
 	}
 
 	// 计算文件 MD5
-	// fileMD5 := md5.Sum([]byte(params.Identifier + params.FileName))
-	// fileMD5Str := hex.EncodeToString(fileMD5[:])
-	userChunkDir := filepath.Join(chunkDir, params.Identifier)
+	fileMD5 := md5.Sum([]byte(params.Identifier + params.FileName))
+	fileMD5Str := hex.EncodeToString(fileMD5[:])
+	userChunkDir := filepath.Join(chunkDir, fileMD5Str)
 
 	chunkFilename := fmt.Sprintf("%d_%d", params.ChunkIndex, params.ChunkTotal)
 	chunkFilePath := filepath.Join(userChunkDir, chunkFilename)
@@ -251,7 +252,7 @@ func (self File) CheckChunk(http *gin.Context) {
 
 // MergeChunks 合并分片
 func (self File) MergeChunks(http *gin.Context) {
-	baseDir := os.TempDir()
+	baseDir := facade.GetConfig().GetString("s3.base_dir")
 	chunkDir := filepath.Join(baseDir, ".chunks")
 
 	type ParamsValidate struct {
@@ -269,12 +270,12 @@ func (self File) MergeChunks(http *gin.Context) {
 	}
 
 	// 计算文件 MD5
-	lockKey := params.Identifier
-	// fileMD5Str := hex.EncodeToString(fileMD5[:])
-	userChunkDir := filepath.Join(chunkDir, params.Identifier)
+	fileMD5 := md5.Sum([]byte(params.Identifier + params.FileName))
+	fileMD5Str := hex.EncodeToString(fileMD5[:])
+	userChunkDir := filepath.Join(chunkDir, fileMD5Str)
 
 	// 获取锁，避免并发合并
-	lock := getChunkLock(lockKey)
+	lock := getChunkLock(fileMD5Str)
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -344,7 +345,7 @@ func (self File) MergeChunks(http *gin.Context) {
 	}
 
 	// 移除锁
-	removeChunkLock(lockKey)
+	removeChunkLock(fileMD5Str)
 
 	slog.Info("chunks merged successfully",
 		"identifier", params.Identifier,
