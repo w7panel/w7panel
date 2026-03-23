@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"io"
 	"log/slog"
 	"sync"
 	"unicode/utf8"
@@ -48,8 +49,9 @@ func (t *TerminalSession) Read(p []byte) (n int, err error) {
 	if t.conn != nil {
 		msgType, data, err := t.conn.ReadMessage()
 		if err != nil {
+			slog.Info("websocket ReadMessage error, signaling EOF to stdin", "err", err)
 			t.Close()
-			return 0, err
+			return 0, io.EOF
 		}
 		if msgType == websocket.BinaryMessage {
 			var Cols, Rows uint16
@@ -74,13 +76,12 @@ func (t *TerminalSession) Read(p []byte) (n int, err error) {
 }
 
 func (t *TerminalSession) Write(p []byte) (n int, err error) {
-	// log.Println((string)(p))
 	if t.conn != nil && utf8.Valid(p) {
 		err := t.conn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {
-			t.Close()
 			slog.Info("write conn err", "err", err)
-			return 0, err
+			t.Close()
+			return 0, io.EOF
 		}
 		return len(p), err
 	}
@@ -93,7 +94,7 @@ func (t *TerminalSession) Close() {
 			t.conn.Close()
 		}
 		if t.cancel != nil {
-			slog.Info("k8s exec close context done")
+			slog.Error("k8s exec close context done")
 			t.cancel()
 		}
 		close(t.sizeChan)
