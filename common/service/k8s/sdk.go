@@ -504,13 +504,10 @@ func (self *Sdk) RunExec(ptyHandler PtyHandler, namespace string, podName string
 		Param("container", containerName).
 		Param("stdin", "true").
 		Param("stdout", "true").
-		// Param("stderr", "true"). //k3k 无法进入pod里
+		Param("stderr", "true").
 		Param("tty", ttystr)
 	for _, c := range cmd {
 		request = request.Param("command", c)
-	}
-	if !tty {
-		request = request.Param("stderr", "true")
 	}
 	exec, err := remotecommand.NewSPDYExecutor(self.restConfig, "POST", request.URL())
 	if err != nil {
@@ -526,7 +523,7 @@ func (self *Sdk) RunExec(ptyHandler PtyHandler, namespace string, podName string
 			TerminalSizeQueue: ptyHandler,
 		})
 
-	slog.Info("k8s exec done", "err", err)
+	slog.Info("k8s exec done", "namespace", namespace, "podName", podName, "containerName", containerName, "cmd", cmd, "err", err)
 	return err
 }
 

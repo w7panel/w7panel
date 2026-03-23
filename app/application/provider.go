@@ -149,6 +149,11 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			// localApiGroup.GET("/pwd", middleware.Auth{}.Process, controller2.PodExec{}.GetPid)             //获取所在pod和pid
 			localApiGroup.GET("/nodepid", middleware.Auth{}.Process, controller2.PodExec{}.GetNodePid) //获取所在pod和pid
 
+			// 分片上传相关接口
+			localApiGroup.POST("/files/upload-chunk", middleware.Auth{}.Process, controller2.File{}.UploadChunk)  // 上传分片
+			localApiGroup.GET("/files/check-chunk", middleware.Auth{}.Process, controller2.File{}.CheckChunk)      // 检查分片是否已上传
+			localApiGroup.POST("/files/merge-chunks", middleware.Auth{}.Process, controller2.File{}.MergeChunks)   // 合并分片
+
 			localApiGroup.POST("/yaml", middleware.Auth{}.Process, controller2.Yaml{}.ApplyYamlOld) // 直接提交yaml
 			localApiGroup.PUT("/rollback", middleware.Auth{}.Process, controller2.Yaml{}.Rollback)  // 回滚资源
 			// localApiGroup.POST("/kcompose", middleware.Auth{}.Process, controller2.Yaml{}.ApplyDockerCompose)   // 直接提交yaml
