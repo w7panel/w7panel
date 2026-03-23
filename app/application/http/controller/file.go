@@ -263,7 +263,7 @@ func (self File) CheckChunk(http *gin.Context) {
 
 // MergeChunks 合并分片
 func (self File) MergeChunks(http *gin.Context) {
-	baseDir := facade.GetConfig().GetString("s3.base_dir")
+	baseDir := os.TempDir()
 	chunkDir := filepath.Join(baseDir, ".chunks")
 
 	type ParamsValidate struct {
