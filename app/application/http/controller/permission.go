@@ -30,10 +30,10 @@ func (c PermissionAgent) Chmod(http *gin.Context) {
 		return
 	}
 
-	targetPid := pid
-	if subpid != "" {
-		targetPid = subpid
-	}
+	// targetPid := pid
+	// if subpid != "" {
+	// 	targetPid = subpid
+	// }
 
 	mode, err := strconv.ParseUint(params.Mode, 8, 32)
 	if err != nil {
@@ -41,7 +41,7 @@ func (c PermissionAgent) Chmod(http *gin.Context) {
 		return
 	}
 
-	fullPath := procpath.GetFilePath(targetPid, "", params.Path)
+	fullPath := procpath.GetFilePath(pid, subpid, params.Path)
 
 	if params.Recursive {
 		err := filepath.Walk(fullPath, func(path string, info os.FileInfo, err error) error {
@@ -80,12 +80,12 @@ func (c PermissionAgent) Chown(http *gin.Context) {
 		return
 	}
 
-	targetPid := pid
-	if subpid != "" {
-		targetPid = subpid
-	}
+	// targetPid := pid
+	// if subpid != "" {
+	// 	targetPid = subpid
+	// }
 
-	fullPath := procpath.GetFilePath(targetPid, "", params.Path)
+	fullPath := procpath.GetFilePath(pid, subpid, params.Path)
 
 	owner := params.Owner
 	var uid, gid int
