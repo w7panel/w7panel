@@ -198,7 +198,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			gpuGroup.GET("/node/devices", controller2.Gpu{}.NodesDevices)
 			gpuGroup.POST("/gpustack/worker", controller2.Gpu{}.CreateGpuStackWorker)
 		}
-
+		// engine.Handle("GET", "/panel-api/v1/files/webdav-agent/:pid/agent/etc/passwd", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Webdav{}.HandlePid)
 		for _, method := range webdavMethods {
 			engine.Handle(method, "/panel-api/v1/files/webdav/*path", middleware.Auth{}.Process, controller2.Webdav{}.Handle)
 			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPid)
@@ -206,7 +206,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid)
 		}
 		// /etc/passwd 缓存
-		engine.Handle("GET", "/panel-api/v1/files/webdav-agent/:pid/agent/etc/passwd", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Webdav{}.HandlePid)
+
 		// 新版 API - 代理到服务
 		engine.Any("/panel-api/v1/namespaces/:namespace/services/:name/proxy-no/*path", middleware.ProxyNoAuth{}.Process, controller2.Proxy{}.ProxyNoAuthService)
 
