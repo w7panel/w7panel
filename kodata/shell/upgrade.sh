@@ -68,3 +68,6 @@ w7panel domain-config
 # w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_nodejs --is-agent=false
 # w7panel sitemanager-upgrade --version=1.0.24 --identifie=w7_python --is-agent=false
 # w7panel sitemanager-upgrade --version=1.0.25 --identifie=w7_sitemanager --is-agent=false
+echo "longhorn config" 
+# longhorn 可能未安装 导致apply 失败 || 不要报错
+kubectl apply -f $KO_DATA_PATH/yaml/longhorn/node-down-pod-deletion-policy.yaml || echo "longhorn node-down-pod-deletion-policy"
