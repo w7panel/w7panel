@@ -220,14 +220,27 @@ func (self File) CheckChunk(http *gin.Context) {
 
 	type ParamsValidate struct {
 		Identifier   string `form:"identifier" binding:"required"`
-		ChunkIndex   int    `form:"chunkIndex" binding:"required"`
-		ChunkTotal   int    `form:"chunkTotal" binding:"required"`
+		ChunkIndex   string `form:"chunkIndex" binding:"required"`
+		ChunkTotal   string `form:"chunkTotal" binding:"required"`
 		FileName     string `form:"fileName"`
 		RelativePath string `form:"relativePath"`
 	}
 
 	params := ParamsValidate{}
-	if !self.Validate(http, &params) {
+	if err := http.ShouldBindQuery(&params); err != nil {
+		self.JsonResponseWithError(http, fmt.Errorf("invalid parameters: %v", err), 400)
+		return
+	}
+
+	chunkIndex, err := strconv.Atoi(params.ChunkIndex)
+	if err != nil {
+		self.JsonResponseWithError(http, fmt.Errorf("invalid chunkIndex: %v", err), 400)
+		return
+	}
+
+	chunkTotal, err := strconv.Atoi(params.ChunkTotal)
+	if err != nil {
+		self.JsonResponseWithError(http, fmt.Errorf("invalid chunkTotal: %v", err), 400)
 		return
 	}
 
@@ -236,11 +249,11 @@ func (self File) CheckChunk(http *gin.Context) {
 	// fileMD5Str := hex.EncodeToString(fileMD5[:])
 	userChunkDir := filepath.Join(chunkDir, params.Identifier)
 
-	chunkFilename := fmt.Sprintf("%d_%d", params.ChunkIndex, params.ChunkTotal)
+	chunkFilename := fmt.Sprintf("%d_%d", chunkIndex, chunkTotal)
 	chunkFilePath := filepath.Join(userChunkDir, chunkFilename)
 
 	// 检查分片是否存在
-	_, err := os.Stat(chunkFilePath)
+	_, err = os.Stat(chunkFilePath)
 	chunkExists := (err == nil)
 
 	self.JsonResponse(http, ChunkCheckResponse{

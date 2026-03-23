@@ -72,7 +72,7 @@ func (c TestUploadChunk) GetName() string {
 }
 
 func (c TestUploadChunk) Configure(cmd *cobra.Command) {
-	cmd.Flags().StringVar(&ucOp.baseURL, "baseURL", "http://localhost:8000", "API 基础 URL")
+	cmd.Flags().StringVar(&ucOp.baseURL, "baseURL", "http://172.16.1.162:9090", "API 基础 URL")
 	cmd.Flags().Int64Var(&ucOp.fileSize, "fileSize", 10*1024*1024, "生成的测试文件大小（字节），默认 10MB")
 	cmd.Flags().Int64Var(&ucOp.chunkSize, "chunkSize", 1*1024*1024, "分片大小（字节），默认 1MB")
 	cmd.Flags().StringVar(&ucOp.fileName, "fileName", "test-chunk-upload.bin", "文件名")
