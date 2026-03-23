@@ -38,8 +38,9 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 	console.RegisterCommand(new(consoleShell.IngressUpgrade))
 	console.RegisterCommand(new(consoleShell.MetricsInstall))
 	console.RegisterCommand(new(consoleShell.UninstallStorePanel)) //删除商店安装的面板
-	console.RegisterCommand(new(consoleShell.DomainParseConfig))   //删除商店安装的面板
-	console.RegisterCommand(new(consoleShell.BeianCheck))          //删除商店安装的面板
+	console.RegisterCommand(new(consoleShell.DomainParseConfig))   //域名解析
+	console.RegisterCommand(new(consoleShell.BeianCheck))          //备案检查
+	console.RegisterCommand(new(consoleShell.TestUploadChunk))     // 测试分片上传功能
 	p.RegisterValidateRule()
 	p.RegisterHttpRoutes(httpServer)
 	console2.SetConsoleApi(facade.GetConfig().GetString("app.console_base_url"))
@@ -150,12 +151,19 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.GET("/nodepid", middleware.Auth{}.Process, controller2.PodExec{}.GetNodePid) //获取所在pod和pid
 
 			// 分片上传相关接口
-			localApiGroup.POST("/files/upload-chunk", middleware.Auth{}.Process, controller2.File{}.UploadChunk)  // 上传分片
-			localApiGroup.GET("/files/check-chunk", middleware.Auth{}.Process, controller2.File{}.CheckChunk)      // 检查分片是否已上传
-			localApiGroup.POST("/files/merge-chunks", middleware.Auth{}.Process, controller2.File{}.MergeChunks)   // 合并分片
+			localApiGroup.POST("/files/upload-chunk", controller2.File{}.UploadChunk) // 上传分片
+			localApiGroup.GET("/files/check-chunk", controller2.File{}.CheckChunk)    // 检查分片是否已上传
+			localApiGroup.POST("/files/merge-chunks", controller2.File{}.MergeChunks) // 合并分片
 
-			localApiGroup.POST("/yaml", middleware.Auth{}.Process, controller2.Yaml{}.ApplyYamlOld) // 直接提交yaml
-			localApiGroup.PUT("/rollback", middleware.Auth{}.Process, controller2.Yaml{}.Rollback)  // 回滚资源
+			// WebDAV 分片上传相关接口
+			localApiGroup.POST("/files/webdav-agent/:pid/upload-chunk", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidChunkUpload)                        // WebDAV PID 上传分片
+			localApiGroup.GET("/files/webdav-agent/:pid/check-chunk", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidChunkCheck)                           // WebDAV PID 检查分片
+			localApiGroup.POST("/files/webdav-agent/:pid/merge-chunks", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidChunkMerge)                         // WebDAV PID 合并分片
+			localApiGroup.POST("/files/webdav-agent/:pid/subagent/:subpid/upload-chunk", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPidChunkUpload) // WebDAV SubPID 上传分片
+			localApiGroup.GET("/files/webdav-agent/:pid/subagent/:subpid/check-chunk", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPidChunkCheck)    // WebDAV SubPID 检查分片
+			localApiGroup.POST("/files/webdav-agent/:pid/subagent/:subpid/merge-chunks", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPidChunkMerge)  // WebDAV SubPID 合并分片
+			localApiGroup.POST("/yaml", middleware.Auth{}.Process, controller2.Yaml{}.ApplyYamlOld)                                                                  // 直接提交yaml
+			localApiGroup.PUT("/rollback", middleware.Auth{}.Process, controller2.Yaml{}.Rollback)                                                                   // 回滚资源
 			// localApiGroup.POST("/kcompose", middleware.Auth{}.Process, controller2.Yaml{}.ApplyDockerCompose)   // 直接提交yaml
 			localApiGroup.POST("/kcompose", middleware.Auth{}.Process, controller2.Yaml{}.ConvertDockerComposeOld) // 转化kompose
 			localApiGroup.POST("/pinyin", middleware.Auth{}.Process, controller2.Util{}.Pinyin)                    // pinyin
