@@ -108,6 +108,12 @@ func (t *TerminalSession) Context() context.Context {
 	return t.context
 }
 
+func (t *TerminalSession) SetContext(ctx context.Context) {
+	ctx, cancel := context.WithCancel(ctx)
+	t.cancel = cancel
+	t.context = ctx
+}
+
 func (t *TerminalSession) GetWriterBytes() []byte {
 	return t.writer.Bytes()
 }

@@ -99,6 +99,7 @@ func (self PodExec) Exec(http *gin.Context) {
 	}
 
 	session := terminal.NewTerminalSession(conn)
+	session.SetContext(http.Request.Context())
 	defer session.Close()
 
 	client, err := k8s.NewK8sClient().Channel(http.MustGet("k8s_token").(string))
@@ -143,6 +144,7 @@ func (p PodExec) NodeTty(http *gin.Context) {
 	token := http.MustGet("k8s_token").(string)
 	k8sToken := k8s.NewK8sToken(token)
 	session := terminal.NewTerminalSession(conn)
+	session.SetContext(http.Request.Context())
 	defer session.Close()
 	rootsdk := k8s.NewK8sClient().Sdk
 	var findPod *corev1.Pod
