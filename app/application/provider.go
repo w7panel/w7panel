@@ -141,9 +141,10 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.GET("/tty", middleware.Auth{}.Process, controller2.PodExec{}.Tty)
 			localApiGroup.GET("/nodetty", middleware.Auth{}.Process, controller2.PodExec{}.NodeTty)
 			localApiGroup.GET("/download/*path", controller2.File{}.Download)
-			localApiGroup.POST("/cp", middleware.Auth{}.Process, controller2.PodExec{}.KubectlCp) //kubectl cp文件
-			localApiGroup.POST("/cppid", middleware.Auth{}.Process, controller2.File{}.CpPidFile) //pid文件移动
-			localApiGroup.POST("/mvpid", middleware.Auth{}.Process, controller2.File{}.CpPidFile) //pid文件移动
+			localApiGroup.POST("/cp", middleware.Auth{}.Process, controller2.PodExec{}.KubectlCp)   //kubectl cp文件
+			localApiGroup.POST("/cppid", middleware.Auth{}.Process, controller2.File{}.CpPidFile)   //pid文件移动
+			localApiGroup.POST("/mvpid", middleware.Auth{}.Process, controller2.File{}.CpPidFile)   //pid文件移动
+			localApiGroup.POST("/mvtopod", middleware.Auth{}.Process, controller2.File{}.MoveToPod) //pid文件移动
 			localApiGroup.GET("/exec", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
 			localApiGroup.POST("/exec2", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
 			localApiGroup.GET("/pid", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Pid{}.GetPid) //获取所在pod和pid

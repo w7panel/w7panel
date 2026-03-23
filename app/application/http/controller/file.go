@@ -405,3 +405,30 @@ func (self File) CpPidFile(http *gin.Context) {
 	}
 	self.JsonSuccessResponse(http)
 }
+
+func (self File) MoveToPod(http *gin.Context) {
+	baseDir := os.TempDir()
+	type ParamsValidate struct {
+		Pid      string `form:"pid"       binding:"required"`
+		SubPID   string `form:"subpid"`
+		FromPath string `form:"fromPath" binding:"required"`
+		ToPath   string `form:"toPath"    binding:"required"`
+	}
+
+	params := ParamsValidate{}
+	if !self.Validate(http, &params) {
+		return
+	}
+	fromFullPath := filepath.Join(baseDir, params.FromPath)
+
+	toBasePath := procpath.GetRootPathWithSubPid(params.Pid, params.SubPID)
+	toFullPath := filepath.Join(toBasePath, params.ToPath)
+
+	// mv file fromFullPath to toFullPath
+	err := exec.Command("mv", fromFullPath, toFullPath).Run()
+	if err != nil {
+		self.JsonResponseWithError(http, err, 500)
+		return
+	}
+	self.JsonSuccessResponse(http)
+}
