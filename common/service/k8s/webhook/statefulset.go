@@ -178,6 +178,10 @@ mount --make-shared /
 				},
 			},
 		})
+		container.Env = append(container.Env, v1.EnvVar{
+			Name:  "TZ",
+			Value: "Asia/Shanghai",
+		})
 		modified = true
 	}
 	if statefulset.Spec.Template.Annotations == nil {
