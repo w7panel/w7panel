@@ -420,6 +420,9 @@ func (self File) MoveToPod(http *gin.Context) {
 		return
 	}
 	fromFullPath := filepath.Join(baseDir, params.FromPath)
+	if params.SubPID == "0" {
+		params.SubPID = ""
+	}
 
 	toBasePath := procpath.GetRootPathWithSubPid(params.Pid, params.SubPID)
 	toFullPath := filepath.Join(toBasePath, params.ToPath)
