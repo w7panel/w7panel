@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -309,7 +308,7 @@ func (self File) MergeChunks(http *gin.Context) {
 	}
 
 	// 排序分片文件（确保按正确顺序合并）
-	sort.Strings(chunkFiles)
+	// sort.Strings(chunkFiles) //错了
 
 	// 确定最终文件路径
 	finalFileName := params.FileName
