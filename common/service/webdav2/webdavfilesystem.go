@@ -21,9 +21,10 @@ func (fs WebDAVFileSystem) OpenFile(ctx context.Context, name string, flag int, 
 	return &WebDAVFile{File: file}, err
 }
 
-// func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, error) {
-// 	return fs.FileSystem.Stat(ctx, name)
-// }
+func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, error) {
+	return fs.FileSystem.Stat(ctx, name)
+}
+
 // func (fs WebDAVFileSystem) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
 // 	return fs.FileSystem.Mkdir(ctx, name, perm)
 // }

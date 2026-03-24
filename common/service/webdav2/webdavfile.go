@@ -11,7 +11,7 @@ import (
 
 type WebDAVFile struct {
 	webdav.File
-	*WebDAVFileInfo
+	fileInfo *WebDAVFileInfo
 }
 
 type WebDAVFileInfo struct {
@@ -47,15 +47,18 @@ func (n *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
 	ret[perm.XMLName] = perm
 	return ret, nil
 }
+func (n *WebDAVFile) Patch(patches []webdav.Proppatch) ([]webdav.Propstat, error) {
 
+	return []webdav.Propstat{{Props: nil}}, nil
+}
 func (n *WebDAVFile) Stat() (os.FileInfo, error) {
-	if n.WebDAVFileInfo != nil {
-		return n.WebDAVFileInfo, nil
+	if n.fileInfo != nil {
+		return n.fileInfo, nil
 	}
 	stat, err := n.File.Stat()
 	if err != nil {
 		return nil, err
 	}
-	n.WebDAVFileInfo = &WebDAVFileInfo{stat}
-	return n.WebDAVFileInfo, nil
+	n.fileInfo = &WebDAVFileInfo{stat}
+	return n.fileInfo, nil
 }
