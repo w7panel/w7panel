@@ -9,6 +9,9 @@
 	# 自定义文件大小和分片大小
 	./runtime/main test:upload-chunk --fileSize=52428800 --chunkSize=2097152
 
+	# 指定具体文件路径上传
+	./runtime/main test:upload-chunk --file=/path/to/your/file.zip
+
 	# 测试 WebDAV PID 上传
 	./runtime/main test:upload-chunk --pid=<process_id>
 
@@ -28,6 +31,7 @@
 	--relativePath 相对路径（可选）
 	--pid          进程 ID（用于 WebDAV PID 上传）
 	--subPid       子进程 ID（用于 WebDAV SubPID 上传）
+	--file         指定具体文件路径（可选，如果指定则使用该文件而不是生成随机文件）
 */
 package console
 
@@ -63,6 +67,7 @@ type uploadChunkOption struct {
 	relativePath string
 	pid          string
 	subPid       string
+	file         string
 }
 
 var ucOp = uploadChunkOption{}
@@ -80,33 +85,55 @@ func (c TestUploadChunk) Configure(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&ucOp.relativePath, "relativePath", "", "相对路径（可选）")
 	cmd.Flags().StringVar(&ucOp.pid, "pid", "", "进程 ID（用于 WebDAV PID 上传）")
 	cmd.Flags().StringVar(&ucOp.subPid, "subPid", "", "子进程 ID（用于 WebDAV SubPID 上传）")
+	cmd.Flags().StringVar(&ucOp.file, "file", "", "指定具体文件路径（可选，如果指定则使用该文件而不是生成随机文件）")
 }
 
 func (c TestUploadChunk) GetDescription() string {
-	return "测试分片上传功能 - 动态生成文件并调用分片上传接口"
+	return "测试分片上传功能 - 支持动态生成文件或使用指定文件"
 }
 
 func (c TestUploadChunk) Handle(cmd *cobra.Command, args []string) {
 
+	// 检查是否指定了文件路径
+	var actualFileSize int64
+	var actualFileName string
+	if ucOp.file != "" {
+		// 使用指定的文件
+		fileInfo, err := os.Stat(ucOp.file)
+		if err != nil {
+			slog.Error("文件不存在或无法访问", "file", ucOp.file, "error", err)
+			return
+		}
+		actualFileSize = fileInfo.Size()
+		actualFileName = filepath.Base(ucOp.file)
+		slog.Info("使用指定文件",
+			"file", ucOp.file,
+			"fileName", actualFileName,
+			"fileSize", actualFileSize)
+	} else {
+		actualFileSize = ucOp.fileSize
+		actualFileName = ucOp.fileName
+	}
+
 	slog.Info("开始分片上传测试",
 		"baseURL", ucOp.baseURL,
-		"fileSize", ucOp.fileSize,
+		"fileSize", actualFileSize,
 		"chunkSize", ucOp.chunkSize,
-		"fileName", ucOp.fileName,
+		"fileName", actualFileName,
 		"pid", ucOp.pid,
 		"subPid", ucOp.subPid)
 
 	// 计算分片数量
-	totalChunks := int((ucOp.fileSize + ucOp.chunkSize - 1) / ucOp.chunkSize)
+	totalChunks := int((actualFileSize + ucOp.chunkSize - 1) / ucOp.chunkSize)
 	slog.Info("分片信息",
 		"totalChunks", totalChunks,
-		"fileSize", ucOp.fileSize,
+		"fileSize", actualFileSize,
 		"chunkSize", ucOp.chunkSize)
 
 	// 生成文件标识符
 	identifier := ucOp.identifier
 	if identifier == "" {
-		identifier = fmt.Sprintf("test-%s-%d", ucOp.fileName, ucOp.fileSize)
+		identifier = fmt.Sprintf("test-%s-%d", actualFileName, actualFileSize)
 	}
 
 	// 确定上传接口路径
@@ -144,14 +171,44 @@ func (c TestUploadChunk) Handle(cmd *cobra.Command, args []string) {
 	// 上传所有分片
 	uploadedChunks := make([]int, 0, totalChunks)
 	for i := 0; i < totalChunks; i++ {
-		chunkSize := ucOp.chunkSize
-		remaining := ucOp.fileSize - int64(i)*ucOp.chunkSize
-		if remaining < ucOp.chunkSize {
-			chunkSize = remaining
+		var chunkData []byte
+		var chunkSize int64
+
+		if ucOp.file != "" {
+			// 从指定文件读取分片
+			file, err := os.Open(ucOp.file)
+			if err != nil {
+				slog.Error("打开文件失败", "file", ucOp.file, "error", err)
+				return
+			}
+
+			offset := int64(i) * ucOp.chunkSize
+			remaining := actualFileSize - offset
+			if remaining > ucOp.chunkSize {
+				chunkSize = ucOp.chunkSize
+			} else {
+				chunkSize = remaining
+			}
+
+			chunkData = make([]byte, chunkSize)
+			_, err = file.ReadAt(chunkData, offset)
+			if err != nil && err != io.EOF {
+				slog.Error("读取文件分片失败", "chunkIndex", i, "error", err)
+				file.Close()
+				return
+			}
+			file.Close()
+		} else {
+			// 生成随机数据分片
+			remaining := actualFileSize - int64(i)*ucOp.chunkSize
+			if remaining < ucOp.chunkSize {
+				chunkSize = remaining
+			} else {
+				chunkSize = ucOp.chunkSize
+			}
+			chunkData = c.generateRandomChunk(chunkSize)
 		}
 
-		// 生成随机数据分片
-		chunkData := c.generateRandomChunk(chunkSize)
 		chunkFilePath := filepath.Join(tempDir, fmt.Sprintf("chunk_%d", i))
 		if err := os.WriteFile(chunkFilePath, chunkData, 0644); err != nil {
 			slog.Error("写入分片文件失败", "chunkIndex", i, "error", err)
@@ -164,7 +221,7 @@ func (c TestUploadChunk) Handle(cmd *cobra.Command, args []string) {
 			"chunkSize", chunkSize)
 
 		// 上传分片
-		success, err := c.uploadChunk(uploadPath, chunkFilePath, i, totalChunks, chunkSize, identifier, ucOp.fileName, ucOp.relativePath, ucOp.fileSize)
+		success, err := c.uploadChunk(uploadPath, chunkFilePath, i, totalChunks, chunkSize, identifier, actualFileName, ucOp.relativePath, actualFileSize)
 		if err != nil {
 			slog.Error("上传分片失败", "chunkIndex", i, "error", err)
 			if !success {
@@ -196,13 +253,13 @@ func (c TestUploadChunk) Handle(cmd *cobra.Command, args []string) {
 
 	// 合并分片
 	slog.Info("开始合并分片")
-	err = c.mergeChunks(mergePath, identifier, ucOp.fileName, ucOp.relativePath, totalChunks, ucOp.fileSize)
+	err = c.mergeChunks(mergePath, identifier, actualFileName, ucOp.relativePath, totalChunks, actualFileSize)
 	if err != nil {
 		slog.Error("合并分片失败", "error", err)
 		return
 	}
 
-	slog.Info("分片上传测试完成", "fileName", ucOp.fileName, "totalSize", ucOp.fileSize)
+	slog.Info("分片上传测试完成", "fileName", actualFileName, "totalSize", actualFileSize)
 }
 
 // generateRandomChunk 生成随机数据分片
