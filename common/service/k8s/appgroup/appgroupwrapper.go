@@ -42,7 +42,10 @@ func (g *appgroupWrapper) AddStatusItem(item v1alpha1.AppGroupItemStatus) {
 					g.Status.Items[i] = item
 				}
 				if i == 0 && v.Title != "" && v.Kind != "Job" {
-					g.Spec.Title = v.Title
+					if g.Spec.Title == "" {
+						g.Spec.Title = v.Title
+					}
+					// g.Spec.Title = v.Title
 				}
 			}
 		} else {
