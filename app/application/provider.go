@@ -141,10 +141,10 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			localApiGroup.GET("/tty", middleware.Auth{}.Process, controller2.PodExec{}.Tty)
 			localApiGroup.GET("/nodetty", middleware.Auth{}.Process, controller2.PodExec{}.NodeTty)
 			localApiGroup.GET("/download/*path", controller2.File{}.Download)
-			localApiGroup.POST("/cp", middleware.Auth{}.Process, controller2.PodExec{}.KubectlCp)   //kubectl cp文件
-			localApiGroup.POST("/cppid", middleware.Auth{}.Process, controller2.File{}.CpPidFile)   //pid文件移动
-			localApiGroup.POST("/mvpid", middleware.Auth{}.Process, controller2.File{}.CpPidFile)   //pid文件移动
-			localApiGroup.POST("/mvtopod", middleware.Auth{}.Process, controller2.File{}.MoveToPod) //pid文件移动
+			localApiGroup.POST("/cp", middleware.Auth{}.Process, controller2.PodExec{}.KubectlCp) //kubectl cp文件
+			localApiGroup.POST("/cppid", middleware.Auth{}.Process, controller2.File{}.CpPidFile) //pid文件移动
+			localApiGroup.POST("/mvpid", middleware.Auth{}.Process, controller2.File{}.CpPidFile) //pid文件移动
+
 			localApiGroup.GET("/exec", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
 			localApiGroup.POST("/exec2", middleware.Auth{}.Process, controller2.PodExec{}.Exec)
 			localApiGroup.GET("/pid", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Pid{}.GetPid) //获取所在pod和pid
@@ -203,9 +203,9 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		// engine.Handle("GET", "/panel-api/v1/files/webdav-agent/:pid/agent/etc/passwd", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Webdav{}.HandlePid)
 		for _, method := range webdavMethods {
 			engine.Handle(method, "/panel-api/v1/files/webdav/*path", middleware.Auth{}.Process, controller2.Webdav{}.Handle)
-			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPid)
+			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPid2)
 
-			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid)
+			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid2)
 		}
 		// /etc/passwd 缓存
 
@@ -226,6 +226,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		localApiGroup.POST("/files/upload-chunk", middleware.Auth{}.Process, controller2.File{}.UploadChunk) // 上传分片
 		localApiGroup.GET("/files/check-chunk", middleware.Auth{}.Process, controller2.File{}.CheckChunk)    // 检查分片是否已上传
 		localApiGroup.POST("/files/merge-chunks", middleware.Auth{}.Process, controller2.File{}.MergeChunks) // 合并分片
+		localApiGroup.POST("/files/mvtopod", middleware.Auth{}.Process, controller2.File{}.MoveToPod)        //pid文件移动
 
 		engine.GET("/panel-api/v1/kubeconfig", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.Kubeconfig)
 		engine.Any("/panel-api/v1/s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process)
