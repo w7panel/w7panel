@@ -224,10 +224,10 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		engine.POST("/panel-api/v1/files/permission-agent/:pid/subagent/:subpid/chown", middleware.Auth{}.Process, controller2.PermissionAgent{}.Chown)
 
 		// 分片上传相关接口
-		localApiGroup.POST("/files/upload-chunk", controller2.File{}.UploadChunk) // 上传分片
-		localApiGroup.GET("/files/check-chunk", controller2.File{}.CheckChunk)    // 检查分片是否已上传
-		localApiGroup.POST("/files/merge-chunks", controller2.File{}.MergeChunks) // 合并分片
-		// localApiGroup.POST("/files/mvtopod", middleware.Auth{}.Process, controller2.File{}.MoveToPod)        //pid文件移动
+		localApiGroup.POST("/files/upload-chunk", controller2.File{}.UploadChunk)                     // 上传分片
+		localApiGroup.GET("/files/check-chunk", controller2.File{}.CheckChunk)                        // 检查分片是否已上传
+		localApiGroup.POST("/files/merge-chunks", controller2.File{}.MergeChunks)                     // 合并分片
+		localApiGroup.POST("/files/mvtopod", middleware.Auth{}.Process, controller2.File{}.MoveToPod) //pid文件移动
 
 		engine.GET("/panel-api/v1/kubeconfig", middleware.Auth{}.Process, middleware.Proxy{}.Process, controller2.Proxy{}.Kubeconfig)
 		engine.Any("/panel-api/v1/s3bucket", middleware.Auth{}.Process, controller2.File{}.Upload).Use(middleware.Cors{}.Process)
