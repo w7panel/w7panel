@@ -68,6 +68,7 @@ func (p *PidResult) ToArray() map[string]string {
 		"compressUrl":    compressUrl,
 		"permissionUrl":  permissionUrl,
 		"pwd":            p.Pwd,
+		"agentUrl":       "/panel-api/v1/" + podIp + ":8000/proxy",
 		// "users":          users,
 	}
 
