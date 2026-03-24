@@ -335,6 +335,7 @@ func (self File) MergeChunks(http *gin.Context) {
 	// 合并分片
 	var totalWritten int64
 	for _, chunkFile := range chunkFiles {
+		slog.Error("chunkFile name", "name", chunkFile)
 		srcFile, err := os.Open(chunkFile)
 		if err != nil {
 			self.JsonResponseWithError(http, fmt.Errorf("failed to open chunk %s: %v", chunkFile, err), 500)
