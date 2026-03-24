@@ -21,9 +21,9 @@ type Compressor struct {
 	rootPath string
 }
 
-func NewCompressor(pid string) *Compressor {
+func NewCompressor(pid string, subPid string) *Compressor {
 	return &Compressor{
-		rootPath: procpath.GetRootPath(pid),
+		rootPath: procpath.GetRootPathWithSubPid(pid, subPid),
 	}
 }
 
