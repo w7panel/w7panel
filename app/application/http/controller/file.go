@@ -429,6 +429,7 @@ func (self File) MoveToPod(http *gin.Context) {
 
 	// mv file fromFullPath to toFullPath
 	err := exec.Command("mv", fromFullPath, toFullPath).Run()
+	slog.Error("mv debug", "from", fromFullPath, "to", toFullPath)
 	if err != nil {
 		self.JsonResponseWithError(http, err, 500)
 		return
