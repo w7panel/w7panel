@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/w7panel/w7panel/common/service/procpath"
+	"github.com/w7panel/w7panel/common/service/webdav2"
 	"golang.org/x/net/webdav"
 )
 
@@ -16,9 +17,10 @@ func (c Webdav) handleWithPermissionPreservation2(ctx *gin.Context, prefix strin
 	if relPath == "" {
 		relPath = "/"
 	}
+	webdavFileSystem := webdav2.NewWebDAVFileSystem(fs)
 	hander := webdav.Handler{
 		Prefix:     prefix,
-		FileSystem: fs,
+		FileSystem: webdavFileSystem,
 		LockSystem: webdav.NewMemLS(),
 		Logger: func(r *http.Request, err error) {
 			if err != nil {
