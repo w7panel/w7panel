@@ -17,7 +17,11 @@ func (c Webdav) handleWithPermissionPreservation2(ctx *gin.Context, prefix strin
 	if relPath == "" {
 		relPath = "/"
 	}
-	webdavFileSystem := webdav2.NewWebDAVFileSystem(fs)
+	dirStr := ""
+	if dir, ok := fs.(webdav.Dir); ok {
+		dirStr = string(dir)
+	}
+	webdavFileSystem := webdav2.NewWebDAVFileSystem(fs, dirStr)
 	hander := webdav.Handler{
 		Prefix:     prefix,
 		FileSystem: webdavFileSystem,
