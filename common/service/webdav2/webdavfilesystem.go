@@ -20,7 +20,7 @@ func (fs WebDAVFileSystem) OpenFile(ctx context.Context, name string, flag int, 
 		slog.Error("webdav OpenFile failed", "name", name, "flag", flag, "perm", perm, "error", err)
 		return nil, err
 	}
-	return NewWebDAVFile(file), err
+	return NewWebDAVFile(file, fs.dir), err
 }
 
 func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, error) {
@@ -28,6 +28,7 @@ func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, 
 	if err != nil {
 		return stat, err
 	}
+	return stat, nil
 	// isSymlink := stat.Mode()&syscall.S_IFMT == syscall.S_IFLNK
 	// fullPath := filepath.Join(fs.dir, stat.Name())
 	// resolvedTarget, err := filepath.EvalSymlinks(fullPath)
@@ -56,7 +57,6 @@ func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, 
 	// 	}
 	// 	return filestat, nil
 	// }
-	return stat, nil
 
 }
 

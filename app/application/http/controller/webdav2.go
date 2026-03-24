@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/webdav"
 )
 
-func (c Webdav) handleWithPermissionPreservation2(ctx *gin.Context, prefix string, fs webdav.FileSystem, pid string, rootDir string) {
+func (c Webdav) handleWithPermissionPreservation2(ctx *gin.Context, prefix string, fs webdav.FileSystem, rootDir string) {
 	// userGroup := webdav1.GetUserGroup(pid)
 
 	relPath := ctx.Request.URL.Path[len(prefix):]
@@ -40,7 +40,7 @@ func (c Webdav) HandlePid2(ctx *gin.Context) {
 	webDirPath := procpath.GetRootPath(pid)
 	c.handleWithPermissionPreservation2(ctx,
 		"/panel-api/v1/files/webdav-agent/"+pid+"/agent",
-		webdav.Dir(webDirPath), pid, webDirPath)
+		webdav.Dir(webDirPath), webDirPath)
 }
 
 func (c Webdav) HandlePidSubPid2(ctx *gin.Context) {
@@ -53,11 +53,11 @@ func (c Webdav) HandlePidSubPid2(ctx *gin.Context) {
 	}
 	c.handleWithPermissionPreservation2(ctx,
 		prefix,
-		webdav.Dir(webDirPath), pid, webDirPath)
+		webdav.Dir(webDirPath), webDirPath)
 }
 
 func (c Webdav) HandleTest(ctx *gin.Context) {
 	c.handleWithPermissionPreservation2(ctx,
 		"/panel-api/v1/files/webdav-test",
-		webdav.Dir("/tmp/webdav"), "1", "/tmp/webdav")
+		webdav.Dir("/"), "/")
 }

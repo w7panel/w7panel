@@ -431,7 +431,8 @@ func (self File) MoveToPod(http *gin.Context) {
 	err := exec.Command("mv", fromFullPath, toFullPath).Run()
 	slog.Error("mv debug", "from", fromFullPath, "to", toFullPath)
 	if err != nil {
-		self.JsonResponseWithError(http, err, 500)
+		slog.Error("mv err", "err", err)
+		// self.JsonResponseWithError(http, err, 500)
 		return
 	}
 	self.JsonSuccessResponse(http)
