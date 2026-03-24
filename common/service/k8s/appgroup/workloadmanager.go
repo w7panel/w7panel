@@ -7,6 +7,7 @@ import (
 
 	"github.com/w7panel/w7panel/common/helper"
 	"github.com/w7panel/w7panel/common/service/k8s"
+	"github.com/w7panel/w7panel/common/service/k8s/k3k"
 	sigclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	// "github.com/w7panel/w7panel/common/service/k8s/zpk"
@@ -192,6 +193,11 @@ func (d *WorkloadManager) HandleQueue(key interface{}) error {
 			// slog.Error("get from ro error", "error", err)
 			return nil
 		}
+		go func() {
+			if helper.IsK3kVirtual() {
+				k3k.SyncSecretHttp(secret) // virtual agent 可能在启动中导致secret 没有接收到webhook事件
+			}
+		}()
 		return d.HandleSecret(secret, false)
 	}
 	if evt.Kind == "AppGroup" {
