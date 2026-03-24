@@ -620,7 +620,13 @@ func (self Metrics) UsageDisk(http *gin.Context) {
 	uage := metrics.NewK3kUsage(k8s.NewK8sClient().Sdk)
 	usage, total, err := uage.GetResourceDiskUsage(user)
 	if err != nil {
-		self.JsonResponseWithServerError(http, err)
+		response := gin.H{
+			"disk": gin.H{
+				"usage": usage,
+				"total": total,
+			},
+		}
+		self.JsonResponseWithoutError(http, response)
 		return
 	}
 	response := gin.H{
