@@ -201,7 +201,7 @@ cronjob:
     - /bin/sh
     - -c
   args:
-    - k8s-offline k3k-return-check
+    - w7panel k3k-return-check
   env: []
   # resources:
   #   limits:

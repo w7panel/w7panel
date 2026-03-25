@@ -27,6 +27,12 @@ func NewCompressor(pid string, subPid string) *Compressor {
 	}
 }
 
+func NewCompressorRootPath(rootPath string) *Compressor {
+	return &Compressor{
+		rootPath: rootPath,
+	}
+}
+
 // Compress 压缩文件/目录
 func (c *Compressor) Compress(sources []string, output string) error {
 	outputPath := filepath.Join(c.rootPath, output)
@@ -327,6 +333,44 @@ func (c *Compressor) extractTar(source, target string) error {
 		return err
 	}
 	defer file.Close()
+
+	// 检测实际文件类型（防止扩展名与实际格式不符）
+	buf := make([]byte, 512)
+	n, err := file.Read(buf)
+	if err != nil {
+		return err
+	}
+	buf = buf[:n]
+
+	// 重置文件指针
+	if _, err := file.Seek(0, 0); err != nil {
+		return err
+	}
+
+	// 检测是否为 gzip
+	if len(buf) >= 2 && buf[0] == 0x1F && buf[1] == 0x8B {
+		gzReader, err := pgzip.NewReader(file)
+		if err != nil {
+			return fmt.Errorf("failed to create gzip reader: %w", err)
+		}
+		defer gzReader.Close()
+		return c.extractTarReader(gzReader, target)
+	}
+
+	// 检测是否为 xz
+	if len(buf) >= 6 && buf[0] == 0xFD && buf[1] == 0x37 && buf[2] == 0x7A && buf[3] == 0x58 && buf[4] == 0x5A && buf[5] == 0x00 {
+		xzReader, err := xz.NewReader(file)
+		if err != nil {
+			return fmt.Errorf("failed to create xz reader: %w", err)
+		}
+		return c.extractTarReader(xzReader, target)
+	}
+
+	// 检测是否为 bzip2
+	if len(buf) >= 3 && buf[0] == 0x42 && buf[1] == 0x5A && buf[2] == 0x68 {
+		bz2Reader := bzip2.NewReader(file)
+		return c.extractTarReader(bz2Reader, target)
+	}
 
 	return c.extractTarReader(file, target)
 }
