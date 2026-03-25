@@ -148,7 +148,7 @@ func main() {
 		router := engine.Group("").
 			Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp4"}))).
 			Use(cachecontrol.New(cachecontrol.CacheAssetsForeverPreset))
-		routerNocache := engine.Group("").
+		routerNocache := engine.Group("/ui").
 			Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp4"})))
 
 		staticPath := facade.Config.GetString("app.static_path")
@@ -156,7 +156,7 @@ func main() {
 		router.Static("/longhorn", staticPath+"/longhorn")
 		router.Static("/charts", staticPath+"/charts")
 		router.Static("/schema", staticPath+"/schema")
-		routerNocache.Static("/ui/microapp/*path", microappPath)
+		routerNocache.Static("/microapp", microappPath)
 		router.Static("/ui/plugin", staticPath+"/plugin")
 		router.Static("/ui/wasm", staticPath+"/wasm")
 		router.Static("/ui/yaml", staticPath+"/yaml")
