@@ -156,7 +156,7 @@ func main() {
 		router.Static("/longhorn", staticPath+"/longhorn")
 		router.Static("/charts", staticPath+"/charts")
 		router.Static("/schema", staticPath+"/schema")
-		routerNocache.Static("/ui/microapp", microappPath)
+		routerNocache.Static("/ui/microapp/*path", microappPath)
 		router.Static("/ui/plugin", staticPath+"/plugin")
 		router.Static("/ui/wasm", staticPath+"/wasm")
 		router.Static("/ui/yaml", staticPath+"/yaml")
