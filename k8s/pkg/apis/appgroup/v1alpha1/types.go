@@ -189,9 +189,9 @@ func (g *AppGroup) ComputeStatus() {
 		}
 	}
 	g.Status.IsZeroReplicas = false
-	if len(g.Status.Items) == 1 {
-		g.Status.IsZeroReplicas = g.Status.Items[0].IsZeroReplicas
-	}
+	// if len(g.Status.Items) == 1 {
+	// 	g.Status.IsZeroReplicas = g.Status.Items[0].IsZeroReplicas
+	// }
 
 	if len(g.Status.Items) > 0 {
 		ready := lo.EveryBy(g.Status.Items, func(v AppGroupItemStatus) bool {
@@ -202,6 +202,12 @@ func (g *AppGroup) ComputeStatus() {
 	if len(g.Status.Items) == 0 {
 		// g.Status.IsZeroReplicas = true
 		g.Status.Ready = true
+	}
+	if len(g.Status.Items) > 0 {
+		allZero := lo.EveryBy(g.Status.Items, func(v AppGroupItemStatus) bool {
+			return v.IsZeroReplicas
+		})
+		g.Status.IsZeroReplicas = allZero
 	}
 }
 

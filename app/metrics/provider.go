@@ -26,7 +26,7 @@ func (p Provider) Register(httpServer *httpserver.Server, console console.Consol
 
 func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 	server.RegisterRouters(func(engine *gin.Engine) {
-		engine.Any("/metrics", controller2.Metrics{}.Promhttp)
+		// engine.Any("/metrics", controller2.Metrics{}.Promhttp)
 
 		engine.GET("/panel-api/v1/metrics/usage/normal", middleware.Auth{}.Process, controller2.Metrics{}.Usage)
 		engine.GET("/panel-api/v1/metrics/usage/disk", middleware.Auth{}.Process, controller2.Metrics{}.UsageDisk)

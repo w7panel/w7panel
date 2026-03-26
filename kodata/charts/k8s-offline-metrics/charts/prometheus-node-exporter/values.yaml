@@ -139,7 +139,7 @@ service:
   nodePort: null
 
   ## If true, node exporter will listen on all interfaces
-  listenOnAllInterfaces: true
+  listenOnAllInterfaces: false
 
   ## Additional annotations and labels for the service
   annotations:
