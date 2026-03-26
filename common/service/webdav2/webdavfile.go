@@ -19,7 +19,7 @@ type WebDAVFile struct {
 	webdav.File
 	fileInfo *WebDAVFileInfo
 	rootDir  string
-	buffer   *SeekableBuffer
+	buffer   *bytes.Buffer
 }
 
 const (
@@ -49,9 +49,9 @@ func (f *WebDAVFile) Readdir(count int) ([]os.FileInfo, error) {
 
 func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
 	r := &WebDAVFile{File: file, rootDir: rootDir}
-	seek := NewSeekableBuffer()
-	seek.Buffer = *bytes.NewBufferString("设备文件不支持读写")
-	r.buffer = seek
+	// seek := &SeekBuffer{buff: []byte("emtpy"), rewindWhenFullReaded: true}
+	// seek.Buffer = *bytes.NewBufferString("设备文件不支持读写")
+	r.buffer = bytes.NewBufferString("nocontent")
 	//测试发现 写入文件内容  权限和所有者不会变更
 	//如果要加 r.stat记录下 权限所有者
 	// webdav.File 的Close方法中恢复权限和所有者
@@ -117,6 +117,10 @@ func (f *WebDAVFile) Read(p []byte) (n int, err error) {
 	return f.File.Read(p)
 }
 
+func (f *WebDAVFile) Close() (err error) {
+	return f.File.Close()
+}
+
 func (f *WebDAVFile) Seek(offset int64, whence int) (n int64, err error) {
 	stat, err := f.Stat()
 	if err != nil {
@@ -124,7 +128,7 @@ func (f *WebDAVFile) Seek(offset int64, whence int) (n int64, err error) {
 	}
 	// 设备文件 不让读
 	if !stat.Mode().IsRegular() {
-		return f.buffer.Seek(offset, whence)
+		return offset, err
 	}
 	return f.File.Seek(offset, whence)
 }
@@ -134,7 +138,7 @@ func (f *WebDAVFile) Write(p []byte) (n int, err error) {
 		return 0, err
 	}
 	if !stat.Mode().IsRegular() {
-		return 0, nil
+		return f.buffer.Write(p)
 	}
 	return f.File.Write(p)
 }
