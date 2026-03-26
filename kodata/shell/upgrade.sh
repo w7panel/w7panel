@@ -30,13 +30,15 @@ kubectl create -f $KO_DATA_PATH/yaml/longhorn-volumes-config.yaml || echo "已�
 
 echo "创建默认pvc"
 # kubectl get pvc default-volume  >/dev/null 2>&1 || kubectl apply -f $KO_DATA_PATH/yaml/default-volume.yaml && kubectl apply -f $KO_DATA_PATH/yaml/default-sc.yaml
-kubectl create -f $KO_DATA_PATH/yaml/default-volume.yaml || echo "已存在default-volume"
+
 # kubectl create -f $KO_DATA_PATH/yaml/default-sc.yaml || echo "已存在default-sc"
 if kubectl get crd settings.longhorn.io &> /dev/null; then
     echo "CRD settings.longhorn.io 已存在"
     kubectl create -f $KO_DATA_PATH/yaml/default-sc.yaml || echo "已存在default-sc"
+    kubectl create -f $KO_DATA_PATH/yaml/default-volume-longhorn.yaml || echo "已存在default-volume"
 else
     echo "CRD settings.longhorn.io 不存在"
+    kubectl create -f $KO_DATA_PATH/yaml/default-volume.yaml || echo "已存在default-volume"
 fi
 echo "域名白名单插件"
 kubectl create -f $KO_DATA_PATH/yaml/w7-white-domain.yaml || echo "已存在wasmplugin w7-white-domain"
