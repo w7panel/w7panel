@@ -36,6 +36,10 @@ func (f *WebDAVFile) Readdir(count int) ([]os.FileInfo, error) {
 		return nil, err
 	}
 	filters := lo.Filter(entries, func(info os.FileInfo, index int) bool {
+		m := info.Mode()
+		if !m.IsRegular() && !m.IsDir() {
+			return false
+		}
 		return info.Name() != "ptmx"
 	})
 

@@ -45,17 +45,26 @@ func (self OverSelling) CurrentResource(http *gin.Context) {
 		self.JsonResponseWithServerError(http, err)
 		return
 	}
-	rs, err := client.GetOverlingResource()
-	if err != nil {
-		self.JsonResponseWithServerError(http, err)
-		return
-	}
 	type Result struct {
 		CPU       int64 `json:"cpu"`
 		Memory    int64 `json:"memory"`
 		Storage   int64 `json:"storage"`
 		BandWidth int64 `json:"bandwidth"`
 	}
+	rs, err := client.GetOverlingResource()
+	if err != nil {
+		//longhorn 默认未安装
+		result := Result{
+			CPU:       0,
+			Memory:    0,
+			Storage:   0,
+			BandWidth: 0,
+			// BandWidth: 100,
+		}
+		self.JsonResponseWithoutError(http, result)
+		return
+	}
+
 	result := Result{
 		CPU:       rs.CPU.Value(),
 		Memory:    rs.Memory.Value() / 1024 / 1024 / 1024,
