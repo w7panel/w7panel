@@ -29,44 +29,8 @@ func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, 
 		return stat, err
 	}
 	return stat, nil
-	// isSymlink := stat.Mode()&syscall.S_IFMT == syscall.S_IFLNK
-	// fullPath := filepath.Join(fs.dir, stat.Name())
-	// resolvedTarget, err := filepath.EvalSymlinks(fullPath)
-	// symlinkTarget := ""
-	// if err == nil {
-	// 	resolvedTarget = filepath.Clean(resolvedTarget)
-	// 	rootDir := filepath.Clean(fs.dir)
-	// 	if strings.HasPrefix(resolvedTarget, rootDir) {
-	// 		symlinkTarget, _ = os.Readlink(fullPath)
-	// 	} else {
-	// 		slog.Warn("symlink escapes container root in Stat - blocked",
-	// 			"link", fullPath,
-	// 			"resolved", resolvedTarget,
-	// 			"root", rootDir)
-	// 	}
-	// }
-	// filestat, ok := stat.(*WebDAVFileInfo)
-	// if ok {
-	// 	filestat.isSymlink = isSymlink
-	// 	filestat.symlinkTarget = symlinkTarget
-	// 	filestat.pem = fmt.Sprintf("%d", stat.Mode().Perm())
-	// 	syscall, ok := stat.Sys().(*syscall.Stat_t)
-	// 	if ok {
-	// 		filestat.uid = fmt.Sprintf("%d", syscall.Uid)
-	// 		filestat.gid = fmt.Sprintf("%d", syscall.Gid)
-	// 	}
-	// 	return filestat, nil
-	// }
-
 }
 
-//	func (fs WebDAVFileSystem) Mkdir(ctx context.Context, name string, perm os.FileMode) error {
-//		return fs.FileSystem.Mkdir(ctx, name, perm)
-//	}
-//
-//	func (fs WebDAVFileSystem) RemoveAll(ctx context.Context, name string) error {
-//		return fs.FileSystem.RemoveAll(ctx, name)
-//	}
 func (fs WebDAVFileSystem) Rename(ctx context.Context, oldName, newName string) error {
 	err := fs.FileSystem.Rename(ctx, oldName, newName)
 	if err != nil {

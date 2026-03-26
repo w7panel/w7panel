@@ -11,7 +11,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/samber/lo"
 	"golang.org/x/net/webdav"
 )
 
@@ -35,15 +34,15 @@ func (f *WebDAVFile) Readdir(count int) ([]os.FileInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	filters := lo.Filter(entries, func(info os.FileInfo, index int) bool {
-		m := info.Mode()
-		if !m.IsRegular() && !m.IsDir() {
-			return false
-		}
-		return info.Name() != "ptmx"
-	})
+	// filters := lo.Filter(entries, func(info os.FileInfo, index int) bool {
+	// 	m := info.Mode()
+	// 	if !m.IsRegular() && !m.IsDir() {
+	// 		return false
+	// 	}
+	// 	return info.Name() != "ptmx"
+	// })
 
-	return filters, nil
+	return entries, nil
 }
 
 func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
@@ -52,25 +51,6 @@ func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
 	//如果要加 r.stat记录下 权限所有者
 	// webdav.File 的Close方法中恢复权限和所有者
 	return r
-}
-
-type WebDAVFileInfo struct {
-	os.FileInfo
-	isSymlink     bool
-	symlinkTarget string
-	uid           string
-	gid           string
-	pem           string
-	ext           string
-}
-
-// 不读文件 获取content-type
-func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
-	ctype := mime.TypeByExtension(info.ext)
-	if ctype != "" {
-		return ctype, nil
-	}
-	return "application/octet-stream", nil
 }
 
 func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
@@ -107,12 +87,7 @@ func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
 		XMLName:  xml.Name{Local: "symlink_target", Space: "w7panel"},
 		InnerXML: []byte(info.symlinkTarget),
 	}
-	// filestat, ok := stat.Sys().(*syscall.Stat_t)
-	// if ok {
-	// 	user.InnerXML = []byte(fmt.Sprintf("%d", filestat.Uid))
-	// 	group.InnerXML = []byte(fmt.Sprintf("%d", filestat.Gid))
-	// 	perm.InnerXML = []byte(fmt.Sprintf("%o", stat.Mode().Perm()))
-	// }
+
 	ret[user.XMLName] = user
 	ret[group.XMLName] = group
 	ret[perm.XMLName] = perm
@@ -120,10 +95,35 @@ func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
 	ret[symlinkTarget.XMLName] = symlinkTarget
 	return ret, nil
 }
-func (n *WebDAVFile) Patch(patches []webdav.Proppatch) ([]webdav.Propstat, error) {
+func (f *WebDAVFile) Patch(patches []webdav.Proppatch) ([]webdav.Propstat, error) {
 
 	return []webdav.Propstat{{Props: nil}}, nil
 }
+
+func (f *WebDAVFile) Read(p []byte) (n int, err error) {
+	stat, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	// 设备文件 不让读
+	if !stat.Mode().IsRegular() {
+		return 0, nil
+	}
+	return f.File.Read(p)
+}
+
+func (f *WebDAVFile) Seek(offset int64, whence int) (n int64, err error) {
+	stat, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	// 设备文件 不让读
+	if !stat.Mode().IsRegular() {
+		return 0, nil
+	}
+	return f.File.Seek(offset, whence)
+}
+
 func (n *WebDAVFile) Stat() (os.FileInfo, error) {
 	if n.fileInfo != nil {
 		return n.fileInfo, nil
@@ -158,7 +158,32 @@ func (n *WebDAVFile) Stat() (os.FileInfo, error) {
 	if ok {
 		n.fileInfo.gid = fmt.Sprintf("%d", sysstat.Gid)
 		n.fileInfo.uid = fmt.Sprintf("%d", sysstat.Uid)
-
 	}
+	n.fileInfo.canEdit = !n.fileInfo.Mode().IsRegular() //非设备文件都可以读写
+	//TODO  软连接
 	return n.fileInfo, nil
+}
+
+type WebDAVFileInfo struct {
+	os.FileInfo
+	isSymlink     bool
+	symlinkTarget string
+	uid           string
+	gid           string
+	pem           string
+	ext           string
+	contentType   string
+	canEdit       bool
+}
+
+// 前端没有判断content-type 不需要 严格返回类型, 所以不去读文件
+func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
+	if !info.Mode().IsRegular() {
+		return "application/linux-file", nil
+	}
+	ctype := mime.TypeByExtension(filepath.Ext(info.Name()))
+	if ctype != "" {
+		return ctype, nil
+	}
+	return "application/octet-stream", nil // fallback
 }
