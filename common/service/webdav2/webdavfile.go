@@ -9,6 +9,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/samber/lo"
 	"golang.org/x/net/webdav"
 )
 
@@ -16,6 +17,27 @@ type WebDAVFile struct {
 	webdav.File
 	fileInfo *WebDAVFileInfo
 	rootDir  string
+}
+
+const (
+	MaxFileSize   = 50 * 1024 * 1024
+	MaxDirEntries = 5000
+)
+
+func (f *WebDAVFile) Readdir(count int) ([]os.FileInfo, error) {
+	if count > 0 && count > MaxDirEntries {
+		count = MaxDirEntries
+	}
+
+	entries, err := f.File.Readdir(count)
+	if err != nil {
+		return nil, err
+	}
+	filters := lo.Filter(entries, func(info os.FileInfo, index int) bool {
+		return info.Name() != "ptmx"
+	})
+
+	return filters, nil
 }
 
 func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {

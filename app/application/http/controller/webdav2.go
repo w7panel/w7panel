@@ -59,5 +59,5 @@ func (c Webdav) HandlePidSubPid2(ctx *gin.Context) {
 func (c Webdav) HandleTest(ctx *gin.Context) {
 	c.handleWithPermissionPreservation2(ctx,
 		"/panel-api/v1/files/webdav-test",
-		webdav.Dir("/"), "/")
+		webdav.Dir("/dev"), "/dev")
 }
