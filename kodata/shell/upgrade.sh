@@ -32,7 +32,12 @@ echo "创建默认pvc"
 # kubectl get pvc default-volume  >/dev/null 2>&1 || kubectl apply -f $KO_DATA_PATH/yaml/default-volume.yaml && kubectl apply -f $KO_DATA_PATH/yaml/default-sc.yaml
 kubectl create -f $KO_DATA_PATH/yaml/default-volume.yaml || echo "已存在default-volume"
 # kubectl create -f $KO_DATA_PATH/yaml/default-sc.yaml || echo "已存在default-sc"
-# helm upgrade --namespace k3k-system --create-namespace k3k $KO_DATA_PATH/charts/k3k-0.3.5.tgz --install --timeout 600s
+if kubectl get crd settings.longhorn.io &> /dev/null; then
+    echo "CRD settings.longhorn.io 已存在"
+    kubectl create -f $KO_DATA_PATH/yaml/default-sc.yaml || echo "已存在default-sc"
+else
+    echo "CRD settings.longhorn.io 不存在"
+fi
 echo "域名白名单插件"
 kubectl create -f $KO_DATA_PATH/yaml/w7-white-domain.yaml || echo "已存在wasmplugin w7-white-domain"
 
