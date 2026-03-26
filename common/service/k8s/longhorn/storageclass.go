@@ -6,70 +6,7 @@ import (
 	longhornV1beta2 "github.com/longhorn/longhorn-manager/k8s/pkg/apis/longhorn/v1beta2"
 	storagev1 "k8s.io/api/storage/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/cache"
 )
-
-/*
-  - kind: StorageClass
-    apiVersion: storage.k8s.io/v1
-    metadata:
-    name: longhorn
-    annotations:
-    storageclass.kubernetes.io/is-default-class: "true"
-    provisioner: driver.longhorn.io
-    allowVolumeExpansion: true
-    reclaimPolicy: "Delete"
-    volumeBindingMode: Immediate
-    parameters:
-    numberOfReplicas: "3"
-    staleReplicaTimeout: "30"
-    fromBackup: ""
-    fsType: "ext4"
-    dataLocality: "disabled"
-    unmapMarkSnapChainRemoved: "ignored"
-    disableRevisionCounter: "true"
-    dataEngine: "v1"
-*/
-func (w *longhorncontroller) WatchLonghornStorageClass() cache.SharedIndexInformer {
-	// slog.Debug("WatchLonghornVolumesEvents")
-	informer := w.factory.KubeInformerFactory.Storage().V1().StorageClasses().Informer()
-	informer.AddEventHandler(cache.ResourceEventHandlerDetailedFuncs{
-		AddFunc: func(obj interface{}, isInit bool) {
-			sc, ok := obj.(*storagev1.StorageClass)
-			if ok {
-				w.HandleStorageClass(sc)
-			}
-		},
-		UpdateFunc: func(oldObj, newObj interface{}) {
-			sc, ok := newObj.(*storagev1.StorageClass)
-			if ok {
-				w.HandleStorageClass(sc)
-			}
-		},
-		DeleteFunc: func(obj interface{}) {
-
-		},
-	})
-	// informer.Run(make(chan struct{}))
-	return informer
-}
-
-func (w *longhorncontroller) HandleStorageClass(storageClass *storagev1.StorageClass) {
-	if storageClass.Name == "longhorn" {
-		val, ok := storageClass.Annotations["storageclass.kubernetes.io/is-default-class"]
-		if ok && val == "true" {
-			storageClass.Annotations["storageclass.kubernetes.io/is-default-class"] = "false"
-			_, err := w.sdk.ClientSet.StorageV1().StorageClasses().Update(w.sdk.Ctx, storageClass, metav1.UpdateOptions{})
-			if err != nil {
-				slog.Error("Failed to update storage class", "err", err)
-			}
-		}
-	}
-}
-
-func (w *longhorncontroller) createStorageClass(node *longhornV1beta2.Node) error {
-	return createStorageClass(node)
-}
 
 func createDefaultStorageClass(defaultDiskClassName string) error {
 	sc, err := lclient.GetK8sStorageClass(defaultDiskClassName)
@@ -103,19 +40,6 @@ func createDefaultStorageClassByPvc() error {
 	}
 	return nil
 
-}
-
-func webhookLonghornStorageClass(storageClass *storagev1.StorageClass) {
-	if storageClass.Name == "longhorn" {
-		val, ok := storageClass.Annotations["storageclass.kubernetes.io/is-default-class"]
-		if ok && val == "true" {
-			storageClass.Annotations["storageclass.kubernetes.io/is-default-class"] = "false"
-			_, err := lclient.sdk.ClientSet.StorageV1().StorageClasses().Update(lclient.sdk.Ctx, storageClass, metav1.UpdateOptions{})
-			if err != nil {
-				slog.Error("Failed to update storage class", "err", err)
-			}
-		}
-	}
 }
 
 func createStorageClass(node *longhornV1beta2.Node) error {
