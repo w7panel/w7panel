@@ -1,9 +1,11 @@
 package webdav2
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 	"log/slog"
+	"mime"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,6 +57,16 @@ type WebDAVFileInfo struct {
 	uid           string
 	gid           string
 	pem           string
+	ext           string
+}
+
+// 不读文件 获取content-type
+func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
+	ctype := mime.TypeByExtension(info.ext)
+	if ctype != "" {
+		return ctype, nil
+	}
+	return "application/octet-stream", nil
 }
 
 func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
@@ -137,6 +149,7 @@ func (n *WebDAVFile) Stat() (os.FileInfo, error) {
 	n.fileInfo.isSymlink = isSymlink
 	n.fileInfo.symlinkTarget = symlinkTarget
 	n.fileInfo.pem = fmt.Sprintf("%o", stat.Mode().Perm())
+	n.fileInfo.ext = filepath.Ext(n.fileInfo.Name())
 	sysstat, ok := stat.Sys().(*syscall.Stat_t)
 	if ok {
 		n.fileInfo.gid = fmt.Sprintf("%d", sysstat.Gid)
