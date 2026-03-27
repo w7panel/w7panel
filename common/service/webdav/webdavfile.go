@@ -1,9 +1,11 @@
 package webdav2
 
 import (
+	"context"
 	"encoding/xml"
 	"fmt"
 	"log/slog"
+	"mime"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -167,4 +169,15 @@ type WebDAVFileInfo struct {
 	pem      string
 	editable bool
 	fileType string
+}
+
+func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
+	if !info.Mode().IsRegular() {
+		return "application/linux-" + info.fileType, nil
+	}
+	ctype := mime.TypeByExtension(filepath.Ext(info.Name()))
+	if ctype != "" {
+		return ctype, nil
+	}
+	return "application/octet-stream", nil // fallback
 }
