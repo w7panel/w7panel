@@ -50,7 +50,7 @@ func (c Registry) Get(ctx *gin.Context) {
 	w := &statusWriter{ResponseWriter: ctx.Writer}
 	mmr.ServeHTTP(w, ctx.Request) //先从内存取镜像
 	if w.statusCode != http.StatusOK {
-		ctx.Writer.WriteHeader(w.statusCode)
+		cdr.ServeHTTP(w, ctx.Request)
 	}
 }
 
