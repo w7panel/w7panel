@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"os/exec"
+	"strings"
 
 	"golang.org/x/net/webdav"
 )
@@ -34,8 +35,7 @@ func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, 
 func (fs WebDAVFileSystem) Rename(ctx context.Context, oldName, newName string) error {
 	err := fs.FileSystem.Rename(ctx, oldName, newName)
 	if err != nil {
-		errStr := err.Error()
-		if len(errStr) >= 25 && errStr[len(errStr)-25:] == "invalid cross-device link" {
+		if strings.Contains(err.Error(), "invalid cross-device link") {
 			slog.Warn("webdav Rename failed, trying cp+rm fallback", "oldName", oldName, "newName", newName, "error", err)
 
 			srcPath := fs.dir + oldName
