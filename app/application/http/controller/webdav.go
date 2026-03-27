@@ -40,7 +40,7 @@ func (c Webdav) handleWithPermissionPreservation(ctx *gin.Context, prefix string
 	hander.ServeHTTP(ctx.Writer, ctx.Request)
 
 }
-func (c Webdav) HandlePid2(ctx *gin.Context) {
+func (c Webdav) HandlePid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	webDirPath := procpath.GetRootPath(pid)
 	c.handleWithPermissionPreservation(ctx,
@@ -48,7 +48,7 @@ func (c Webdav) HandlePid2(ctx *gin.Context) {
 		webdav.Dir(webDirPath), webDirPath)
 }
 
-func (c Webdav) HandlePidSubPid2(ctx *gin.Context) {
+func (c Webdav) HandlePidSubPid(ctx *gin.Context) {
 	pid := ctx.Param("pid")
 	subpid := ctx.Param("subpid")
 	webDirPath := procpath.GetRootPathWithSubPid(pid, subpid)

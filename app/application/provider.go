@@ -203,9 +203,9 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		// engine.Handle("GET", "/panel-api/v1/files/webdav-agent/:pid/agent/etc/passwd", middleware.Auth{}.Process, middleware.CacheResponseWithExpire(time.Minute*5), controller2.Webdav{}.HandlePid)
 		for _, method := range webdavMethods {
 			// engine.Handle(method, "/panel-api/v1/files/webdav/*path", middleware.Auth{}.Process, controller2.Webdav{}.Handle)
-			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPid2)
+			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePidSubPid)
 
-			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid2)
+			engine.Handle(method, "/panel-api/v1/files/webdav-agent/:pid/agent/*path", middleware.Auth{}.Process, controller2.Webdav{}.HandlePid)
 			// engine.Handle(method, "/panel-api/v1/files/webdav-test/*path", controller2.Webdav{}.HandleTest)
 		}
 		// /etc/passwd 缓存
