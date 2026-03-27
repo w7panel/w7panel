@@ -36,8 +36,8 @@ func (c Registry) Get(ctx *gin.Context) {
 }
 
 // Tags 返回镜像标签
-func (c Registry) Header(ctx *gin.Context) {
-	cdr.ServeHTTP(ctx.Writer, ctx.Request)
+func (c Registry) Post(ctx *gin.Context) {
+	memoryRegistry.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // InitUpload 初始化 blob 上传

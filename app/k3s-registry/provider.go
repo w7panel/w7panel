@@ -22,6 +22,9 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		{
 			registryGroup.GET("/v2/*path", controller.Registry{}.Get)
 			registryGroup.HEAD("/v2/*path", controller.Registry{}.Get)
+			registryGroup.POST("/v2/*path", controller.Registry{}.Post)
+			registryGroup.PUT("/v2/*path", controller.Registry{}.Post)
+			registryGroup.PATCH("/v2/*path", controller.Registry{}.Post)
 			// m.Handle("GET /v2/", r.registryHandler)
 			// m.Handle("HEAD /v2/", r.registryHandler)
 			// registryGroup.GET("/v2/", controller.Registry{}.Version)

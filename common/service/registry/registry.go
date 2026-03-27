@@ -18,7 +18,7 @@ const (
 	// containerdRoot    = "/run/k3s/containerd"
 	// containerdAddr    = "/run/k3s/containerd/containerd.sock"
 
-	containerdRoot = "/run/containerd"
+	containerdRoot = "/var/lib/containerd"
 	containerdAddr = "/run/containerd/containerd.sock"
 )
 
