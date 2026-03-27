@@ -142,14 +142,29 @@ func (c *Compressor) compressZip(sources []string, output string) error {
 
 // addToZip 添加文件到 ZIP
 func (c *Compressor) addToZip(zipWriter *zip.Writer, filePath, rootPath string) error {
+	return c.addToZipWithBase(zipWriter, filePath, rootPath, "")
+}
+
+// addToZipWithBase 添加文件到 ZIP，baseName 用于指定压缩后的文件名
+func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, rootPath, baseName string) error {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return err
 	}
 
-	relPath, err := filepath.Rel(rootPath, filePath)
-	if err != nil {
-		return err
+	var relPath string
+	if !info.IsDir() {
+		// 单个文件：直接使用文件名，或指定的 baseName
+		if baseName != "" {
+			relPath = baseName
+		} else {
+			relPath = filepath.Base(filePath)
+		}
+	} else {
+		relPath, err = filepath.Rel(rootPath, filePath)
+		if err != nil {
+			return err
+		}
 	}
 
 	if info.IsDir() {
@@ -159,7 +174,7 @@ func (c *Compressor) addToZip(zipWriter *zip.Writer, filePath, rootPath string) 
 		}
 		for _, entry := range entries {
 			subPath := filepath.Join(filePath, entry.Name())
-			if err := c.addToZip(zipWriter, subPath, rootPath); err != nil {
+			if err := c.addToZipWithBase(zipWriter, subPath, rootPath, ""); err != nil {
 				return err
 			}
 		}
@@ -233,14 +248,29 @@ func (c *Compressor) compressTar(sources []string, output string, compress bool,
 
 // addToTar 添加文件到 TAR
 func (c *Compressor) addToTar(tarWriter *tar.Writer, filePath, rootPath string) error {
+	return c.addToTarWithBase(tarWriter, filePath, rootPath, "")
+}
+
+// addToTarWithBase 添加文件到 TAR，baseName 用于指定压缩后的文件名
+func (c *Compressor) addToTarWithBase(tarWriter *tar.Writer, filePath, rootPath, baseName string) error {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return err
 	}
 
-	relPath, err := filepath.Rel(rootPath, filePath)
-	if err != nil {
-		return err
+	var relPath string
+	if !info.IsDir() {
+		// 单个文件：直接使用文件名，或指定的 baseName
+		if baseName != "" {
+			relPath = baseName
+		} else {
+			relPath = filepath.Base(filePath)
+		}
+	} else {
+		relPath, err = filepath.Rel(rootPath, filePath)
+		if err != nil {
+			return err
+		}
 	}
 
 	header, err := tar.FileInfoHeader(info, "")
@@ -270,7 +300,7 @@ func (c *Compressor) addToTar(tarWriter *tar.Writer, filePath, rootPath string) 
 		}
 		for _, entry := range entries {
 			subPath := filepath.Join(filePath, entry.Name())
-			if err := c.addToTar(tarWriter, subPath, rootPath); err != nil {
+			if err := c.addToTarWithBase(tarWriter, subPath, rootPath, ""); err != nil {
 				return err
 			}
 		}
