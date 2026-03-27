@@ -174,6 +174,10 @@ func (p PodExec) NodeTty(http *gin.Context) {
 		}
 		shells = []string{"nsenter", "-t", "1", "--mount", "--uts", "--ipc", "--net", "--pid", "--", params.Shell}
 	}
+	if findPod == nil {
+		p.JsonResponseWithServerError(http, fmt.Errorf("not found agent pod for hostIp: %s", params.HostIp))
+		return
+	}
 	err = rootsdk.RunExec(session, findPod.Namespace, findPod.Name, findPod.Spec.Containers[0].Name, shells, true)
 	if err != nil {
 		p.JsonResponseWithServerError(http, err)
