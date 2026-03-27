@@ -46,21 +46,78 @@ func (c *Compressor) Compress(sources []string, output string) error {
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
+	// 计算所有源的共同基础路径
+	basePath := c.calculateBasePath(sources)
+
 	switch format {
 	case "zip":
-		return c.compressZip(sources, outputPath)
+		return c.compressZip(sources, outputPath, basePath)
 	case "tar":
-		return c.compressTar(sources, outputPath, false, "")
+		return c.compressTar(sources, outputPath, false, "", basePath)
 	case "tar.gz", "tgz":
-		return c.compressTar(sources, outputPath, true, "gzip")
+		return c.compressTar(sources, outputPath, true, "gzip", basePath)
 	case "tar.bz2", "tbz2":
-		return c.compressTar(sources, outputPath, true, "bzip2")
+		return c.compressTar(sources, outputPath, true, "bzip2", basePath)
 	case "tar.xz", "txz":
-		return c.compressTar(sources, outputPath, true, "xz")
+		return c.compressTar(sources, outputPath, true, "xz", basePath)
 	default:
 		// 默认使用 zip
-		return c.compressZip(sources, outputPath)
+		return c.compressZip(sources, outputPath, basePath)
 	}
+}
+
+// calculateBasePath 计算所有源文件的共同基础路径
+func (c *Compressor) calculateBasePath(sources []string) string {
+	if len(sources) == 0 {
+		return c.rootPath
+	}
+	if len(sources) == 1 {
+		// 单个源：如果是文件，使用其目录；如果是目录，使用其本身
+		srcPath := filepath.Join(c.rootPath, sources[0])
+		info, err := os.Stat(srcPath)
+		if err != nil {
+			return c.rootPath
+		}
+		if info.IsDir() {
+			return srcPath
+		}
+		return filepath.Dir(srcPath)
+	}
+
+	// 多个源：找到所有路径的共同前缀
+	dirs := make([]string, 0, len(sources))
+	for _, src := range sources {
+		srcPath := filepath.Join(c.rootPath, src)
+		info, err := os.Stat(srcPath)
+		if err != nil {
+			continue
+		}
+		if info.IsDir() {
+			dirs = append(dirs, srcPath)
+		} else {
+			dirs = append(dirs, filepath.Dir(srcPath))
+		}
+	}
+
+	if len(dirs) == 0 {
+		return c.rootPath
+	}
+
+	// 找到共同父目录
+	common := dirs[0]
+	for _, d := range dirs[1:] {
+		common = c.commonPath(common, d)
+	}
+
+	return common
+}
+
+// commonPath 找到两个路径的共同父目录
+func (c *Compressor) commonPath(a, b string) string {
+	for len(a) > 0 && !strings.HasPrefix(b, a) {
+		a = filepath.Dir(a)
+	}
+	return a
 }
 
 // Extract 解压文件
@@ -120,7 +177,7 @@ func detectFormat(filename string) string {
 }
 
 // compressZip 压缩为 ZIP 格式
-func (c *Compressor) compressZip(sources []string, output string) error {
+func (c *Compressor) compressZip(sources []string, output string, basePath string) error {
 	zipFile, err := os.Create(output)
 	if err != nil {
 		return err
@@ -132,7 +189,7 @@ func (c *Compressor) compressZip(sources []string, output string) error {
 
 	for _, src := range sources {
 		srcPath := filepath.Join(c.rootPath, src)
-		if err := c.addToZip(zipWriter, srcPath, c.rootPath); err != nil {
+		if err := c.addToZip(zipWriter, srcPath, basePath); err != nil {
 			return err
 		}
 	}
@@ -141,12 +198,12 @@ func (c *Compressor) compressZip(sources []string, output string) error {
 }
 
 // addToZip 添加文件到 ZIP
-func (c *Compressor) addToZip(zipWriter *zip.Writer, filePath, rootPath string) error {
-	return c.addToZipWithBase(zipWriter, filePath, rootPath, "")
+func (c *Compressor) addToZip(zipWriter *zip.Writer, filePath, basePath string) error {
+	return c.addToZipWithBase(zipWriter, filePath, basePath, "")
 }
 
 // addToZipWithBase 添加文件到 ZIP，baseName 用于指定压缩后的文件名
-func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, rootPath, baseName string) error {
+func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, basePath, baseName string) error {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return err
@@ -154,16 +211,19 @@ func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, rootPath,
 
 	var relPath string
 	if !info.IsDir() {
-		// 单个文件：直接使用文件名，或指定的 baseName
+		// 单个文件：相对于 basePath 计算路径
 		if baseName != "" {
 			relPath = baseName
 		} else {
-			relPath = filepath.Base(filePath)
+			relPath, err = filepath.Rel(basePath, filePath)
+			if err != nil {
+				relPath = filepath.Base(filePath)
+			}
 		}
 	} else {
-		relPath, err = filepath.Rel(rootPath, filePath)
+		relPath, err = filepath.Rel(basePath, filePath)
 		if err != nil {
-			return err
+			relPath = filepath.Base(filePath)
 		}
 	}
 
@@ -174,7 +234,7 @@ func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, rootPath,
 		}
 		for _, entry := range entries {
 			subPath := filepath.Join(filePath, entry.Name())
-			if err := c.addToZipWithBase(zipWriter, subPath, rootPath, ""); err != nil {
+			if err := c.addToZipWithBase(zipWriter, subPath, basePath, ""); err != nil {
 				return err
 			}
 		}
@@ -205,7 +265,7 @@ func (c *Compressor) addToZipWithBase(zipWriter *zip.Writer, filePath, rootPath,
 }
 
 // compressTar 压缩为 TAR 格式（可选压缩）
-func (c *Compressor) compressTar(sources []string, output string, compress bool, compressType string) error {
+func (c *Compressor) compressTar(sources []string, output string, compress bool, compressType string, basePath string) error {
 	file, err := os.Create(output)
 	if err != nil {
 		return err
@@ -238,7 +298,7 @@ func (c *Compressor) compressTar(sources []string, output string, compress bool,
 
 	for _, src := range sources {
 		srcPath := filepath.Join(c.rootPath, src)
-		if err := c.addToTar(tarWriter, srcPath, c.rootPath); err != nil {
+		if err := c.addToTar(tarWriter, srcPath, basePath); err != nil {
 			return err
 		}
 	}
@@ -247,12 +307,12 @@ func (c *Compressor) compressTar(sources []string, output string, compress bool,
 }
 
 // addToTar 添加文件到 TAR
-func (c *Compressor) addToTar(tarWriter *tar.Writer, filePath, rootPath string) error {
-	return c.addToTarWithBase(tarWriter, filePath, rootPath, "")
+func (c *Compressor) addToTar(tarWriter *tar.Writer, filePath, basePath string) error {
+	return c.addToTarWithBase(tarWriter, filePath, basePath, "")
 }
 
 // addToTarWithBase 添加文件到 TAR，baseName 用于指定压缩后的文件名
-func (c *Compressor) addToTarWithBase(tarWriter *tar.Writer, filePath, rootPath, baseName string) error {
+func (c *Compressor) addToTarWithBase(tarWriter *tar.Writer, filePath, basePath, baseName string) error {
 	info, err := os.Stat(filePath)
 	if err != nil {
 		return err
@@ -260,16 +320,19 @@ func (c *Compressor) addToTarWithBase(tarWriter *tar.Writer, filePath, rootPath,
 
 	var relPath string
 	if !info.IsDir() {
-		// 单个文件：直接使用文件名，或指定的 baseName
+		// 单个文件：相对于 basePath 计算路径
 		if baseName != "" {
 			relPath = baseName
 		} else {
-			relPath = filepath.Base(filePath)
+			relPath, err = filepath.Rel(basePath, filePath)
+			if err != nil {
+				relPath = filepath.Base(filePath)
+			}
 		}
 	} else {
-		relPath, err = filepath.Rel(rootPath, filePath)
+		relPath, err = filepath.Rel(basePath, filePath)
 		if err != nil {
-			return err
+			relPath = filepath.Base(filePath)
 		}
 	}
 
@@ -300,7 +363,7 @@ func (c *Compressor) addToTarWithBase(tarWriter *tar.Writer, filePath, rootPath,
 		}
 		for _, entry := range entries {
 			subPath := filepath.Join(filePath, entry.Name())
-			if err := c.addToTarWithBase(tarWriter, subPath, rootPath, ""); err != nil {
+			if err := c.addToTarWithBase(tarWriter, subPath, basePath, ""); err != nil {
 				return err
 			}
 		}
