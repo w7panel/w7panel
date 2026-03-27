@@ -9,6 +9,7 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -19,7 +20,7 @@ type WebDAVFile struct {
 	webdav.File
 	fileInfo *WebDAVFileInfo
 	rootDir  string
-	buffer   *bytes.Buffer
+	buffer   *bytes.Reader
 }
 
 const (
@@ -51,7 +52,7 @@ func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
 	r := &WebDAVFile{File: file, rootDir: rootDir}
 	// seek := &SeekBuffer{buff: []byte("emtpy"), rewindWhenFullReaded: true}
 	// seek.Buffer = *bytes.NewBufferString("设备文件不支持读写")
-	r.buffer = bytes.NewBufferString("nocontent")
+	r.buffer = bytes.NewReader([]byte("nocontent"))
 	//测试发现 写入文件内容  权限和所有者不会变更
 	//如果要加 r.stat记录下 权限所有者
 	// webdav.File 的Close方法中恢复权限和所有者
@@ -80,6 +81,10 @@ func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
 		XMLName:  xml.Name{Local: "mode", Space: "w7panel"},
 		InnerXML: []byte(info.pem),
 	}
+	canEdit := webdav.Property{
+		XMLName:  xml.Name{Local: "canedit", Space: "w7panel"},
+		InnerXML: []byte(strconv.FormatBool(info.canEdit)),
+	}
 	symlinkStr := "false"
 	if info.isSymlink {
 		symlinkStr = "true"
@@ -98,6 +103,7 @@ func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
 	ret[perm.XMLName] = perm
 	ret[symlink.XMLName] = symlink
 	ret[symlinkTarget.XMLName] = symlinkTarget
+	ret[canEdit.XMLName] = canEdit
 	return ret, nil
 }
 func (f *WebDAVFile) Patch(patches []webdav.Proppatch) ([]webdav.Propstat, error) {
@@ -128,7 +134,7 @@ func (f *WebDAVFile) Seek(offset int64, whence int) (n int64, err error) {
 	}
 	// 设备文件 不让读
 	if !stat.Mode().IsRegular() {
-		return offset, err
+		return f.buffer.Seek(offset, whence)
 	}
 	return f.File.Seek(offset, whence)
 }
@@ -138,7 +144,7 @@ func (f *WebDAVFile) Write(p []byte) (n int, err error) {
 		return 0, err
 	}
 	if !stat.Mode().IsRegular() {
-		return f.buffer.Write(p)
+		return 0, err
 	}
 	return f.File.Write(p)
 }

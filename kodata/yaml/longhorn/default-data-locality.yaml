@@ -1,0 +1,8 @@
+apiVersion: longhorn.io/v1beta2
+kind: Setting
+metadata:
+    name: default-data-locality
+    namespace: longhorn-system
+status:
+    applied: true
+value: strict-local
