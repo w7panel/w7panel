@@ -90,13 +90,12 @@ func (t *TerminalSession) Write(p []byte) (n int, err error) {
 
 func (t *TerminalSession) Close() {
 	t.once.Do(func() {
-		if t.conn != nil {
-			t.conn.WriteMessage(websocket.TextMessage, []byte("exit\n"))
-			t.conn.Close()
-		}
 		if t.cancel != nil {
 			slog.Error("k8s exec close context done")
 			t.cancel()
+		}
+		if t.conn != nil {
+			t.conn.Close()
 		}
 		close(t.sizeChan)
 	})
