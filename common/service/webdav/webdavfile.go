@@ -86,22 +86,40 @@ func (f *WebDAVFile) ensureStat() error {
 }
 
 func getFileTypeAndEditable(mode os.FileMode) (string, bool) {
-	switch mode & syscall.S_IFMT {
-	case syscall.S_IFREG:
-		return "file", true
-	case syscall.S_IFDIR:
-		return "directory", false
-	case syscall.S_IFLNK:
+
+	switch mode.Type() {
+	case os.ModeSymlink:
 		return "symlink", true
-	case syscall.S_IFBLK, syscall.S_IFCHR:
+	case os.ModeDevice:
 		return "device", false
-	case syscall.S_IFIFO:
+	case os.ModeNamedPipe:
 		return "fifo", false
-	case syscall.S_IFSOCK:
+	case os.ModeSocket:
 		return "socket", false
+	case os.ModeIrregular:
+		return "file", true
+	case os.ModeDir:
+		return "directory", false
+
 	default:
 		return "file", true
 	}
+	// switch mode & syscall.S_IFMT {
+	// case syscall.S_IFREG:
+	// 	return "file", true
+	// case syscall.S_IFDIR:
+	// 	return "directory", false
+	// case syscall.S_IFLNK:
+	// 	return "symlink", true
+	// case syscall.S_IFBLK, syscall.S_IFCHR:
+	// 	return "device", false
+	// case syscall.S_IFIFO:
+	// 	return "fifo", false
+	// case syscall.S_IFSOCK:
+	// 	return "socket", false
+	// default:
+	// 	return "file", true
+	// }
 }
 
 func (f *WebDAVFile) DeadProps() (map[xml.Name]webdav.Property, error) {
@@ -173,7 +191,7 @@ type WebDAVFileInfo struct {
 
 func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
 	if !info.Mode().IsRegular() {
-		return "application/linux-" + info.fileType, nil
+		return "application/linux-file", nil
 	}
 	ctype := mime.TypeByExtension(filepath.Ext(info.Name()))
 	if ctype != "" {
