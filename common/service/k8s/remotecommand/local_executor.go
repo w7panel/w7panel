@@ -2,11 +2,12 @@ package remotecommand
 
 import (
 	"context"
-	"github.com/creack/pty"
 	"io"
-	"k8s.io/client-go/tools/remotecommand"
 	"log/slog"
 	"os/exec"
+
+	"github.com/creack/pty"
+	"k8s.io/client-go/tools/remotecommand"
 )
 
 type LocalExecutor struct {
@@ -75,6 +76,9 @@ func (e LocalExecutor) StreamWithContext(ctx context.Context, options remotecomm
 
 	select {
 	case <-ctx.Done():
+		if e.cmd.Process != nil {
+			e.cmd.Process.Kill()
+		}
 		return ctx.Err()
 	}
 }
