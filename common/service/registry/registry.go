@@ -2,18 +2,24 @@ package registry
 
 import (
 	"context"
+	"log/slog"
+	"net/http"
 	"path/filepath"
 
 	"github.com/cockroachdb/errors"
 	"github.com/spegel-org/spegel/pkg/oci"
-	"github.com/spegel-org/spegel/pkg/registry"
+	sreg "github.com/spegel-org/spegel/pkg/registry"
 	"github.com/spegel-org/spegel/pkg/routing"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 const (
 	registryNamespace = "k8s.io"
-	containerdRoot    = "/"
-	containerdAddr    = ""
+	// containerdRoot    = "/run/k3s/containerd"
+	// containerdAddr    = "/run/k3s/containerd/containerd.sock"
+
+	containerdRoot = "/run/containerd"
+	containerdAddr = "/run/containerd/containerd.sock"
 )
 
 //	type Router interface {
@@ -27,6 +33,21 @@ const (
 //		Withdraw(ctx context.Context, keys []string) error
 //	}
 type MockRouter struct {
+}
+
+var sregRegistry *sreg.Registry
+var ContainerDRegistryHandler http.Handler
+
+func init() {
+	reg, err := CreateSpegelRegistry(context.Background())
+	if err != nil {
+		slog.Error("create reg registry err", "err", err)
+	}
+	sregRegistry = reg
+	if sregRegistry != nil {
+		logrLogger := log.FromContext(context.Background())
+		ContainerDRegistryHandler = sregRegistry.Handler(logrLogger)
+	}
 }
 
 func NewEmptyRouter() *MockRouter {
@@ -51,7 +72,7 @@ func (m *MockRouter) Withdraw(ctx context.Context, keys []string) error {
 func newOciStore(ctx context.Context, sock, namespace string, opts ...oci.ContainerdOption) (*oci.Containerd, error) {
 	return oci.NewContainerd(ctx, sock, namespace, opts...)
 }
-func CreateRegistry(ctx context.Context) (*registry.Registry, error) {
+func CreateSpegelRegistry(ctx context.Context) (*sreg.Registry, error) {
 
 	ociClient, err := oci.NewClient()
 	if err != nil {
@@ -65,14 +86,19 @@ func CreateRegistry(ctx context.Context) (*registry.Registry, error) {
 		return nil, errors.WithMessage(err, "failed to create OCI store")
 	}
 
-	registryOpts := []registry.RegistryOption{
+	registryOpts := []sreg.RegistryOption{
 		// registry.WithRegistryFilters(filters),
-		registry.WithOCIClient(ociClient),
+		sreg.WithOCIClient(ociClient),
 	}
 	router := NewEmptyRouter()
-	reg, err := registry.NewRegistry(ociStore, router, registryOpts...)
+	reg, err := sreg.NewRegistry(ociStore, router, registryOpts...)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create embedded registry")
 	}
 	return reg, err
+}
+
+func spegelRegistryHandler(ctx context.Context) http.Handler {
+	logrLogger := log.FromContext(ctx)
+	return sregRegistry.Handler(logrLogger)
 }

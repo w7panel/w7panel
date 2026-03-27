@@ -11,24 +11,28 @@ import (
 type Provider struct{}
 
 func (p Provider) Register(httpServer *httpserver.Server, console console.Console) {
-	// p.RegisterHttpRoutes(httpServer) //
+	p.RegisterHttpRoutes(httpServer) //
 }
 
 func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 	server.RegisterRouters(func(engine *gin.Engine) {
 		// Registry API - 镜像仓库
-		registryGroup := engine.Group("/panel-api/v1/k3s-registry")
-		registryGroup.Use(middleware.Auth{}.Process)
+		registryGroup := engine.Group("")
+		registryGroup.Use()
 		{
-			registryGroup.GET("/v2/", controller.Registry{}.Version)
-			registryGroup.GET("/v2/_catalog", controller.Registry{}.Catalog)
-			registryGroup.GET("/v2/:name/tags/list", controller.Registry{}.Tags)
-			registryGroup.GET("/v2/:name/manifests/*reference", controller.Registry{}.Manifest)
-			registryGroup.PUT("/v2/:name/manifests/*reference", controller.Registry{}.PushManifest)
-			registryGroup.GET("/v2/:name/blobs/*digest", controller.Registry{}.Blob)
-			registryGroup.HEAD("/v2/:name/blobs/*digest", controller.Registry{}.BlobExists)
-			registryGroup.POST("/v2/:name/blobs/uploads/", controller.Registry{}.InitUpload)
-			registryGroup.PUT("/v2/:name/blobs/uploads/:uuid", controller.Registry{}.CompleteUpload)
+			registryGroup.GET("/v2/*path", controller.Registry{}.Get)
+			registryGroup.HEAD("/v2/*path", controller.Registry{}.Get)
+			// m.Handle("GET /v2/", r.registryHandler)
+			// m.Handle("HEAD /v2/", r.registryHandler)
+			// registryGroup.GET("/v2/", controller.Registry{}.Version)
+			// registryGroup.GET("/v2/_catalog", controller.Registry{}.Catalog)
+			// registryGroup.GET("/v2/:name/tags/list", controller.Registry{}.Tags)
+			// registryGroup.GET("/v2/:name/manifests/*reference", controller.Registry{}.Manifest)
+			// registryGroup.PUT("/v2/:name/manifests/*reference", controller.Registry{}.PushManifest)
+			// registryGroup.GET("/v2/:name/blobs/*digest", controller.Registry{}.Blob)
+			// registryGroup.HEAD("/v2/:name/blobs/*digest", controller.Registry{}.BlobExists)
+			// registryGroup.POST("/v2/:name/blobs/uploads/", controller.Registry{}.InitUpload)
+			// registryGroup.PUT("/v2/:name/blobs/uploads/:uuid", controller.Registry{}.CompleteUpload)
 		}
 
 		// Patch API - 容器操作
