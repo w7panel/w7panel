@@ -45,6 +45,13 @@ func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
 	return &WebDAVFile{File: file, rootDir: rootDir}
 }
 
+// 必须返回WebDAVFileInfo， 否则ContentType() 触发不了
+func (f *WebDAVFile) Stat() (os.FileInfo, error) {
+	if err := f.ensureStat(); err != nil {
+		return nil, err
+	}
+	return f.fileInfo, nil
+}
 func (f *WebDAVFile) ensureStat() error {
 	f.statOnce.Do(func() {
 		stat, err := f.File.Stat()
@@ -189,7 +196,7 @@ type WebDAVFileInfo struct {
 	fileType string
 }
 
-func (info WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
+func (info *WebDAVFileInfo) ContentType(ctx context.Context) (string, error) {
 	if !info.Mode().IsRegular() {
 		return "application/linux-file", nil
 	}
