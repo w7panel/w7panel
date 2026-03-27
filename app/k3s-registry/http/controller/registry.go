@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/w7panel/w7panel/app/k3s-registry/logic"
 	"github.com/w7panel/w7panel/common/service/registry"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
@@ -14,11 +13,26 @@ type Registry struct {
 	controller.Abstract
 }
 
-var memoryRegistry = registry.CreateMicroRegistry()
+var mmr = registry.CreateMicroRegistry()
 
 var cdr = registry.ContainerDRegistryHandler
 
-var registryLogic = logic.NewRegistryLogic()
+type statusWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (sw *statusWriter) WriteHeader(statusCode int) {
+	sw.statusCode = statusCode
+	sw.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (sw *statusWriter) Write(b []byte) (int, error) {
+	if sw.statusCode == 0 {
+		sw.statusCode = http.StatusOK
+	}
+	return sw.ResponseWriter.Write(b)
+}
 
 // Version 返回 Registry API 版本
 func (c Registry) Version(ctx *gin.Context) {
@@ -29,15 +43,20 @@ func (c Registry) Version(ctx *gin.Context) {
 
 // Catalog 返回镜像列表
 func (c Registry) Get(ctx *gin.Context) {
+
 	values := ctx.Request.URL.Query()
 	values.Set("ns", "ccr.ccs.tencentyun.com")
 	ctx.Request.URL.RawQuery = values.Encode()
-	cdr.ServeHTTP(ctx.Writer, ctx.Request)
+	w := &statusWriter{ResponseWriter: ctx.Writer}
+	mmr.ServeHTTP(w, ctx.Request) //先从内存取镜像
+	if w.statusCode != http.StatusOK {
+		ctx.Writer.WriteHeader(w.statusCode)
+	}
 }
 
 // Tags 返回镜像标签
 func (c Registry) Post(ctx *gin.Context) {
-	memoryRegistry.ServeHTTP(ctx.Writer, ctx.Request)
+	mmr.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // InitUpload 初始化 blob 上传
@@ -54,7 +73,7 @@ func (c Registry) InitUpload(ctx *gin.Context) {
 	// ctx.Header("Range", "bytes=0-0")
 	// ctx.JSON(http.StatusAccepted, gin.H{})
 
-	memoryRegistry.ServeHTTP(ctx.Writer, ctx.Request)
+	mmr.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // CompleteUpload 完成 blob 上传
@@ -72,6 +91,6 @@ func (c Registry) CompleteUpload(ctx *gin.Context) {
 
 	// ctx.Header("Location", "/v2/"+name+"/blobs/"+digest)
 	// ctx.JSON(http.StatusCreated, gin.H{})
-	memoryRegistry.ServeHTTP(ctx.Writer, ctx.Request)
+	mmr.ServeHTTP(ctx.Writer, ctx.Request)
 	// nerdctl commit image
 }
