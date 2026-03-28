@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/binary"
+	"errors"
 	"io"
 	"log/slog"
 	"sync"
@@ -21,6 +22,8 @@ type TerminalSession struct {
 	context  context.Context
 	cancel   context.CancelFunc
 	once     sync.Once
+	mu       sync.Mutex
+	closedBy string
 }
 
 func NewTerminalSession(conn *websocket.Conn) *TerminalSession {
@@ -34,7 +37,31 @@ func NewTerminalSession(conn *websocket.Conn) *TerminalSession {
 		writer:   &bytes.Buffer{},
 		cancel:   cancel,
 		once:     sync.Once{},
+		closedBy: "unknown",
 	}
+}
+
+func closeReasonFromWsError(err error) string {
+	if err == nil {
+		return "unknown"
+	}
+	if errors.Is(err, io.EOF) {
+		return "client_close"
+	}
+	var closeErr *websocket.CloseError
+	if errors.As(err, &closeErr) {
+		switch closeErr.Code {
+		case websocket.CloseNormalClosure:
+			return "client_close"
+		case websocket.CloseGoingAway:
+			return "upstream_close"
+		case websocket.CloseAbnormalClosure:
+			return "upstream_close"
+		default:
+			return "upstream_close"
+		}
+	}
+	return "upstream_close"
 }
 
 func (t *TerminalSession) Next() *remotecommand.TerminalSize {
@@ -49,8 +76,9 @@ func (t *TerminalSession) Read(p []byte) (n int, err error) {
 	if t.conn != nil {
 		msgType, data, err := t.conn.ReadMessage()
 		if err != nil {
-			slog.Info("websocket ReadMessage error, signaling EOF to stdin", "err", err)
-			t.Close()
+			reason := closeReasonFromWsError(err)
+			slog.Info("websocket ReadMessage error, signaling EOF to stdin", "err", err, "reason", reason)
+			t.CloseWithReason(reason)
 			return 0, io.EOF
 		}
 		if msgType == websocket.BinaryMessage {
@@ -79,8 +107,9 @@ func (t *TerminalSession) Write(p []byte) (n int, err error) {
 	if t.conn != nil && utf8.Valid(p) {
 		err := t.conn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {
-			slog.Info("write conn err", "err", err)
-			t.Close()
+			reason := closeReasonFromWsError(err)
+			slog.Info("write conn err", "err", err, "reason", reason)
+			t.CloseWithReason(reason)
 			return 0, io.EOF
 		}
 		return len(p), err
@@ -89,9 +118,26 @@ func (t *TerminalSession) Write(p []byte) (n int, err error) {
 }
 
 func (t *TerminalSession) Close() {
+	t.CloseWithReason("session_close")
+}
+
+func (t *TerminalSession) CloseWithReason(reason string) {
+	if reason == "" {
+		reason = "unknown"
+	}
+	t.mu.Lock()
+	t.closedBy = reason
+	t.mu.Unlock()
+
 	t.once.Do(func() {
+		reasonSnapshot := t.GetCloseReason()
+		if t.context != nil {
+			if errors.Is(t.context.Err(), context.DeadlineExceeded) {
+				reasonSnapshot = "timeout"
+			}
+		}
 		if t.cancel != nil {
-			slog.Error("k8s exec close context done")
+			slog.Info("k8s exec close context done", "reason", reasonSnapshot)
 			t.cancel()
 		}
 		if t.conn != nil {
@@ -99,6 +145,15 @@ func (t *TerminalSession) Close() {
 		}
 		close(t.sizeChan)
 	})
+}
+
+func (t *TerminalSession) GetCloseReason() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.closedBy == "" {
+		return "unknown"
+	}
+	return t.closedBy
 }
 
 func (t *TerminalSession) Done() <-chan struct{} {

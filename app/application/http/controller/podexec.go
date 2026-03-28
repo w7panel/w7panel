@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -99,8 +101,21 @@ func (self PodExec) Exec(http *gin.Context) {
 	}
 
 	session := terminal.NewTerminalSession(conn)
-	session.SetContext(http.Request.Context())
-	defer session.Close()
+	execTimeout := facade.GetConfig().GetInt("k8s.exec_timeout_seconds")
+	if execTimeout <= 0 {
+		execTimeout = 1800
+	}
+	ctx, cancel := context.WithTimeout(http.Request.Context(), time.Duration(execTimeout)*time.Second)
+	defer cancel()
+	session.SetContext(ctx)
+	defer func() {
+		reason := session.GetCloseReason()
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			reason = "timeout"
+		}
+		slog.Info("pod exec session closing", "namespace", params.Namespace, "podName", params.PodName, "containerName", params.ContainerName, "reason", reason)
+		session.CloseWithReason(reason)
+	}()
 
 	client, err := k8s.NewK8sClient().Channel(http.MustGet("k8s_token").(string))
 	if err != nil {
@@ -117,6 +132,12 @@ func (self PodExec) Exec(http *gin.Context) {
 	// }
 	err = client.RunExec(session, params.Namespace, params.PodName, params.ContainerName, cmd, params.Tty)
 	if err != nil {
+		reason := "upstream_close"
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			reason = "timeout"
+		}
+		session.CloseWithReason(reason)
+		slog.Warn("pod exec run error", "namespace", params.Namespace, "podName", params.PodName, "containerName", params.ContainerName, "reason", reason, "err", err)
 		self.JsonResponseWithServerError(http, err)
 		return
 	}
@@ -144,8 +165,21 @@ func (p PodExec) NodeTty(http *gin.Context) {
 	token := http.MustGet("k8s_token").(string)
 	k8sToken := k8s.NewK8sToken(token)
 	session := terminal.NewTerminalSession(conn)
-	session.SetContext(http.Request.Context())
-	defer session.Close()
+	execTimeout := facade.GetConfig().GetInt("k8s.exec_timeout_seconds")
+	if execTimeout <= 0 {
+		execTimeout = 1800
+	}
+	ctx, cancel := context.WithTimeout(http.Request.Context(), time.Duration(execTimeout)*time.Second)
+	defer cancel()
+	session.SetContext(ctx)
+	defer func() {
+		reason := session.GetCloseReason()
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			reason = "timeout"
+		}
+		slog.Info("node tty session closing", "hostIp", params.HostIp, "reason", reason)
+		session.CloseWithReason(reason)
+	}()
 	rootsdk := k8s.NewK8sClient().Sdk
 	var findPod *corev1.Pod
 	shells := []string{params.Shell}
@@ -180,6 +214,12 @@ func (p PodExec) NodeTty(http *gin.Context) {
 	}
 	err = rootsdk.RunExec(session, findPod.Namespace, findPod.Name, findPod.Spec.Containers[0].Name, shells, true)
 	if err != nil {
+		reason := "upstream_close"
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			reason = "timeout"
+		}
+		session.CloseWithReason(reason)
+		slog.Warn("node tty run error", "hostIp", params.HostIp, "reason", reason, "err", err)
 		p.JsonResponseWithServerError(http, err)
 		return
 	}
@@ -223,7 +263,21 @@ func (self PodExec) Tty(http *gin.Context) {
 	}
 
 	session := terminal.NewTerminalSession(conn)
-	defer session.Close()
+	execTimeout := facade.GetConfig().GetInt("k8s.exec_timeout_seconds")
+	if execTimeout <= 0 {
+		execTimeout = 1800
+	}
+	ctx, cancel := context.WithTimeout(http.Request.Context(), time.Duration(execTimeout)*time.Second)
+	defer cancel()
+	session.SetContext(ctx)
+	defer func() {
+		reason := session.GetCloseReason()
+		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+			reason = "timeout"
+		}
+		slog.Info("tty session closing", "reason", reason)
+		session.CloseWithReason(reason)
+	}()
 	token := http.MustGet("k8s_token").(string)
 	k8sToken := k8s.NewK8sToken(token)
 	if k8sToken.IsK3kCluster() {
@@ -243,6 +297,12 @@ func (self PodExec) Tty(http *gin.Context) {
 		params.Shell = "/bin/sh" //k3k pod 只支持 /bin/sh
 		err = client.RunExec(session, k3kConfig.Namespace, k3kConfig.GetK3kServer0Name(), k3kConfig.GetK3kServer0ContainerName(), []string{params.Shell}, true)
 		if err != nil {
+			reason := "upstream_close"
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				reason = "timeout"
+			}
+			session.CloseWithReason(reason)
+			slog.Warn("tty k3k run error", "reason", reason, "err", err)
 			self.JsonResponseWithServerError(http, err)
 			return
 		}
@@ -255,7 +315,12 @@ func (self PodExec) Tty(http *gin.Context) {
 			TerminalSizeQueue: session,
 		})
 		if err != nil {
-			slog.Error("tty error", "err", err)
+			reason := "upstream_close"
+			if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+				reason = "timeout"
+			}
+			session.CloseWithReason(reason)
+			slog.Error("tty error", "reason", reason, "err", err)
 			return
 		}
 	}
