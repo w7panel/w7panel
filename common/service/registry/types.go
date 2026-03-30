@@ -1,6 +1,9 @@
 package registry
 
-import "github.com/w7panel/w7panel/common/helper"
+import (
+	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/w7panel/w7panel/common/helper"
+)
 
 const (
 	registryNamespace = "k8s.io"
@@ -12,6 +15,14 @@ const (
 	k3sContainerAddr    = "/var/run/k3s/containerd/containerd.sock"
 	k3sContainerRoot    = "/var/lib/rancher/k3s/agent/containerd"
 )
+
+func CreateClient() (*containerd.Client, error) {
+	client, err := containerd.New(containerAddr(), containerd.WithDefaultNamespace(registryNamespace))
+	if err != nil {
+		return nil, err
+	}
+	return client, err
+}
 
 func containerRoot() string {
 	if helper.IsChildAgent() || helper.IsAgent() {

@@ -14,14 +14,6 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-func createClient() (*containerd.Client, error) {
-	client, err := containerd.New(containerAddr(), containerd.WithDefaultNamespace(registryNamespace))
-	if err != nil {
-		return nil, err
-	}
-	return client, err
-}
-
 // commit a image
 func Commit(ctx context.Context, client *containerd.Client, rawRef string, req string, options types.ContainerCommitOptions) error {
 	return container.Commit(ctx, client, rawRef, req, options)
@@ -67,10 +59,11 @@ func Pull(ctx context.Context, client *containerd.Client, rawRef string, options
 }
 
 func CommitToContainerD(ctx context.Context, rawRef, containerId string) (digest.Digest, error) {
-	client, err := createClient()
+	client, err := CreateClient()
 	if err != nil {
 		return "", err
 	}
+	defer client.Close()
 	return CommitOne(ctx, client, rawRef, containerId, types.ContainerCommitOptions{
 		GOptions: types.GlobalCommandOptions{DataRoot: "/tmp", Address: containerAddr()},
 	})
@@ -80,6 +73,7 @@ func PullToContainerD(ctx context.Context, rawRef string) error {
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 	return Pull(ctx, client, rawRef, types.ImagePullOptions{
 		// Std
 		Stdout:                 os.Stdout,
