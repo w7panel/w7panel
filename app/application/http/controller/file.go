@@ -266,11 +266,13 @@ func (self File) MergeChunks(http *gin.Context) {
 	chunkDir := filepath.Join(baseDir, ".chunks")
 
 	type ParamsValidate struct {
-		Identifier   string `json:"identifier" binding:"required"`
-		FileName     string `json:"fileName" binding:"required"`
-		RelativePath string `json:"relativePath"`
-		TotalChunks  int    `json:"totalChunks" binding:"required"`
-		FileSize     int64  `json:"fileSize"`
+		Identifier string `json:"identifier" binding:"required"`
+		FileName   string `json:"fileName" binding:"required"`
+		// RelativePath string `json:"relativePath"`
+		TotalChunks int    `json:"totalChunks" binding:"required"`
+		FileSize    int64  `json:"fileSize"`
+		Pid         string `json:"pid"`
+		SubPid      string `json:"subPid"`
 	}
 
 	params := ParamsValidate{}
@@ -312,10 +314,11 @@ func (self File) MergeChunks(http *gin.Context) {
 
 	// 确定最终文件路径
 	finalFileName := params.FileName
-	if params.RelativePath != "" {
-		finalFileName = filepath.Join(params.RelativePath, params.FileName)
-	}
 	finalFilePath := filepath.Join(baseDir, finalFileName)
+	if params.Pid != "" && params.Pid != "0" {
+		procPath := procpath.GetRootPathWithSubPid(params.Pid, params.SubPid)
+		finalFilePath = filepath.Join(procPath, params.FileName)
+	}
 
 	// 创建目标文件目录
 	if err := os.MkdirAll(filepath.Dir(finalFilePath), 0755); err != nil {

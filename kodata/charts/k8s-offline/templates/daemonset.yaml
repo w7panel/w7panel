@@ -29,6 +29,14 @@ spec:
         hostPath:
           path: /
           type: ""
+      - name: cd-socket
+        hostPath:
+          path: /var/run/k3s/containerd/containerd.sock
+          type: Socket    
+      - name: cd-data
+        hostPath:
+          path: /var/lib/rancher/k3s/agent/containerd
+          type: Directory     
       tolerations:
       - 
         operator: Exists
@@ -72,8 +80,12 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}  
           volumeMounts:
+            - name: cd-socket
+              mountPath: /var/run/k3s/containerd/containerd.sock
+            - name: cd-data
+              mountPath: /var/lib/rancher/k3s/agent/containerd  
             - name: host-root
-              mountPath: /host
+              mountPath: /host  
 {{- end }}            
 
 
