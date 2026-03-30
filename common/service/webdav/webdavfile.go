@@ -97,7 +97,7 @@ func getFileTypeAndEditable(mode os.FileMode) (string, bool) {
 	switch mode.Type() {
 	case os.ModeSymlink:
 		return "symlink", true
-	case os.ModeDevice:
+	case os.ModeDevice, os.ModeCharDevice:
 		return "device", false
 	case os.ModeNamedPipe:
 		return "fifo", false
