@@ -14,8 +14,15 @@ type Commit struct {
 var commitLogic = logic.NewCommitLogic()
 
 // Run 提交容器为新镜像
-func (c Commit) Run(ctx *gin.Context) {
+func (self Commit) Run(ctx *gin.Context) {
 	id := ctx.Param("id")
+	ref := ctx.GetString("ref")
 
-	registry.CommitToContainerD(ctx, id)
+	digest, err := registry.CommitToContainerD(ctx, ref, id)
+	if err != nil {
+		self.JsonResponseWithServerError(ctx, err)
+		return
+	}
+	self.JsonResponseWithoutError(ctx, gin.H{"digest": digest})
+	return
 }

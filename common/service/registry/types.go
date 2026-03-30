@@ -6,7 +6,7 @@ const (
 	registryNamespace = "k8s.io"
 	// containerdRoot    = "/run/k3s/containerd"
 	// containerdAddr    = "/run/k3s/containerd/containerd.sock"
-
+	defaultDamain       = "registry.local.w7.cc"
 	debugcontainerdRoot = "/var/lib/containerd"
 	debugcontainerdAddr = "/run/containerd/containerd.sock"
 	k3sContainerAddr    = "/var/run/k3s/containerd/containerd.sock"

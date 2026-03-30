@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -27,19 +28,18 @@ func init() {
 }
 
 // Version 返回 Registry API 版本
-func (c Registry) Version(ctx *gin.Context) {
+func (self Registry) Version(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"schemas": []string{"https://docs.docker.com/spec/api/v2/"},
 	})
 }
 
 // Catalog 返回镜像列表
-func (c Registry) Handler(ctx *gin.Context) {
-
-	
+func (self Registry) Handler(ctx *gin.Context) {
 	if regisry != nil {
 		regisry.ServeHTTP(ctx.Writer, ctx.Request)
+		return
 	}
+	err := errors.New("not support")
+	self.JsonResponseWithServerError(ctx, err)
 }
-
-

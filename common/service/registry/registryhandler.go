@@ -77,7 +77,7 @@ func (brw *bufferResponseWriter) commit() {
 
 func (r *RegistryHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	values := req.URL.Query()
-	values.Set("ns", "ccr.ccs.tencentyun.com")
+	values.Set("ns", defaultDamain) //默认仓库域名
 	req.URL.RawQuery = values.Encode()
 	if isReadOnly(req.Method) {
 		// 只读请求：先尝试 memoryHandler，如果返回非 200 则用 spegelHandler
@@ -106,7 +106,8 @@ func (r *RegistryHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		if name != "" && reference != "" {
 			// 上传完成，ctr import
 			// r.uploadStatus.Store(reference, true)
-			err := PullToContainerD(context.TODO(), "127.0.0.1:8000/afan/test:v1")
+
+			err := PullToContainerD(context.TODO(), "127.0.0.1:8000/"+name+":"+reference)
 			if err != nil {
 				slog.Warn("pull to containerd err", "err", err)
 			}

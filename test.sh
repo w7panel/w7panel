@@ -11,6 +11,6 @@ sudo ctr -n k8s.io images import ./test.tar
 
 sudo chmod 666 /run/containerd/containerd.sock
 
-ctr run --rm ccr.ccs.tencentyun.com/afan-public/nginx:latest nginx-test
+ctr run --rm ccr.ccs.tencentyun.com/afan-public/nginx:test nginx-test1
 
-sudo ctr task exec --exec-id shell -t nginx-test /bin/bash
+sudo ctr task exec --exec-id shell -t nginx-test1 /bin/bash
