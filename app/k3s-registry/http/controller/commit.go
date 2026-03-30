@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/w7panel/w7panel/app/k3s-registry/logic"
-	"github.com/w7panel/w7panel/app/k3s-registry/model"
+	"github.com/w7panel/w7panel/common/service/registry"
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 
@@ -17,16 +17,5 @@ var commitLogic = logic.NewCommitLogic()
 func (c Commit) Run(ctx *gin.Context) {
 	id := ctx.Param("id")
 
-	var req model.CommitRequest
-	if !c.Validate(ctx, &req) {
-		return
-	}
-
-	resp, err := commitLogic.Run(ctx, id, req)
-	if err != nil {
-		c.JsonResponseWithServerError(ctx, err)
-		return
-	}
-
-	c.JsonResponseWithoutError(ctx, resp)
+	registry.CommitToContainerD(ctx, id)
 }

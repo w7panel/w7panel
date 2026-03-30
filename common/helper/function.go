@@ -750,8 +750,14 @@ func GetApiServerHost(k3kNamespce string) string {
 	return k3kNamespce + "-service" + "." + k3kNamespce
 }
 
+// 子用户Agent
 func IsChildAgent() bool {
 	return os.Getenv("IS_CHILD") == "true"
+}
+
+// 是否daemonset Agent
+func IsAgent() bool {
+	return os.Getenv("IS_AGENT") == "true"
 }
 
 func SelfReqUrl() string {

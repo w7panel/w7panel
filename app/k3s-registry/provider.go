@@ -20,11 +20,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		registryGroup := engine.Group("")
 		registryGroup.Use()
 		{
-			registryGroup.GET("/v2/*path", controller.Registry{}.Get)
-			registryGroup.HEAD("/v2/*path", controller.Registry{}.Get)
-			registryGroup.POST("/v2/*path", controller.Registry{}.Post)
-			registryGroup.PUT("/v2/*path", controller.Registry{}.Post)
-			registryGroup.PATCH("/v2/*path", controller.Registry{}.Post)
+			registryGroup.Any("/v2/*path", controller.Registry{}.Handler)
 			// m.Handle("GET /v2/", r.registryHandler)
 			// m.Handle("HEAD /v2/", r.registryHandler)
 			// registryGroup.GET("/v2/", controller.Registry{}.Version)
@@ -42,10 +38,10 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 		patchGroup := engine.Group("/panel-api/v1/k3s-patch")
 		patchGroup.Use(middleware.Auth{}.Process)
 		{
-			patchGroup.GET("/containers", controller.Containers{}.List)
-			patchGroup.GET("/containers/:id", controller.Containers{}.Get)
-			patchGroup.GET("/containers/:id/layers", controller.Containers{}.Layers)
-			patchGroup.POST("/containers/:id/exec", controller.Exec{}.Run)
+			// patchGroup.GET("/containers", controller.Containers{}.List)
+			// patchGroup.GET("/containers/:id", controller.Containers{}.Get)
+			// patchGroup.GET("/containers/:id/layers", controller.Containers{}.Layers)
+			// patchGroup.POST("/containers/:id/exec", controller.Exec{}.Run)
 			patchGroup.POST("/containers/:id/commit", controller.Commit{}.Run)
 		}
 	})

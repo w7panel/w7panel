@@ -13,25 +13,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-const (
-	registryNamespace = "k8s.io"
-	// containerdRoot    = "/run/k3s/containerd"
-	// containerdAddr    = "/run/k3s/containerd/containerd.sock"
-
-	containerdRoot = "/var/lib/containerd"
-	containerdAddr = "/run/containerd/containerd.sock"
-)
-
-//	type Router interface {
-//		// Ready returns true when the router is ready.
-//		Ready(ctx context.Context) (bool, error)
-//		// Lookup discovers peers with the given key and returns a balancer with the peers.
-//		Lookup(ctx context.Context, key string, count int) (routing.Balancer, error)
-//		// Advertise broadcasts the availability of the given keys.
-//		Advertise(ctx context.Context, keys []string) error
-//		// Withdraw stops the broadcasting the availability of the given keys to the network.
-//		Withdraw(ctx context.Context, keys []string) error
-//	}
 type MockRouter struct {
 }
 
@@ -79,9 +60,9 @@ func CreateSpegelRegistry(ctx context.Context) (*sreg.Registry, error) {
 		return nil, err
 	}
 	storeOpts := []oci.ContainerdOption{
-		oci.WithContentPath(filepath.Join(containerdRoot, "io.containerd.content.v1.content")),
+		oci.WithContentPath(filepath.Join(containerRoot(), "io.containerd.content.v1.content")),
 	}
-	ociStore, err := newOciStore(ctx, containerdAddr, registryNamespace, storeOpts...)
+	ociStore, err := newOciStore(ctx, containerAddr(), registryNamespace, storeOpts...)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to create OCI store")
 	}

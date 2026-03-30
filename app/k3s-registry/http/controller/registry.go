@@ -34,67 +34,12 @@ func (c Registry) Version(ctx *gin.Context) {
 }
 
 // Catalog 返回镜像列表
-func (c Registry) Get(ctx *gin.Context) {
+func (c Registry) Handler(ctx *gin.Context) {
 
-	values := ctx.Request.URL.Query()
-	values.Set("ns", "ccr.ccs.tencentyun.com")
-	ctx.Request.URL.RawQuery = values.Encode()
+	
 	if regisry != nil {
 		regisry.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 }
 
-func (c Registry) Post(ctx *gin.Context) {
 
-	values := ctx.Request.URL.Query()
-	values.Set("ns", "ccr.ccs.tencentyun.com")
-	ctx.Request.URL.RawQuery = values.Encode()
-	if regisry != nil {
-		regisry.ServeHTTP(ctx.Writer, ctx.Request)
-	}
-}
-
-// func (c Registry) Finish(ctx *gin.Context) {
-// 	name := ctx.Param("name")
-// 	ref := ctx.Param("reference")
-// 	values := ctx.Request.URL.Query()
-// 	values.Set("ns", "ccr.ccs.tencentyun.com")
-// 	ctx.Request.URL.RawQuery = values.Encode()
-// 	if regisry != nil {
-// 		regisry.ServeHTTP(ctx.Writer, ctx.Request)
-// 	}
-// }
-
-// InitUpload 初始化 blob 上传
-func (c Registry) InitUpload(ctx *gin.Context) {
-	// name := ctx.Param("name")
-
-	// uuid, err := registryLogic.InitUpload(ctx, name)
-	// if err != nil {
-	// 	c.JsonResponseWithServerError(ctx, err)
-	// 	return
-	// }
-
-	// ctx.Header("Location", "/v2/"+name+"/blobs/uploads/"+uuid)
-	// ctx.Header("Range", "bytes=0-0")
-	// ctx.JSON(http.StatusAccepted, gin.H{})
-
-}
-
-// CompleteUpload 完成 blob 上传
-func (c Registry) CompleteUpload(ctx *gin.Context) {
-	// name := ctx.Param("name")
-	// uuid := ctx.Param("uuid")
-	// digest := ctx.Query("digest")
-
-	// body, _ := ctx.GetRawData()
-
-	// if err := registryLogic.CompleteUpload(ctx, name, uuid, digest, body); err != nil {
-	// 	c.JsonResponseWithServerError(ctx, err)
-	// 	return
-	// }
-
-	// ctx.Header("Location", "/v2/"+name+"/blobs/"+digest)
-	// ctx.JSON(http.StatusCreated, gin.H{})
-	// nerdctl commit image
-}
