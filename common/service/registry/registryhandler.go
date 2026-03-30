@@ -2,16 +2,35 @@ package registry
 
 import (
 	"bytes"
+	"context"
+	"fmt"
+	"log/slog"
 	"net/http"
+	"strings"
+	"sync"
+
+	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type RegistryHandler struct {
 	memoryHandler http.Handler
 	spegelHandler http.Handler
+	uploadStatus  sync.Map // map[string]bool - tracks upload completion by digest
 }
 
-func NewRegistry() *RegistryHandler {
-	return &RegistryHandler{}
+func InitReigstry(ctx context.Context) (*RegistryHandler, error) {
+	memory := CreateMicroRegistry()
+	reg, err := CreateSpegelRegistry(context.Background())
+	if err != nil {
+		slog.Error("create reg registry err", "err", err)
+		return nil, err
+	}
+	logrLogger := log.FromContext(ctx)
+	return NewRegistryHandler(memory, reg.Handler(logrLogger)), nil
+}
+
+func NewRegistryHandler(pre, next http.Handler) *RegistryHandler {
+	return &RegistryHandler{memoryHandler: pre, spegelHandler: next}
 }
 
 // bufferResponseWriter 用于缓冲响应，避免污染原始 ResponseWriter
@@ -74,7 +93,71 @@ func (r *RegistryHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// 修改请求：只用 memoryHandler 处理
-	r.memoryHandler.ServeHTTP(rw, req)
+	brw := newBufferResponseWriter(rw)
+	r.memoryHandler.ServeHTTP(brw, req)
+
+	brw.commit()
+	// 检查是否是 PUT /v2/{name}/manifests/{reference} 请求，判断上传是否完成
+	if r.isPutManifestRequest(req, brw.status) {
+		name, reference := r.extractNameAndReference(req.URL.Path)
+		if name != "" && reference != "" {
+			// 上传完成，ctr import
+			// r.uploadStatus.Store(reference, true)
+			manifestURL := r.getManifestURL(req, name, reference)
+			slog.Info("upload complete", "name", name, "reference", reference, "manifest_url", manifestURL)
+		}
+	}
+
+}
+
+// isPutManifestRequest 检查是否是 PUT manifest 请求且成功
+func (r *RegistryHandler) isPutManifestRequest(req *http.Request, status int) bool {
+	// Docker Registry API: PUT /v2/{name}/manifests/{reference}
+	return req.Method == http.MethodPut &&
+		strings.Contains(req.URL.Path, "/manifests/") &&
+		status == http.StatusCreated
+}
+
+// extractNameAndReference 从路径中提取仓库名称和 reference (digest/tag)
+func (r *RegistryHandler) extractNameAndReference(path string) (string, string) {
+	// 路径格式：/v2/{name}/manifests/{reference}
+	parts := strings.Split(path, "/")
+	for i, part := range parts {
+		if part == "manifests" && i+1 < len(parts) {
+			// 提取 name: /v2/{name}/manifests/...
+			name := strings.Join(parts[2:i], "/")
+			reference := parts[i+1]
+			return name, reference
+		}
+	}
+	return "", ""
+}
+
+// getManifestURL 获取上传镜像 manifest 地址
+func (r *RegistryHandler) getManifestURL(req *http.Request, name, reference string) string {
+	baseURL := ""
+	if req.Host != "" {
+		baseURL = fmt.Sprintf("http://%s", req.Host)
+	}
+	return fmt.Sprintf("%s/v2/%s/manifests/%s", baseURL, name, reference)
+}
+
+// IsUploadComplete 检查指定 reference 的上传是否完成
+func (r *RegistryHandler) IsUploadComplete(reference string) bool {
+	completed, ok := r.uploadStatus.Load(reference)
+	if !ok {
+		return false
+	}
+	return completed.(bool)
+}
+
+// GetManifestURL 获取已上传镜像的 manifest 地址
+func (r *RegistryHandler) GetManifestURL(name, reference string) string {
+	if completed, ok := r.uploadStatus.Load(reference); !ok || !completed.(bool) {
+		return ""
+	}
+	// 返回完整的 manifest URL
+	return fmt.Sprintf("/v2/%s/manifests/%s", name, reference)
 }
 
 func isReadOnly(method string) bool {

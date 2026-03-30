@@ -31,7 +31,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			// registryGroup.GET("/v2/_catalog", controller.Registry{}.Catalog)
 			// registryGroup.GET("/v2/:name/tags/list", controller.Registry{}.Tags)
 			// registryGroup.GET("/v2/:name/manifests/*reference", controller.Registry{}.Manifest)
-			// registryGroup.PUT("/v2/:name/manifests/*reference", controller.Registry{}.PushManifest)
+			// registryGroup.PUT("/v2/:name/manifests/*reference", controller.Registry{}.Post)
 			// registryGroup.GET("/v2/:name/blobs/*digest", controller.Registry{}.Blob)
 			// registryGroup.HEAD("/v2/:name/blobs/*digest", controller.Registry{}.BlobExists)
 			// registryGroup.POST("/v2/:name/blobs/uploads/", controller.Registry{}.InitUpload)

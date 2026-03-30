@@ -283,6 +283,7 @@ func (self *repo) loadPackageByHttp(uri string, token string, isParent bool) (*t
 	// LoadDependsByPackage 接口权限问题 改为使用InstallFormulas 全部返回 所以需要mock 子应用manifest
 	for _, formula := range p.InstallFormulas {
 		if formula.Name == p.Manifest.Application.Identifie {
+			
 			continue
 		}
 		target, err := deepcopy.Anything(p)

@@ -1,11 +1,13 @@
 package controller
 
 import (
+	"context"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/w7panel/w7panel/common/service/registry"
+
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
 
@@ -13,25 +15,15 @@ type Registry struct {
 	controller.Abstract
 }
 
-var mmr = registry.CreateMicroRegistry()
+var regisry *registry.RegistryHandler
 
-var cdr = registry.ContainerDRegistryHandler
-
-type statusWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (sw *statusWriter) WriteHeader(statusCode int) {
-	sw.statusCode = statusCode
-	sw.ResponseWriter.WriteHeader(statusCode)
-}
-
-func (sw *statusWriter) Write(b []byte) (int, error) {
-	if sw.statusCode == 0 {
-		sw.statusCode = http.StatusOK
+func init() {
+	reg, err := registry.InitReigstry(context.Background())
+	if err != nil {
+		slog.Error("init registry err", "err", err)
+		return
 	}
-	return sw.ResponseWriter.Write(b)
+	regisry = reg
 }
 
 // Version 返回 Registry API 版本
@@ -47,17 +39,31 @@ func (c Registry) Get(ctx *gin.Context) {
 	values := ctx.Request.URL.Query()
 	values.Set("ns", "ccr.ccs.tencentyun.com")
 	ctx.Request.URL.RawQuery = values.Encode()
-	w := &statusWriter{ResponseWriter: ctx.Writer}
-	mmr.ServeHTTP(w, ctx.Request) //先从内存取镜像
-	if w.statusCode != http.StatusOK {
-		cdr.ServeHTTP(w, ctx.Request)
+	if regisry != nil {
+		regisry.ServeHTTP(ctx.Writer, ctx.Request)
 	}
 }
 
-// Tags 返回镜像标签
 func (c Registry) Post(ctx *gin.Context) {
-	mmr.ServeHTTP(ctx.Writer, ctx.Request)
+
+	values := ctx.Request.URL.Query()
+	values.Set("ns", "ccr.ccs.tencentyun.com")
+	ctx.Request.URL.RawQuery = values.Encode()
+	if regisry != nil {
+		regisry.ServeHTTP(ctx.Writer, ctx.Request)
+	}
 }
+
+// func (c Registry) Finish(ctx *gin.Context) {
+// 	name := ctx.Param("name")
+// 	ref := ctx.Param("reference")
+// 	values := ctx.Request.URL.Query()
+// 	values.Set("ns", "ccr.ccs.tencentyun.com")
+// 	ctx.Request.URL.RawQuery = values.Encode()
+// 	if regisry != nil {
+// 		regisry.ServeHTTP(ctx.Writer, ctx.Request)
+// 	}
+// }
 
 // InitUpload 初始化 blob 上传
 func (c Registry) InitUpload(ctx *gin.Context) {
@@ -73,7 +79,6 @@ func (c Registry) InitUpload(ctx *gin.Context) {
 	// ctx.Header("Range", "bytes=0-0")
 	// ctx.JSON(http.StatusAccepted, gin.H{})
 
-	mmr.ServeHTTP(ctx.Writer, ctx.Request)
 }
 
 // CompleteUpload 完成 blob 上传
@@ -91,6 +96,5 @@ func (c Registry) CompleteUpload(ctx *gin.Context) {
 
 	// ctx.Header("Location", "/v2/"+name+"/blobs/"+digest)
 	// ctx.JSON(http.StatusCreated, gin.H{})
-	mmr.ServeHTTP(ctx.Writer, ctx.Request)
 	// nerdctl commit image
 }
