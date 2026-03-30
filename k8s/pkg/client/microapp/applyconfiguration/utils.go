@@ -39,8 +39,16 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &microappv1alpha1.MicroAppApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("MicroAppConfig"):
 		return &microappv1alpha1.MicroAppConfigApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("MicroAppConfig2"):
+		return &microappv1alpha1.MicroAppConfig2ApplyConfiguration{}
 	case v1alpha1.SchemeGroupVersion.WithKind("MicroAppSpec"):
 		return &microappv1alpha1.MicroAppSpecApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("Props"):
+		return &microappv1alpha1.PropsApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("ProxyRequest"):
+		return &microappv1alpha1.ProxyRequestApplyConfiguration{}
+	case v1alpha1.SchemeGroupVersion.WithKind("Role"):
+		return &microappv1alpha1.RoleApplyConfiguration{}
 
 	}
 	return nil

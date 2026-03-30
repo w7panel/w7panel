@@ -140,6 +140,8 @@ spec:
                 type: string
               title:
                 type: string
+              version:
+                type: string
             required:
             - frontendUrl
             - title

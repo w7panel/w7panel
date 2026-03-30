@@ -20,14 +20,17 @@ package v1alpha1
 // MicroAppSpecApplyConfiguration represents a declarative configuration of the MicroAppSpec type for use
 // with apply.
 type MicroAppSpecApplyConfiguration struct {
-	Framework   *string                           `json:"framework,omitempty"`
-	BackendUrl  *string                           `json:"backendUrl,omitempty"`
-	FrontendUrl *string                           `json:"frontendUrl,omitempty"`
-	Title       *string                           `json:"title,omitempty"`
-	Logo        *string                           `json:"logo,omitempty"`
-	Config      *MicroAppConfigApplyConfiguration `json:"config,omitempty"`
-	Description *string                           `json:"description,omitempty"`
-	Bindings    []BindingsApplyConfiguration      `json:"bindings,omitempty"`
+	Framework   *string                            `json:"framework,omitempty"`
+	BackendUrl  *string                            `json:"backendUrl,omitempty"`
+	FrontendUrl *string                            `json:"frontendUrl,omitempty"`
+	ProxyUrl    *string                            `json:"proxyUrl,omitempty"`
+	Title       *string                            `json:"title,omitempty"`
+	Logo        *string                            `json:"logo,omitempty"`
+	Config      *MicroAppConfigApplyConfiguration  `json:"config,omitempty"`
+	Version     *string                            `json:"version,omitempty"`
+	ConfigV2    *MicroAppConfig2ApplyConfiguration `json:"config-v2,omitempty"`
+	Description *string                            `json:"description,omitempty"`
+	Bindings    []BindingsApplyConfiguration       `json:"bindings,omitempty"`
 }
 
 // MicroAppSpecApplyConfiguration constructs a declarative configuration of the MicroAppSpec type for use with
@@ -60,6 +63,14 @@ func (b *MicroAppSpecApplyConfiguration) WithFrontendUrl(value string) *MicroApp
 	return b
 }
 
+// WithProxyUrl sets the ProxyUrl field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ProxyUrl field is set to the value of the last call.
+func (b *MicroAppSpecApplyConfiguration) WithProxyUrl(value string) *MicroAppSpecApplyConfiguration {
+	b.ProxyUrl = &value
+	return b
+}
+
 // WithTitle sets the Title field in the declarative configuration to the given value
 // and returns the receiver, so that objects can be built by chaining "With" function invocations.
 // If called multiple times, the Title field is set to the value of the last call.
@@ -81,6 +92,22 @@ func (b *MicroAppSpecApplyConfiguration) WithLogo(value string) *MicroAppSpecApp
 // If called multiple times, the Config field is set to the value of the last call.
 func (b *MicroAppSpecApplyConfiguration) WithConfig(value *MicroAppConfigApplyConfiguration) *MicroAppSpecApplyConfiguration {
 	b.Config = value
+	return b
+}
+
+// WithVersion sets the Version field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Version field is set to the value of the last call.
+func (b *MicroAppSpecApplyConfiguration) WithVersion(value string) *MicroAppSpecApplyConfiguration {
+	b.Version = &value
+	return b
+}
+
+// WithConfigV2 sets the ConfigV2 field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the ConfigV2 field is set to the value of the last call.
+func (b *MicroAppSpecApplyConfiguration) WithConfigV2(value *MicroAppConfig2ApplyConfiguration) *MicroAppSpecApplyConfiguration {
+	b.ConfigV2 = value
 	return b
 }
 

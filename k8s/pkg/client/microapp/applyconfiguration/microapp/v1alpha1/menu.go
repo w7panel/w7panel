@@ -26,6 +26,7 @@ type MenuApplyConfiguration struct {
 	IsDefault    *int    `json:"is_default,omitempty"`
 	Location     *string `json:"location,omitempty"`
 	Title        *string `json:"title,omitempty"`
+	Parent       *string `json:"parent,omitempty"`
 }
 
 // MenuApplyConfiguration constructs a declarative configuration of the Menu type for use with
@@ -79,5 +80,13 @@ func (b *MenuApplyConfiguration) WithLocation(value string) *MenuApplyConfigurat
 // If called multiple times, the Title field is set to the value of the last call.
 func (b *MenuApplyConfiguration) WithTitle(value string) *MenuApplyConfiguration {
 	b.Title = &value
+	return b
+}
+
+// WithParent sets the Parent field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Parent field is set to the value of the last call.
+func (b *MenuApplyConfiguration) WithParent(value string) *MenuApplyConfiguration {
+	b.Parent = &value
 	return b
 }
