@@ -46,7 +46,7 @@ func (p Provider) RegisterHttpRoutes(server *httpserver.Server) {
 			// patchGroup.GET("/containers/:id", controller.Containers{}.Get)
 			// patchGroup.GET("/containers/:id/layers", controller.Containers{}.Layers)
 			// patchGroup.POST("/containers/:id/exec", controller.Exec{}.Run)
-			patchGroup.POST("/containers/:id/commit", controller.Commit{}.Run)
+			patchGroup.POST("/containers/:id/commit", middleware.Auth{}.Process, controller.Commit{}.Run)
 		}
 	})
 }
