@@ -15,7 +15,7 @@ func CheckLogo() error {
 	sdk := NewK8sClient()
 	configMap, err := sdk.ClientSet.CoreV1().ConfigMaps("kube-system").Get(context.TODO(), LOGO_NAME, metav1.GetOptions{})
 	if err != nil {
-		slog.Error("Failed to get logo config", "error", err)
+		// slog.Error("Failed to get logo config", "error", err)
 		return err
 	}
 	return WriteLogo(configMap)

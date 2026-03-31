@@ -2,7 +2,6 @@ package registry
 
 import (
 	"context"
-	"log/slog"
 	"net/http"
 	"path/filepath"
 
@@ -22,7 +21,7 @@ var ContainerDRegistryHandler http.Handler
 func init() {
 	reg, err := CreateSpegelRegistry(context.Background())
 	if err != nil {
-		slog.Error("create reg registry err", "err", err)
+		// slog.Error("create reg registry err", "err", err)
 	}
 	sregRegistry = reg
 	if sregRegistry != nil {
