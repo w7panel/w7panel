@@ -31,7 +31,7 @@ clean:
   enabled: ${CLEAN_ENABLED-true} # 是否开启自动升级功能
   interval: ${CLEAN_CHECK_INTERVAL-66s} # 清理s3过期文件 单位分钟
 registry:
-  watch: ${REGISTRY_WATCH-false}
+  enabled: ${K3S_REGISTRY_ENABLED-false}
 
 mcp:
   watch: ${MCP_WATCH-false}

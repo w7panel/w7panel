@@ -55,7 +55,7 @@ spec:
           env: 
           # - name: GOGC
           #   value: "10"
-          - name: REGISTRY_WATCH
+          - name: K3K_REGISTRY_ENABLED
             value: "true"     
           - name: IS_AGENT
             value: "true"   
