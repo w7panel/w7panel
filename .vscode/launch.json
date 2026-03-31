@@ -31,7 +31,8 @@
                 "DEBUG": "true",
                 "IMAGE_REPO": "ccr.ccs.tencentyun.com/afan-public/w7panel",
                 "POD_IP": "10.42.0.117",
-                "NODE_IP": "10.0.0.206"
+                "NODE_IP": "10.0.0.206",
+                "K3S_REGISTRY_ENABLED": "true",
                 // "KUBECONFIG": "/home/workspace/k8s-offline/k3k-k8-k8-kubeconfig.yaml"
             },
             "type": "go",
