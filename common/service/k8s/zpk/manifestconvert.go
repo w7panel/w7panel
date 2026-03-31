@@ -22,7 +22,8 @@ import (
 	// appsv1 "k8s.io/client-go/applyconfigurations/apps/v1"
 )
 
-const buildimage = "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-19"
+// const buildimage = "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-new5-19"
+const buildimage = "ccr.ccs.tencentyun.com/afan-public/kaniko:w7console-build-test1"
 
 type K8sResourceMetaInterface interface {
 	GetTitle() string
