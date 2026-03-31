@@ -38,3 +38,4 @@ runtime/http.pid
 runtime/main
 vendor
 vendor/** 
+w7panel-offline-*.tgz

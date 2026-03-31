@@ -1,5 +1,5 @@
 
-IV ?= v1.1.27.6
+IV ?= v1.1.28.7
 
 build-charts:
 	helm package ./kodata/charts/k8s-offline
