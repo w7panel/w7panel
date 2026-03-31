@@ -12,8 +12,8 @@ type Commit struct {
 
 // Run 提交容器为新镜像
 func (self Commit) Run(ctx *gin.Context) {
-	id := ctx.Param("id")
-	ref := ctx.GetString("ref")
+	id := ctx.Param("id")       //镜像id
+	ref := ctx.GetString("ref") // ccr.ccs.tencentyun.com/afan/test:v1
 
 	digest, err := registry.CommitToContainerD(ctx, ref, id)
 	if err != nil {

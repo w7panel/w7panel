@@ -1193,6 +1193,11 @@ func HelmValflattenMap(config map[string]interface{}) map[string]string {
 }
 
 func PanelInnerUrl() string {
+	if IsChildAgent() {
+		svcName := os.Getenv("SVC_NAME")
+		return "http://" + svcName + ".default.svc:8000"
+
+	}
 	ns := os.Getenv("HELM_NAMESPACE")
 	if ns == "" {
 		ns = "default"

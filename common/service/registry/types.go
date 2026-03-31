@@ -2,6 +2,7 @@ package registry
 
 import (
 	containerd "github.com/containerd/containerd/v2/client"
+	"github.com/distribution/reference"
 	"github.com/w7panel/w7panel/common/helper"
 )
 
@@ -44,4 +45,8 @@ func containerAddr() string {
 
 	return ""
 
+}
+
+func parseRef(ref string) (reference.Reference, error) {
+	return reference.Parse(ref)
 }

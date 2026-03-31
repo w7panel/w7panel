@@ -242,22 +242,30 @@ func (self Zpk) Install(http *gin.Context) {
 		params.IngressHost, params.IngressSeletorName, params.IngressClassName)
 	packageApps.ForceHttps(params.IngressForceHttps)
 	// packageApps.Root.K3kMode = k8sToken.K3kMode()
-	isVirtual := k8sToken.IsVirtual()
-	if isVirtual {
-		// 虚拟集群也使用traefik
-		// packageApps.Root.IngressClassName = "traefik"
+	isChild := k8sToken.IsVirtual() || k8sToken.IsShared()
+
+	realToken := ""
+	config, err := client.ToRESTConfig()
+	if err != nil {
+		slog.Warn("client config err", "err", err)
+	}
+	if config != nil {
+		realToken = config.BearerToken
 	}
 
 	sa := client.GetServiceAccountName()
 	packageApps.Root.ServiceAccountName = sa
 	packageApps.Root.K8sToken = k8sToken
+	packageApps.Root.IsChild = isChild
+	packageApps.Root.RealToken = realToken
 	for _, child := range packageApps.Children {
 		child.ServiceAccountName = sa
-		if isVirtual {
+		if k8sToken.IsVirtual() {
 			child.IngressClassName = packageApps.Root.IngressClassName
 		}
 		child.K8sToken = k8sToken
-		// child.K3kMode = k8sToken.K3kMode()
+		child.IsChild = k8sToken.IsVirtual() || k8sToken.IsShared()
+		child.RealToken = realToken
 
 	}
 

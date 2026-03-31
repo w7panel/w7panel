@@ -105,14 +105,20 @@ func (r *RegistryHandler) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 		name, reference := r.extractNameAndReference(req.URL.Path)
 		if name != "" && reference != "" {
 			// 上传完成，ctr import
-			// r.uploadStatus.Store(reference, true)
-
-			err := PullToContainerD(context.TODO(), "127.0.0.1:8000/"+name+":"+reference)
-			if err != nil {
-				slog.Warn("pull to containerd err", "err", err)
-			}
-			// manifestURL := r.getManifestURL(req, name, reference)
-			// slog.Info("upload complete", "name", name, "reference", reference, "manifest_url", manifestURL)
+			// ref, err := parseRef(reference)
+			// if err != nil {
+			// 	slog.Warn("parse ref err", "err", err)
+			// 	return
+			// }
+			// if ref.
+			sourceUrl := "127.0.0.1:8000/" + name + ":" + reference
+			targeUrl := defaultDamain + "/" + name + ":" + reference
+			go func() {
+				err := PullToContainerD(context.TODO(), sourceUrl, targeUrl)
+				if err != nil {
+					slog.Warn("pull to containerd err", "err", err)
+				}
+			}()
 		}
 	}
 

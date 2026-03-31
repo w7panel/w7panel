@@ -160,6 +160,8 @@ func toHelmInstallJob(packageApp *types.PackageApp, children []*types.PackageApp
 	shellCmd += " --set " + "global.panel.thirdPartyCDToken=" + packageApp.ThirdpartyCDToken
 	shellCmd += " --set " + "global.panel.installId=" + packageApp.InstallId
 	shellCmd += " --set " + "global.panel.innerUrl=" + helper.PanelInnerUrl()
+	shellCmd += " --set " + "global.panel.panelToken=" + packageApp.K8sToken.GetToken()
+	shellCmd += " --set " + "global.panel.panelRealToken=" + packageApp.RealToken
 	atomic := false
 	set := fillHelmSet(packageApp, "", []string{"HELM_ATOMIC", "DOMAIN_URL"}, false) //pvc 站点管理 会新建一个名字出来
 

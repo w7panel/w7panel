@@ -79,6 +79,8 @@ type InstallOption struct {
 	Volumes                  []corev1.Volume      `json:"volumes"`
 	VolumesMounts            []corev1.VolumeMount `json:"volumesMounts"`
 	K8sToken                 *k8s.K8sToken
+	IsChild                  bool
+	RealToken                string // 子集群token需要返回实际的token 内网访问面板代理 不会经过主集群面板
 	// K3kMode                  string               `json:"k3kMode"`              // 子集群模式
 }
 
