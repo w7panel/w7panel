@@ -3,18 +3,22 @@ kind: VMPodScrape
 metadata:
     labels:
        app: node-exporter
-    name: node-exporter
-    namespace: vm-operator
+    name: w7panel-metrics-k8s-offline-metrics-node-exporter
+    namespace: default
 spec:
     podMetricsEndpoints:
         -
             # bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
             port: metrics
             scheme: http
+            relabelConfigs:
+              - sourceLabels:
+                - "__meta_kubernetes_pod_node_name"
+                action: replace
+                targetLabel: instance
             # tlsConfig:
             #     caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
             #     serverName: kubernetes
-    jobLabel: node-exporter
     namespaceSelector:
         matchNames:
             - default

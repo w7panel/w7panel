@@ -1,0 +1,27 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+   name: {{ include "k8s-offline-metrics.fullname" . }}-node-exporter
+   labels:
+         {{- include "k8s-offline-metrics.labels" . | nindent 4 }}
+spec:
+    namespaceSelector:
+        matchNames:
+            - default
+    podMetricsEndpoints:
+        -
+            port: metrics
+            relabelConfigs:
+                -
+                    action: replace
+                    sourceLabels:
+                        - __meta_kubernetes_pod_node_name
+                    targetLabel: instance
+            scheme: http
+    selector:
+        matchLabels:
+            app.kubernetes.io/instance: w7panel-metrics
+            app.kubernetes.io/name: prometheus-node-exporter
+            app.kubernetes.io/part-of: prometheus-node-exporter
+
+

@@ -22,7 +22,7 @@ func InitReigstry(ctx context.Context) (*RegistryHandler, error) {
 	memory := CreateMicroRegistry()
 	reg, err := CreateSpegelRegistry(context.Background())
 	if err != nil {
-		slog.Error("create reg registry err", "err", err)
+		// slog.Error("create reg registry err", "err", err)
 		return nil, err
 	}
 	logrLogger := log.FromContext(ctx)

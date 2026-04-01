@@ -1,27 +1,27 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMNodeScrape
 metadata:
+    annotations:
+        meta.helm.sh/release-name: w7panel-metrics
+        meta.helm.sh/release-namespace: default
+    creationTimestamp: '2026-04-01T09:44:24Z'
+    generation: 1
     labels:
-        app: node-exporter
-    name: node-exporter
+        app.kubernetes.io/instance: w7panel-metrics
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/name: k8s-offline-metrics
+        app.kubernetes.io/version: 1.16.0
+        helm.sh/chart: k8s-offline-metrics-1.0.17
+    name: w7panel-metrics-k8s-offline-metrics-node-exporter
+    namespace: default
+    resourceVersion: '3332'
+    uid: 43cc709d-a34d-4975-9118-87d1bc09ef39
 spec:
-    # bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     honorLabels: true
     honorTimestamps: false
-    interval: 30s
+    interval: 60s
+    jobLabel: node-exporter
     metricRelabelConfigs:
-        -
-            action: labeldrop
-            regex: __meta_kubernetes_node_label_nvidia_com.*
-        -
-            action: labeldrop
-            regex: __meta_kubernetes_node_label_feature_node.*
-        -
-            action: labeldrop
-            regex: (uid)
-        -
-            action: labeldrop
-            regex: (id|name)
         -
             action: drop
             regex: >-
@@ -29,8 +29,14 @@ spec:
             source_labels:
                 - __name__
     path: /metrics
-    port: "9100"
+    port: '9100'
     relabelConfigs:
+        -
+            action: labeldrop
+            regex: __meta_kubernetes_node_label.*
+        -
+            action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
         -
             action: labeldrop
             regex: __meta_kubernetes_node_label_nvidia_com.*
@@ -38,20 +44,21 @@ spec:
             action: labeldrop
             regex: __meta_kubernetes_node_label_feature_node.*
         -
-            action: labelmap
-            regex: __meta_kubernetes_node_label_(.+)
-        -
             sourceLabels:
                 - __metrics_path__
             targetLabel: metrics_path
-        # -
-        #     replacement: kubelet-resource
-        #     targetLabel: job
-    jobLabel: node-exporter    
-    scheme: https
+    scheme: http
     scrapeTimeout: 5s
     selector: {}
-    # tlsConfig:
-    #     caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-    #     insecureSkipVerify: true
-
+status:
+    conditions:
+        -
+            lastTransitionTime: '2026-04-01T09:44:33Z'
+            lastUpdateTime: '2026-04-01T09:44:33Z'
+            observedGeneration: 1
+            reason: ConfigParsedAndApplied
+            status: 'True'
+            type: >-
+                w7panel-metrics-k8s-offline-metrics-agent.default.vmagent.victoriametrics.com/Applied
+    observedGeneration: 1
+    updateStatus: operational

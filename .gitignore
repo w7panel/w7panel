@@ -39,3 +39,4 @@ runtime/main
 vendor
 vendor/** 
 w7panel-offline-*.tgz
+k8s-offline-*.tgz
