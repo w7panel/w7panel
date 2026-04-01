@@ -2,6 +2,7 @@ package console
 
 import (
 	"crypto/x509"
+	"log/slog"
 	"time"
 
 	"github.com/w7panel/w7panel/common/helper"
@@ -117,9 +118,13 @@ func IsFree() bool {
 
 func RefreshLicense() {
 	if licenseClient != nil {
-		currentLicense, _ = licenseClient.GetLicense()
-		if currentLicense != nil {
-			config.MainW7Config, _ = licenseClient.GetConfig(currentLicense.FounderSaName)
+		cl, err := licenseClient.GetLicense()
+		if err != nil {
+			slog.Error("获取license失败", "err", err)
+		}
+		if cl != nil {
+			currentLicense = cl
+			config.MainW7Config, _ = licenseClient.GetConfig(cl.FounderSaName)
 		}
 	}
 }

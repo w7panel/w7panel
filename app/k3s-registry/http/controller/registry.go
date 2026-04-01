@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +20,7 @@ var regisry *registry.RegistryHandler
 func init() {
 	reg, err := registry.InitReigstry(context.Background())
 	if err != nil {
-		slog.Error("init registry err", "err", err)
+		// slog.Error("init registry err", "err", err)
 		return
 	}
 	regisry = reg

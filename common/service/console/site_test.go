@@ -8,11 +8,19 @@ import (
 )
 
 func TestPath(t *testing.T) {
-	os.Setenv("USER_AGFNT", "we7test-beta")
 	os.Setenv("DEBUG", "true")
 	err := PatchAppId(k8s.NewK8sClient().Sdk, &AppSecret{AppId: "1", AppSecret: "2"}, "cs-zyy-rxnnhxjl", "default", "cs-zyy")
 	if err != nil {
 		t.Errorf("PatchAppId() error = %v", err)
+	}
+}
+
+func TestRegisterSite(t *testing.T) {
+	os.Setenv("USER_AGFNT", "we7test-beta")
+	os.Setenv("DEBUG", "true")
+	err := RegisterLicenseSite("admin")
+	if err != nil {
+		t.Errorf("RegisterSite() error = %v", err)
 	}
 }
 

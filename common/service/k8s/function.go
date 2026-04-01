@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"log/slog"
 	"os"
 
 	corev1 "k8s.io/api/core/v1"
@@ -30,7 +29,7 @@ func WriteLogo(configMap *corev1.ConfigMap) error {
 				// save configMap
 				err := os.WriteFile(kodata+"/assets/logo.png", logoData, 0644)
 				if err != nil {
-					slog.Error("Failed to write logo", "error", err)
+					// slog.Error("Failed to write logo", "error", err)
 					return err
 				}
 			} // save configMap

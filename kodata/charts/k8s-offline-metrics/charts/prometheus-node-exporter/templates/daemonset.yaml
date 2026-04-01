@@ -264,7 +264,7 @@ spec:
       imagePullSecrets:
         {{- include "prometheus-node-exporter.imagePullSecrets" (dict "Values" .Values "imagePullSecrets" .Values.imagePullSecrets) | indent 8 }}
       {{- end }}
-      hostNetwork: {{ .Values.hostNetwork }}
+      # hostNetwork: {{ .Values.hostNetwork }}
       hostPID: {{ .Values.hostPID }}
       hostIPC: {{ .Values.hostIPC }}
       affinity:
