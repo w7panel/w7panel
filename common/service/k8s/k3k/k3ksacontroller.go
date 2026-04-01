@@ -346,6 +346,19 @@ func (r *K3kServiceAccountController) createAgent(ctx context.Context, k3kUser *
 	// 	}
 	// 	return err
 	// }
+	endpoints := k3ktypes.ToK3kPanelPodIpEndpoint(k3kUser)
+	_, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpoints, func() error { return nil })
+	if err != nil {
+		slog.Warn("failed to create endpoints", "err", err)
+		// return err
+	}
+
+	endpointsSvc := k3ktypes.ToK3kPanelEndpointService(k3kUser)
+	_, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpointsSvc, func() error { return nil })
+	if err != nil {
+		slog.Warn("failed to create endpointsSvc", "err", err)
+		// return err
+	}
 
 	ds := k3ktypes.ToK3kDaemonSet(k3kUser)
 	copy := ds.DeepCopy()

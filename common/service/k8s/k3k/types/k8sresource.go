@@ -486,3 +486,67 @@ func ToVirtualIngressService(k3kUser *K3kUser) *corev1.Service {
 		},
 	}
 }
+func ToK3kPanelPodIpEndpoint(k3kUser *K3kUser) *corev1.Endpoints {
+
+	return &corev1.Endpoints{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Endpoints",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "panel-root-svc",
+			Namespace: "default",
+			Labels: map[string]string{
+				"k3k-sa":   k3kUser.Name,
+				"k3k-name": k3kUser.GetK3kName(),
+			},
+		},
+		Subsets: []corev1.EndpointSubset{
+			{
+				Addresses: []corev1.EndpointAddress{
+					{
+						IP: os.Getenv("POD_IP"),
+					},
+				},
+				Ports: []corev1.EndpointPort{
+					{
+						Port: 8000,
+					},
+				},
+			},
+		},
+	}
+}
+
+func ToK3kPanelEndpointService(k3kUser *K3kUser) *corev1.Service {
+
+	return &corev1.Service{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Service",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "panel-root-svc",
+			Namespace: k3kUser.GetK3kNamespace(),
+			Labels: map[string]string{
+				"k3k-sa":   k3kUser.Name,
+				"k3k-name": "default",
+			},
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "http",
+					Port:       8000,
+					TargetPort: intstr.FromInt(8000),
+					Protocol:   corev1.ProtocolTCP,
+				},
+				{
+					Name:       "https",
+					Port:       443,
+					TargetPort: intstr.FromInt(443),
+				},
+			},
+		},
+	}
+}
