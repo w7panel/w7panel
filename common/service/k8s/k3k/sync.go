@@ -122,6 +122,10 @@ func SyncHttp(obj SyncObjectInterface, path string) error {
 
 	// postUrl := "http://" + os.Getenv("ROOT_SVCNAME") + "." + os.Getenv("ROOT_NAMESPACE") + ".svc:8000/k8s/k3k/" + path
 	postUrl := "http://" + os.Getenv("ROOT_POD_IP") + ":8000/panel-api/v1/k3k/" + path
+	hostip, ok := os.LookupEnv("ROOT_HOST_IP")
+	if ok {
+		postUrl = "http://" + hostip + ":9090/panel-api/v1/k3k/" + path
+	}
 	if helper.IsLocalMock() {
 		postUrl = "http://172.16.1.126:9007/panel-api/v1/k3k/sync-ingress"
 	}

@@ -337,34 +337,28 @@ func (r *K3kServiceAccountController) createAgent(ctx context.Context, k3kUser *
 		return err
 	}
 
-	// Check if pod exists
-	// ds2 := &appsv1.DaemonSet{}
-	// err = clientSigClient.Get(ctx, types.NamespacedName{Namespace: k3kUser.Namespace, Name: k3kUser.GetAgentName()}, ds2)
+	// endpoints := k3ktypes.ToK3kPanelPodIpEndpoint(k3kUser)
+	// _, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpoints, func() error { return nil })
 	// if err != nil {
-	// 	if errors.IsNotFound(err) {
-	// 		return r.createPod(ctx, clientSigClient, k3kUser)
-	// 	}
-	// 	return err
+	// 	slog.Warn("failed to create endpoints", "err", err)
+	// 	// return err
 	// }
-	endpoints := k3ktypes.ToK3kPanelPodIpEndpoint(k3kUser)
-	_, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpoints, func() error { return nil })
-	if err != nil {
-		slog.Warn("failed to create endpoints", "err", err)
-		// return err
-	}
 
-	endpointsSvc := k3ktypes.ToK3kPanelEndpointService(k3kUser)
-	_, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpointsSvc, func() error { return nil })
-	if err != nil {
-		slog.Warn("failed to create endpointsSvc", "err", err)
-		// return err
-	}
+	// endpointsSvc := k3ktypes.ToK3kPanelEndpointService(k3kUser)
+	// _, err = controllerutil.CreateOrUpdate(ctx, clientSigClient, endpointsSvc, func() error { return nil })
+	// if err != nil {
+	// 	slog.Warn("failed to create endpointsSvc", "err", err)
+	// 	// return err
+	// }
 
 	ds := k3ktypes.ToK3kDaemonSet(k3kUser)
 	copy := ds.DeepCopy()
-	_, err = controllerutil.CreateOrPatch(ctx, clientSigClient, copy, func() error {
+	result, err := controllerutil.CreateOrPatch(ctx, clientSigClient, copy, func() error {
+		//copy 变成 etcd 返回的 ds
 		copy.Annotations = ds.Annotations
-		copy.Annotations["root-pod-ip"] = os.Getenv("POD_IP")
+		// host-ip helm-version 任意一个变动就patch 更新 否则 不更新
+		copy.Annotations["root-host-ip"] = os.Getenv("HOST_IP") //
+		copy.Annotations["helm-version"] = os.Getenv("HELM_VERSION")
 		// copy.Labels["d"]
 		copy.Spec = ds.Spec
 		return nil
@@ -373,7 +367,7 @@ func (r *K3kServiceAccountController) createAgent(ctx context.Context, k3kUser *
 		slog.Warn("failed to create daemonSet", "err", err)
 		return err
 	}
-
+	slog.Error("create agent daemonset", "result", result, "name", k3kUser.GetName())
 	// helmVersion := os.Getenv("HELM_VERSION") //pod.Annotations["helm-version"]
 	// podVersion := pod.Annotations["helm-version"]
 	// rootPodIp := pod.Annotations["root-pod-ip"]

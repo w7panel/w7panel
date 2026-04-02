@@ -179,6 +179,15 @@ mount --make-shared /
 			},
 		})
 		container.Env = append(container.Env, v1.EnvVar{
+			Name: "K3K_HOST_IP",
+			ValueFrom: &v1.EnvVarSource{
+				FieldRef: &v1.ObjectFieldSelector{
+					APIVersion: "v1",
+					FieldPath:  "status.hostIP",
+				},
+			},
+		})
+		container.Env = append(container.Env, v1.EnvVar{
 			Name:  "TZ",
 			Value: "Asia/Shanghai",
 		})

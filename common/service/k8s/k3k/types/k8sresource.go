@@ -161,6 +161,7 @@ func ToK3kDaemonSet(k3kUser *K3kUser) *appsv1.DaemonSet {
 			Annotations: map[string]string{
 				"helm-version":     os.Getenv("HELM_VERSION"),
 				"root-pod-ip":      os.Getenv("POD_IP"),
+				"root-host-ip":     os.Getenv("HOST_IP"),
 				"title":            "面板代理",
 				"w7.cc/create-svc": "true",
 				"w7.cc.app/ports":  "{\"8000\":8000}",
@@ -185,6 +186,13 @@ func ToK3kDaemonSet(k3kUser *K3kUser) *appsv1.DaemonSet {
 func ToK3kPod(k3kUser *K3kUser) *corev1.Pod {
 	// shell := "cd /tmp && k3kcli kubeconfig generate --namespace $K3K_NAMESPACE --name $K3K_NAME && k8s-offline"
 	clusterMode := k3kUser.GetClusterMode()
+	// cacheKey := "k3k-" + k3kUser.GetName()
+	// panelToken, ok := helper.Get(cacheKey)
+	// if !ok {
+	// 	panelToken = helper.RandomString(32) //面板重启 panelToken 还是会变 导致daemonset 还是会重建
+	// 	helper.Set(cacheKey, panelToken, time.Hour*24*365)
+	// 	return nil
+	// }
 	// k3smode := "4"
 	// if mode == "virtual" {
 	// 	k3smode = "5"
@@ -276,13 +284,17 @@ func ToK3kPod(k3kUser *K3kUser) *corev1.Pod {
 			Value: os.Getenv("POD_IP"),
 		},
 		{
+			Name:  "ROOT_HOST_IP",
+			Value: os.Getenv("HOST_IP"),
+		},
+		{
 			Name:  "STATIC_DOWN_ENABLED",
 			Value: "true",
 		},
-		{
-			Name:  "PANEL_TOKEN",
-			Value: helper.RandomString(32),
-		},
+		// {
+		// 	Name:  "PANEL_TOKEN",
+		// 	Value: panelToken.(string),
+		// },
 		{
 			Name:  "IMAGE_REPO",
 			Value: os.Getenv("IMAGE_REPO"),
