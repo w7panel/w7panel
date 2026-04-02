@@ -226,11 +226,11 @@ spec:
               {{- if .Values.kubeRBACProxy.enableHostPort }}
               hostPort: {{ .Values.service.port }}
               {{- end }}
-            - containerPort: {{ .Values.kubeRBACProxy.proxyEndpointsPort }}
-              {{- if .Values.kubeRBACProxy.enableProxyEndpointsHostPort }}
-              hostPort: {{ .Values.kubeRBACProxy.proxyEndpointsPort }}
-              {{- end }}
-              name: "http-healthz"
+            # - containerPort: {{ .Values.kubeRBACProxy.proxyEndpointsPort }}
+            #   {{- if .Values.kubeRBACProxy.enableProxyEndpointsHostPort }}
+            #   hostPort: {{ .Values.kubeRBACProxy.proxyEndpointsPort }}
+            #   {{- end }}
+            #   name: "http-healthz"
           # readinessProbe:
           #   httpGet:
           #     scheme: HTTPS
