@@ -21,7 +21,7 @@ func (fs WebDAVFileSystem) OpenFile(ctx context.Context, name string, flag int, 
 		slog.Error("webdav OpenFile failed", "name", name, "flag", flag, "perm", perm, "error", err)
 		return nil, err
 	}
-	return NewWebDAVFile(file, fs.dir), err
+	return NewWebDAVFile(file, fs.dir, name), err
 }
 
 func (fs WebDAVFileSystem) Stat(ctx context.Context, name string) (os.FileInfo, error) {

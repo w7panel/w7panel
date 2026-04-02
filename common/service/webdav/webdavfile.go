@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 
 	"golang.org/x/net/webdav"
 )
@@ -19,6 +18,7 @@ import (
 type WebDAVFile struct {
 	webdav.File
 	rootDir  string
+	reqPath  string
 	fileInfo *WebDAVFileInfo
 	statOnce sync.Once
 	statErr  error
@@ -41,8 +41,8 @@ func (f *WebDAVFile) Readdir(count int) ([]os.FileInfo, error) {
 	return entries, nil
 }
 
-func NewWebDAVFile(file webdav.File, rootDir string) *WebDAVFile {
-	return &WebDAVFile{File: file, rootDir: rootDir}
+func NewWebDAVFile(file webdav.File, rootDir, reqPath string) *WebDAVFile {
+	return &WebDAVFile{File: file, rootDir: rootDir, reqPath: reqPath}
 }
 
 // 必须返回WebDAVFileInfo， 否则ContentType() 触发不了
@@ -68,9 +68,21 @@ func (f *WebDAVFile) ensureStat() error {
 			f.fileInfo.uid = fmt.Sprintf("%d", sysstat.Uid)
 		}
 
-		isSymlink := stat.Mode()&syscall.S_IFMT == syscall.S_IFLNK
-		if isSymlink {
-			fullPath := filepath.Join(f.rootDir, stat.Name())
+		fullPath := filepath.Clean(filepath.Join(f.rootDir, strings.TrimPrefix(f.reqPath, "/")))
+		lstat, err := os.Lstat(fullPath)
+		if err != nil {
+			slog.Warn("lstat failed, mark unknown",
+				"path", fullPath,
+				"reqPath", f.reqPath,
+				"error", err)
+			f.fileInfo.fileType = "unknown"
+			f.fileInfo.editable = false
+			return
+		}
+
+		f.fileInfo.fileType, f.fileInfo.editable = getFileTypeAndEditable(lstat.Mode())
+
+		if lstat.Mode()&os.ModeSymlink != 0 {
 			resolvedTarget, err := filepath.EvalSymlinks(fullPath)
 			if err == nil {
 				resolvedTarget = filepath.Clean(resolvedTarget)
@@ -80,14 +92,11 @@ func (f *WebDAVFile) ensureStat() error {
 						"link", fullPath,
 						"resolved", resolvedTarget,
 						"root", rootDir)
-					f.fileInfo.fileType = "file"
 					f.fileInfo.editable = false
 					return
 				}
 			}
 		}
-
-		f.fileInfo.fileType, f.fileInfo.editable = getFileTypeAndEditable(stat.Mode())
 	})
 	return f.statErr
 }
@@ -104,12 +113,15 @@ func getFileTypeAndEditable(mode os.FileMode) (string, bool) {
 	case os.ModeSocket:
 		return "socket", false
 	case os.ModeIrregular:
-		return "file", true
+		return "unknown", false
 	case os.ModeDir:
 		return "directory", false
 
 	default:
-		return "file", true
+		if mode.IsRegular() {
+			return "file", true
+		}
+		return "unknown", false
 	}
 	// switch mode & syscall.S_IFMT {
 	// case syscall.S_IFREG:
