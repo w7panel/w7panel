@@ -192,9 +192,9 @@ spec:
             {{-  if .Values.kubeRBACProxy.extraArgs  }}
             {{- .Values.kubeRBACProxy.extraArgs | toYaml | nindent 12 }}
             {{-  end  }}
-            - --secure-listen-address=:{{ .Values.service.port}}
+            - --secure-listen-address=$(IP):{{ .Values.service.port}}
             - --upstream=http://127.0.0.1:{{ $servicePort }}/
-            - --proxy-endpoints-port={{ .Values.kubeRBACProxy.proxyEndpointsPort }}
+            # - --proxy-endpoints-port={{ .Values.kubeRBACProxy.proxyEndpointsPort }}
             - --config-file=/etc/kube-rbac-proxy-config/config-file.yaml
             {{- if and .Values.kubeRBACProxy.tls.enabled .Values.tlsSecret.enabled }}
             - --tls-cert-file=/tls/private/{{ .Values.tlsSecret.certItem }}
@@ -248,13 +248,21 @@ spec:
           terminationMessagePolicy: {{ .terminationMessagePolicy }}
           {{- end }}
           {{- end }}
-          {{- with .Values.kubeRBACProxy.env }}
+          # {{- with .Values.kubeRBACProxy.env }}
+          # env:
+          #   {{- range $key, $value := $.Values.kubeRBACProxy.env }}
+          #   - name: {{ $key }}
+          #     value: {{ $value | quote }}
+          #   {{- end }}
+          # {{- end }}
           env:
-            {{- range $key, $value := $.Values.kubeRBACProxy.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
-          {{- end }}
+            - name: IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+             
+          
           {{- if .Values.kubeRBACProxy.containerSecurityContext }}
           securityContext:
           {{ toYaml .Values.kubeRBACProxy.containerSecurityContext | nindent 12 }}
@@ -264,9 +272,9 @@ spec:
       imagePullSecrets:
         {{- include "prometheus-node-exporter.imagePullSecrets" (dict "Values" .Values "imagePullSecrets" .Values.imagePullSecrets) | indent 8 }}
       {{- end }}
-      # hostNetwork: {{ .Values.hostNetwork }}
+      hostNetwork: {{ .Values.hostNetwork }}
       hostPID: {{ .Values.hostPID }}
-      hostIPC: {{ .Values.hostIPC }}
+      # hostIPC: {{ .Values.hostIPC }}
       affinity:
         {{- include "prometheus-node-exporter.mergedAffinities" . | nindent 8 }}
       {{- with .Values.dnsConfig }}

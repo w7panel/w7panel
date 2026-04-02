@@ -38,7 +38,7 @@ global:
 # Configure kube-rbac-proxy. When enabled, creates a kube-rbac-proxy to protect the node-exporter http endpoint.
 # The requests are served through the same service but requests are HTTPS.
 kubeRBACProxy:
-  enabled: false
+  enabled: true
   ## Set environment variables as name/value pairs
   env: {}
     # VARIABLE: value
@@ -60,9 +60,9 @@ kubeRBACProxy:
   containerSecurityContext: {}
 
   # Specify the port used for the Node exporter container (upstream port)
-  port: 8100
+  port: 9101 #8100
   # Specify the name of the container port
-  portName: http
+  portName: metrics #http
   # Configure a hostPort. If true, hostPort will be enabled in the container and set to service.port.
   enableHostPort: false
 
@@ -77,9 +77,9 @@ kubeRBACProxy:
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #  cpu: 100m
-    #  memory: 64Mi
+    limits:
+     cpu: 20m
+     memory: 40Mi
     # requests:
     #  cpu: 10m
     #  memory: 32Mi
@@ -139,7 +139,7 @@ service:
   nodePort: null
 
   ## If true, node exporter will listen on all interfaces
-  listenOnAllInterfaces: true
+  listenOnAllInterfaces: false
 
   ## Additional annotations and labels for the service
   annotations:
@@ -351,7 +351,7 @@ serviceAccount:
   name:
   annotations: {}
   imagePullSecrets: []
-  automountServiceAccountToken: false
+  automountServiceAccountToken: true
 
 securityContext:
   fsGroup: 65534
@@ -379,7 +379,7 @@ rbac:
 endpoints: []
 
 # Expose the service to the host network
-hostNetwork: false
+hostNetwork: true
 
 # Share the host process ID namespace
 hostPID: true
