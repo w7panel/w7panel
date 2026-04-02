@@ -1204,3 +1204,8 @@ func PanelInnerUrl() string {
 	}
 	return "http://" + ServiceAccountName() + "." + ns + ".svc:8000"
 }
+
+// 主集群svcname
+func PanelRootSvcName() string {
+	return "w7panel-root-svc"
+}

@@ -494,7 +494,7 @@ func ToK3kPanelPodIpEndpoint(k3kUser *K3kUser) *corev1.Endpoints {
 			Kind:       "Endpoints",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "w7panel-root-svc",
+			Name:      helper.PanelRootSvcName(),
 			Namespace: "default",
 			Labels: map[string]string{
 				"k3k-sa":   k3kUser.Name,
@@ -526,7 +526,7 @@ func ToK3kPanelEndpointService(k3kUser *K3kUser) *corev1.Service {
 			Kind:       "Service",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "w7panel-root-svc",
+			Name:      helper.PanelRootSvcName(),
 			Namespace: k3kUser.GetK3kNamespace(),
 			Labels: map[string]string{
 				"k3k-sa":   k3kUser.Name,
