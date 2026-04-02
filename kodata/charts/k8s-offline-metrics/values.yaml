@@ -125,6 +125,10 @@ tolerations: []
 
 affinity: {}
 
+nodeexporter:
+  pod:
+    enabled: false # 是否使用pod-node-exporter
+
 servicelb:
   enabled: false
   port: 9429

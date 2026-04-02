@@ -45,7 +45,7 @@ kubeRBACProxy:
   image:
     registry: quay.io
     repository: brancz/kube-rbac-proxy
-    tag: v0.18.2
+    tag: v0.5.0
     sha: ""
     pullPolicy: IfNotPresent
 
@@ -118,7 +118,7 @@ tlsSecret:
 ## Service configuration
 service:
   ## Creating a service is enabled by default
-  enabled: true
+  enabled: false #true
 
   ## Service type
   type: ClusterIP
@@ -143,7 +143,7 @@ service:
 
   ## Additional annotations and labels for the service
   annotations:
-    prometheus.io/scrape: "true"
+    # prometheus.io/scrape: "true"
   labels: {}
 
   ## Dual stack settings for the service
@@ -371,7 +371,7 @@ rbac:
   create: true
   ## If true, create & use Pod Security Policy resources
   ## https://kubernetes.io/docs/concepts/policy/pod-security-policy/
-  pspEnabled: true
+  pspEnabled: false
   pspAnnotations: {}
 
 # for deployments that have node_exporter deployed outside of the cluster, list

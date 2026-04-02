@@ -1,3 +1,4 @@
+{{- if .Values.nodeexporter.pod.enabled}}
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
@@ -10,6 +11,7 @@ spec:
             - default
     podMetricsEndpoints:
         -
+            bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
             port: metrics
             relabelConfigs:
                 -
@@ -17,11 +19,16 @@ spec:
                     sourceLabels:
                         - __meta_kubernetes_pod_node_name
                     targetLabel: instance
-            scheme: http
+            scheme: https
+            tlsConfig:
+                caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+                insecureSkipVerify: true
     selector:
         matchLabels:
             app.kubernetes.io/instance: w7panel-metrics
             app.kubernetes.io/name: prometheus-node-exporter
             app.kubernetes.io/part-of: prometheus-node-exporter
+
+{{- end }}
 
 

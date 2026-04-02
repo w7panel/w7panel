@@ -31,10 +31,10 @@ spec:
         -
             action: labeldrop
             regex: __meta_kubernetes_node_label_feature_node.*
-        -
-            sourceLabels:
-                - __metrics_path__
-            targetLabel: metrics_path
+        # -
+        #     sourceLabels:
+        #         - __metrics_path__
+        #     targetLabel: metrics_path
         # -
         #     replacement: kubelet-resource
         #     targetLabel: job
