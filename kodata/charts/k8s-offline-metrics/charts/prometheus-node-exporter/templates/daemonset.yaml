@@ -60,7 +60,7 @@ spec:
             - --path.udev.data=/host/root/run/udev/data
             {{- end }}
             {{- end }}
-            - --web.listen-address=[$(HOST_IP)]:{{ $servicePort }}
+            - --web.listen-address=127.0.0.1:{{ $servicePort }}
             {{- with .Values.extraArgs }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -68,22 +68,22 @@ spec:
           securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          env:
-            - name: HOST_IP
-              {{- if .Values.kubeRBACProxy.enabled }}
-              value: 127.0.0.1
-              {{- else if .Values.service.listenOnAllInterfaces }}
-              value: 0.0.0.0
-              {{- else }}
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
-              {{- end }}
-            {{- range $key, $value := .Values.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
+          # env:
+          #   - name: HOST_IP
+          #     {{- if .Values.kubeRBACProxy.enabled }}
+          #     value: 127.0.0.1
+          #     {{- else if .Values.service.listenOnAllInterfaces }}
+          #     value: 0.0.0.0
+          #     {{- else }}
+          #     valueFrom:
+          #       fieldRef:
+          #         apiVersion: v1
+          #         fieldPath: status.hostIP
+          #     {{- end }}
+          #   {{- range $key, $value := .Values.env }}
+          #   - name: {{ $key }}
+          #     value: {{ $value | quote }}
+          #   {{- end }}
           {{- if eq .Values.kubeRBACProxy.enabled false }}
           ports:
             - name: {{ .Values.service.portName }}

@@ -27,6 +27,6 @@ annotations:
   w7.cc/title: "微擎面板"
   w7.cc/description: "微擎面板"
   title: "微擎面板"
-  w7.cc/icon: "https://zpk.w7.cc/zip/icon/w7panel_offline"
-  w7.cc/zpk-url: "https://zpk.w7.cc/respo/info/w7panel_offline"
+  w7.cc/icon: "https://zpk.w7.cc/zpk/zip/icon/w7panel_offline"
+  w7.cc/zpk-url: "https://zpk.w7.cc/zpk/respo/info/w7panel_offline"
   w7.cc/identifie: "w7panel-offline"

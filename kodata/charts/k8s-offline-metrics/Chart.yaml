@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.0.19
+version: 1.0.21
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -33,6 +33,6 @@ annotations:
   w7.cc/title: "面板监控"
   w7.cc/description: "面板监控"
   title: "面板监控"
-  w7.cc/icon: "https://zpk.w7.cc/zip/icon/w7panel_metrics"
-  w7.cc/zpk-url: "https://zpk.w7.cc/respo/info/w7panel_metrics"
+  w7.cc/icon: "https://zpk.w7.cc/zpk/zip/icon/w7panel_metrics"
+  w7.cc/zpk-url: "https://zpk.w7.cc/zpk/respo/info/w7panel_metrics"
   w7.cc/identifie: "w7panel-metrics"
