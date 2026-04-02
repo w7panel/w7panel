@@ -284,8 +284,8 @@ func ToK3kPod(k3kUser *K3kUser) *corev1.Pod {
 		// 	Value: os.Getenv("POD_IP"),
 		// },
 		{
-			Name:  "ROOT_HOST_IP",
-			Value: os.Getenv("HOST_IP"),
+			Name:  "ROOT_NODE_IP",
+			Value: os.Getenv("NODE_IP"),
 		},
 		{
 			Name:  "STATIC_DOWN_ENABLED",

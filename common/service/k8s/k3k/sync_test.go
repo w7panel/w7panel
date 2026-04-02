@@ -40,12 +40,13 @@ func TestSyncIngressHttps(t *testing.T) {
 }
 
 func TestSyncIngressHttp(t *testing.T) {
-	os.Setenv("LOCAL_MOCK", "true")
-	os.Setenv("K3K_NAME", "s25")
-	os.Setenv("K3K_NAMESPACE", "k3k-s25")
+	// os.Setenv("LOCAL_MOCK", "true")
+	os.Setenv("K3K_NAME", "console-164315")
+	os.Setenv("K3K_NAMESPACE", "k3k-console-164315")
+	os.Setenv("ROOT_POD_IP", "172.16.1.162")
 	ing := &networkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ing-rhdjzknn",
+			Name:      "ing-cyqqsnoq",
 			Namespace: "default",
 		},
 	}

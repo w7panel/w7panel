@@ -37,7 +37,7 @@ func StartCroupMetrics() {
 		}
 		collectReport(metricsClient) // 首次执行
 		// 启动定时任务
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(30 * time.Second)
 		for {
 			if err := collectReport(metricsClient); err != nil {
 				// 记录错误但继续运行

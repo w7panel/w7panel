@@ -22,7 +22,7 @@ import (
 
 // 处理 Ingress 资源
 func (m *ResourceMutator) handleIngress(ctx context.Context, req admission.Request) admission.Response {
-	slog.Info("处理 Ingress admission 请求")
+	// slog.Info("处理 Ingress admission 请求")
 
 	defer handlerIngressSync(req, m.decoder, m.client)
 	ingress := &networkingv1.Ingress{}
@@ -105,7 +105,7 @@ func (m *ResourceMutator) handleIngressDelete(client client.Client, ingress *net
 }
 
 func handlerIngressSync(req admission.Request, decoder admission.Decoder, client client.Client) {
-	slog.Info("处理 Ingress admission 请求")
+	// slog.Info("处理 Ingress admission 请求")
 
 	switch req.Operation {
 	case "CREATE":
