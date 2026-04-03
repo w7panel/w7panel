@@ -20,6 +20,12 @@ const (
 	k3sContainerRoot    = "/var/lib/rancher/k3s/agent/containerd"
 )
 
+type tagMetadata struct {
+	MediaType string `json:"mediaType"`
+	Digest    string `json:"digest"`
+	Size      int64  `json:"size"`
+}
+
 func withNamespace(ctx context.Context) context.Context {
 	return namespaces.WithNamespace(ctx, NS)
 }

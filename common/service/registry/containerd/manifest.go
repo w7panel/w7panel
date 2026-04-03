@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -31,11 +30,40 @@ type Manifest struct {
 	store    content.Store
 }
 
-func NewManifest(ctrd *client.Client, imageSvc images.Store) *Manifest {
+func NewManifest(ctrd *client.Client) *Manifest {
 	return &Manifest{
 		ctrd:     ctrd,
-		imageSvc: imageSvc,
+		imageSvc: ctrd.ImageService(),
+		store:    ctrd.ContentStore(),
 	}
+}
+
+func (r *Manifest) HeadManifestRead(w http.ResponseWriter, req *http.Request, repo, ref string) {
+	meta, err := r.resolveManifest(repo, ref)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+	manifestDigest, err := digest.Parse(meta.Digest)
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+	ctx := withNamespace(req.Context())
+	body, err := content.ReadBlob(ctx, r.store, ocispec.Descriptor{Digest: manifestDigest})
+	if err != nil {
+		http.NotFound(w, req)
+		return
+	}
+
+	w.Header().Set("Content-Type", meta.MediaType)
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", len(body)))
+	w.Header().Set("Docker-Content-Digest", meta.Digest)
+	if req.Method == http.MethodHead {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.Write(body)
 }
 
 func (r *Manifest) PutManifest(w http.ResponseWriter, req *http.Request, repo, ref string) {
@@ -51,15 +79,30 @@ func (r *Manifest) PutManifest(w http.ResponseWriter, req *http.Request, repo, r
 	}
 
 	dgst := digest.FromBytes(body)
-	go func() {
-		if err := r.importToContainerd(context.Background(), repo, ref, mediaType, body); err != nil {
-			slog.Error("import to containerd failed", "error", err)
-		}
-	}()
+	if err := r.importToContainerd(req.Context(), repo, ref, mediaType, body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
 
 	w.Header().Set("Location", fmt.Sprintf("/v2/%s/manifests/%s", repo, ref))
 	w.Header().Set("Docker-Content-Digest", dgst.String())
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (r *Manifest) HeadManifest(w http.ResponseWriter, req *http.Request, repo, ref string) {
+	ctx := withNamespace(req.Context())
+	fullRef := r.imageRef(repo, ref)
+
+	img, err := r.imageSvc.Get(ctx, fullRef)
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Docker-Content-Digest", img.Target.Digest.String())
+	w.Header().Set("Content-Type", img.Target.MediaType)
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", img.Target.Size))
+	w.WriteHeader(http.StatusOK)
 }
 
 func (r *Manifest) importToContainerd(ctx context.Context, repo, ref, mediaType string, body []byte) error {
@@ -185,4 +228,48 @@ func setGCChildLabels(ctx context.Context, store content.Store, desc ocispec.Des
 
 	_, err = store.Update(ctx, info, fields...)
 	return err
+}
+
+func inferManifestMediaType(ctx context.Context, store content.Store, dgst digest.Digest) string {
+	body, err := content.ReadBlob(ctx, store, ocispec.Descriptor{Digest: dgst})
+	if err != nil {
+		return ocispec.MediaTypeImageManifest
+	}
+	var probe struct {
+		MediaType string `json:"mediaType"`
+	}
+	if err := json.Unmarshal(body, &probe); err != nil || probe.MediaType == "" {
+		return ocispec.MediaTypeImageManifest
+	}
+	return probe.MediaType
+}
+
+func (r *Manifest) resolveManifest(repo, ref string) (*tagMetadata, error) {
+	if strings.HasPrefix(ref, "sha256:") {
+		dgst, err := digest.Parse(ref)
+		if err != nil {
+			return nil, err
+		}
+		ctx := withNamespace(context.Background())
+		info, err := r.store.Info(ctx, dgst)
+		if err != nil {
+			return nil, err
+		}
+		return &tagMetadata{
+			MediaType: inferManifestMediaType(ctx, r.store, dgst),
+			Digest:    dgst.String(),
+			Size:      info.Size,
+		}, nil
+	}
+
+	ctx := withNamespace(context.Background())
+	image, err := r.imageSvc.Get(ctx, r.imageRef(repo, ref))
+	if err != nil {
+		return nil, err
+	}
+	return &tagMetadata{
+		MediaType: image.Target.MediaType,
+		Digest:    image.Target.Digest.String(),
+		Size:      image.Target.Size,
+	}, nil
 }

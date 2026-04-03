@@ -25,7 +25,7 @@ func NewRegistry() (*Registry, error) {
 	}
 	contentStore := c.ContentStore()
 	handler := NewBlobHandler(contentStore)
-	manifest := NewManifest(c, c.ImageService())
+	manifest := NewManifest(c)
 	google := micro.New(micro.WithBlobHandler(handler))
 	return &Registry{
 		google:   google,
@@ -41,6 +41,12 @@ func (r *Registry) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
 			r.manifest.PutManifest(rw, req, name, reference)
 			return
 		}
+	} else if r.isHeadManifestRequest(req) {
+		name, reference := r.extractNameAndReference(req.URL.Path)
+		if name != "" && reference != "" {
+			r.manifest.HeadManifestRead(rw, req, name, reference)
+			return
+		}
 	} else {
 		r.google.ServeHTTP(rw, req)
 	}
@@ -51,6 +57,12 @@ func (r *Registry) isPutManifestRequest(req *http.Request, status int) bool {
 	return req.Method == http.MethodPut &&
 		strings.Contains(req.URL.Path, "/manifests/") &&
 		status == http.StatusCreated
+}
+
+func (r *Registry) isHeadManifestRequest(req *http.Request) bool {
+	// Docker Registry API: HEAD /v2/{name}/manifests/{reference}
+	return (req.Method == http.MethodHead || req.Method == http.MethodGet) &&
+		strings.Contains(req.URL.Path, "/manifests/")
 }
 
 // extractNameAndReference 从路径中提取仓库名称和 reference (digest/tag)
