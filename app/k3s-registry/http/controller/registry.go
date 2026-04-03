@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/w7panel/w7panel/common/service/registry"
+	"github.com/w7panel/w7panel/common/service/registry/containerd"
 
 	"github.com/we7coreteam/w7-rangine-go/v2/src/http/controller"
 )
@@ -15,10 +15,10 @@ type Registry struct {
 	controller.Abstract
 }
 
-var regisry *registry.RegistryHandler
+var regisry http.Handler
 
 func init() {
-	reg, err := registry.InitReigstry(context.Background())
+	reg, err := containerd.InitReigstry(context.Background())
 	if err != nil {
 		// slog.Error("init registry err", "err", err)
 		return

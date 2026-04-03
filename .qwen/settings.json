@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/go/src/net/http/httputil/**)"
+    ]
+  },
+  "$version": 3
+}
