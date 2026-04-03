@@ -518,3 +518,5 @@ require (
 replace github.com/containerd/nerdctl/mod/tigron v0.0.0 => ./mod/tigron
 
 replace github.com/google/go-containerregistry v0.0.0 => ./mod/go-containerregistry
+
+replace github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20250613215107-59a4b8593039 => ./mod/go-containerregistry/pkg/authn/k8schain
