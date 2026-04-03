@@ -91,6 +91,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
+	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.9.1 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -98,6 +99,7 @@ require (
 	github.com/bodgit/windows v1.0.1 // indirect
 	github.com/bytedance/sonic/loader v0.2.2 // indirect
 	github.com/chai2010/gettext-go v1.0.2 // indirect
+	github.com/chrismellard/docker-credential-acr-env v0.0.0-20230304212654-82a0ddb27589 // indirect
 	github.com/cilium/ebpf v0.16.0 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
@@ -117,6 +119,7 @@ require (
 	github.com/containerd/platforms v1.0.0-rc.2 // indirect
 	github.com/containerd/plugin v1.0.0 // indirect
 	github.com/containerd/stargz-snapshotter v0.18.1 // indirect
+	github.com/containerd/stargz-snapshotter/estargz v0.18.1 // indirect
 	github.com/containerd/stargz-snapshotter/ipfs v0.18.1 // indirect
 	github.com/containerd/ttrpc v1.2.7 // indirect
 	github.com/containerd/typeurl/v2 v2.2.3 // indirect
@@ -132,6 +135,8 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
 	github.com/djherbis/times v1.6.0 // indirect
+	github.com/docker/cli v29.1.3+incompatible // indirect
+	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v28.5.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
 	github.com/docker/go-connections v0.6.0 // indirect
@@ -170,6 +175,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
+	github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20250225234217-098045d5e61f // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gookit/color v1.5.3 // indirect
@@ -198,6 +204,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/koron/go-ssdp v0.0.6 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -227,6 +234,7 @@ require (
 	github.com/mikioh/tcpopt v0.0.0-20190314235656-172688c1accc // indirect
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
+	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
@@ -338,6 +346,8 @@ require (
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/exp v0.0.0-20251023183803-a4bb9ffd2546 // indirect
 	golang.org/x/image v0.25.0 // indirect
+	golang.org/x/oauth2 v0.32.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/telemetry v0.0.0-20251111182119-bc8e575c7b54 // indirect
 	golang.org/x/term v0.38.0 // indirect
 	golang.org/x/tools/godoc v0.1.0-deprecated // indirect
@@ -370,30 +380,22 @@ require (
 
 require (
 	github.com/aws/smithy-go v1.22.3
-	github.com/awslabs/amazon-ecr-credential-helper/ecr-login v0.9.1
 	github.com/bodgit/sevenzip v1.5.2
-	github.com/chrismellard/docker-credential-acr-env v0.0.0-20230304212654-82a0ddb27589
 	github.com/cockroachdb/errors v1.11.3
 	github.com/containerd/cgroups/v3 v3.1.3
 	github.com/containerd/containerd v1.7.27
 	github.com/containerd/containerd/v2 v2.2.2
 	github.com/containerd/errdefs v1.0.0
-	github.com/containerd/stargz-snapshotter/estargz v0.18.1
 	github.com/coredns/caddy v1.1.3
 	github.com/distribution/reference v0.6.0
-	github.com/docker/cli v29.1.3+incompatible
-	github.com/docker/distribution v2.8.3+incompatible
 	github.com/gin-contrib/gzip v1.2.2
 	github.com/go-logr/logr v1.4.3
 	github.com/go-resty/resty/v2 v2.16.3
 	github.com/golang/protobuf v1.5.4
 	github.com/google/gnostic-models v0.7.0
-	github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20250225234217-098045d5e61f
-	github.com/klauspost/compress v1.18.2
 	github.com/klauspost/pgzip v1.2.6
 	github.com/lib/pq v1.10.9
 	github.com/lionsoul2014/ip2region/binding/golang v0.0.0-20251011075309-e39ac2d6d123
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.1.1
 	github.com/prometheus/client_golang v1.23.2
@@ -408,8 +410,6 @@ require (
 	github.com/ulikunitz/xz v0.5.12
 	github.com/we7coreteam/w7-rangine-go/v2 v2.0.2
 	go.eigsys.de/gin-cachecontrol/v2 v2.3.0
-	golang.org/x/oauth2 v0.32.0
-	golang.org/x/sync v0.19.0
 	golang.org/x/time v0.14.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251029180050-ab9386a59fda
 	gopkg.in/yaml.v2 v2.4.0
@@ -515,8 +515,9 @@ require (
 	oras.land/oras-go/v2 v2.6.0
 )
 
-replace github.com/containerd/nerdctl/mod/tigron v0.0.0 => ./mod/tigron
-
-replace github.com/google/go-containerregistry v0.0.0 => ./mod/go-containerregistry
-
-replace github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20250613215107-59a4b8593039 => ./mod/go-containerregistry/pkg/authn/k8schain
+replace (
+	github.com/containerd/nerdctl/mod/tigron v0.0.0 => ./mod/tigron
+	github.com/google/go-containerregistry v0.20.6 => ./mod/go-containerregistry
+	github.com/google/go-containerregistry/pkg/authn/k8schain v0.0.0-20250613215107-59a4b8593039 => ./mod/go-containerregistry/pkg/authn/k8schain
+	github.com/google/go-containerregistry/pkg/authn/kubernetes v0.0.0-20250225234217-098045d5e61f => ./mod/go-containerregistry/pkg/authn/kubernetes
+)

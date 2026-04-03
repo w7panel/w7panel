@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Read(//home/go/src/net/http/httputil/**)"
+      "Read(//home/go/src/net/http/httputil/**)",
+      "Bash(go *)",
+      "Bash(sleep *)",
+      "Bash(rm *)"
     ]
   },
   "$version": 3
