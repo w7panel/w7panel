@@ -116,7 +116,7 @@ func (u *k3kUserOrder) NeedCreateOrder() bool {
 
 // 到期后必须续费，否则无法使用
 func (u *k3kUserOrder) NeedRenew() bool {
-	if err := u.CanRenewError(); err != nil {
+	if u.NeedBuyResource() {
 		expireTime, err := u.GetExpireTime()
 		if err != nil {
 			return false
@@ -126,6 +126,16 @@ func (u *k3kUserOrder) NeedRenew() bool {
 			return true
 		}
 	}
+	// if err := u.CanRenewError(); err != nil {
+	// 	expireTime, err := u.GetExpireTime()
+	// 	if err != nil {
+	// 		return false
+	// 	}
+	// 	if expireTime.Before(time.Now()) { //3天内可以续费
+	// 		// if expireTime.Before(time.Now().Add(-time.Hour * 72)) { //3天内可以续费
+	// 		return true
+	// 	}
+	// }
 	return false
 }
 

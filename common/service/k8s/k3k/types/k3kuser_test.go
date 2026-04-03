@@ -41,3 +41,23 @@ func TestGetClusterStorageRequestSize(t *testing.T) {
 	scName := k3kUser.GetStorageClass()
 	t.Log(scName)
 }
+
+func TestRenew(t *testing.T) {
+	sdk := k8s.NewK8sClient().Sdk
+	client, err := sdk.ToSigClient()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	sa := &v1.ServiceAccount{}
+	err = client.Get(sdk.Ctx, types.NamespacedName{Namespace: "default", Name: "console-164315"}, sa)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	k3kUser := NewK3kUser(sa)
+	ok := k3kUser.NeedRenew()
+	if ok {
+		t.Log(ok)
+	}
+}
