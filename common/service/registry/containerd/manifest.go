@@ -38,6 +38,7 @@ func NewManifest(ctrd *client.Client) *Manifest {
 	}
 }
 
+// head get 得有 docker push会请求
 func (r *Manifest) HeadManifestRead(w http.ResponseWriter, req *http.Request, repo, ref string) {
 	meta, err := r.resolveManifest(repo, ref)
 	if err != nil {
@@ -87,22 +88,6 @@ func (r *Manifest) PutManifest(w http.ResponseWriter, req *http.Request, repo, r
 	w.Header().Set("Location", fmt.Sprintf("/v2/%s/manifests/%s", repo, ref))
 	w.Header().Set("Docker-Content-Digest", dgst.String())
 	w.WriteHeader(http.StatusCreated)
-}
-
-func (r *Manifest) HeadManifest(w http.ResponseWriter, req *http.Request, repo, ref string) {
-	ctx := withNamespace(req.Context())
-	fullRef := r.imageRef(repo, ref)
-
-	img, err := r.imageSvc.Get(ctx, fullRef)
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Docker-Content-Digest", img.Target.Digest.String())
-	w.Header().Set("Content-Type", img.Target.MediaType)
-	w.Header().Set("Content-Length", fmt.Sprintf("%d", img.Target.Size))
-	w.WriteHeader(http.StatusOK)
 }
 
 func (r *Manifest) importToContainerd(ctx context.Context, repo, ref, mediaType string, body []byte) error {
