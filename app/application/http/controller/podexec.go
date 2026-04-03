@@ -478,7 +478,7 @@ func (self PodExec) GetAgentPodAndPid(http *gin.Context) {
 		// 本地模拟模式: 直接使用本地路由，不通过 agent 代理
 		webdavUrl = "/panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
 		webdavBasePath = "panel-api/v1/files/webdav-agent/" + pidstr + "/agent"
-		compressUrl = "/panel-api/v1/filescompress-agent/" + pidstr
+		compressUrl = "/panel-api/v1/files/compress-agent/" + pidstr
 		permissionUrl = "/panel-api/v1/files/permission-agent/" + pidstr
 		if subPid > 0 {
 			subpidstr := strconv.Itoa(subPid)

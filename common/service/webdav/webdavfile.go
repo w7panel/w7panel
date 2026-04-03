@@ -3,6 +3,7 @@ package webdav2
 import (
 	"context"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"log/slog"
 	"mime"
@@ -15,6 +16,8 @@ import (
 
 	"golang.org/x/net/webdav"
 )
+
+var errSpecialFileNotReadable = errors.New("special file is not readable")
 
 type WebDAVFile struct {
 	webdav.File
@@ -185,7 +188,7 @@ func (f *WebDAVFile) Read(p []byte) (n int, err error) {
 		return 0, err
 	}
 	if !f.fileInfo.editable {
-		return 0, nil
+		return 0, errSpecialFileNotReadable
 	}
 	return f.File.Read(p)
 }
@@ -195,7 +198,7 @@ func (f *WebDAVFile) Seek(offset int64, whence int) (n int64, err error) {
 		return 0, err
 	}
 	if !f.fileInfo.editable {
-		return 0, nil
+		return 0, errSpecialFileNotReadable
 	}
 	return f.File.Seek(offset, whence)
 }

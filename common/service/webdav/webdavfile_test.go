@@ -1,6 +1,7 @@
 package webdav2
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -62,4 +63,46 @@ func TestWebDAVFileEnsureStat_UsesReqPathForLstat(t *testing.T) {
 	if wf.fileInfo.fileType != "file" || !wf.fileInfo.editable {
 		t.Fatalf("unexpected file type/editable: got=(%s,%v)", wf.fileInfo.fileType, wf.fileInfo.editable)
 	}
+}
+
+func TestWebDAVFileReadSeek_ReturnErrorWhenNotEditable(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "webdav-file-readseek")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.RemoveAll(tmpDir) })
+
+	targetPath := filepath.Join(tmpDir, "special")
+	if err := os.WriteFile(targetPath, []byte("hello"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	f, err := os.Open(targetPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = f.Close() })
+
+	wf := NewWebDAVFile(f, tmpDir, "/special")
+	wf.fileInfo = &WebDAVFileInfo{FileInfo: mustStat(t, targetPath), editable: false, fileType: "device"}
+
+	buf := make([]byte, 16)
+	if _, err := wf.Read(buf); err == nil {
+		t.Fatal("expected read error for non-editable file")
+	}
+	if _, err := wf.Seek(0, 0); err == nil {
+		t.Fatal("expected seek error for non-editable file")
+	}
+	if !errors.Is(errSpecialFileNotReadable, errSpecialFileNotReadable) {
+		t.Fatal("sentinel error should be comparable")
+	}
+}
+
+func mustStat(t *testing.T, path string) os.FileInfo {
+	t.Helper()
+	info, err := os.Stat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return info
 }
