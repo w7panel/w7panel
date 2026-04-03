@@ -65,7 +65,7 @@ func (l *LimitHardWrapper) decodeOnce() {
 
 func (l *LimitHardWrapper) GetResourceQuota() (*v1.ResourceQuota, error) {
 	if true {
-		// return nil, errors.New("移除限制")
+		return nil, errors.New("移除限制")
 	}
 	l.decodeOnce()
 	if l.lrq == nil {
