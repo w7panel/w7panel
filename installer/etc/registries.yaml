@@ -1,0 +1,36 @@
+mirrors:
+  registry.local.w7.cc:
+  docker.io:
+    endpoint:
+      - "https://mirror.ccs.tencentyun.com"
+      - "https://registry.cn-hangzhou.aliyuncs.com"
+      - "https://docker.m.daocloud.io"
+      - "https://docker.1panel.live"
+  quay.io:
+    endpoint:
+      - "https://quay.m.daocloud.io"
+      - "https://quay.dockerproxy.com"
+  gcr.io:
+    endpoint:
+      - "https://gcr.m.daocloud.io"
+      - "https://gcr.dockerproxy.com"
+  ghcr.io:
+    endpoint:
+      - "https://ghcr.m.daocloud.io"
+      - "https://ghcr.dockerproxy.com"
+  k8s.gcr.io:
+    endpoint:
+      - "https://k8s-gcr.m.daocloud.io"
+      - "https://k8s.dockerproxy.com"
+  registry.k8s.io:
+    endpoint:
+      - "https://k8s.m.daocloud.io"
+      - "https://k8s.dockerproxy.com"
+  mcr.microsoft.com:
+    endpoint:
+      - "https://mcr.m.daocloud.io"
+      - "https://mcr.dockerproxy.com"
+  nvcr.io:
+    endpoint:
+      - "https://nvcr.m.daocloud.io"
+  "*":

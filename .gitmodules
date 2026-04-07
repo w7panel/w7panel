@@ -7,6 +7,3 @@
 [submodule "codeblitz"]
 	path = codeblitz
 	url = https://github.com/w7panel/codeblitz.git
-[submodule "docs"]
-	path = docs
-	url = https://github.com/w7panel/docs.git

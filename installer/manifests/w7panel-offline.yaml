@@ -1,0 +1,13 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: w7panel-offline
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/w7panel-offline-1.0.19.tgz
+  version: v1.0.19
+  targetNamespace: default
+  createNamespace: true
+  set:
+    servicelb.loadBalancerClass: "io.cilium/node"
+    register.needInitUser: "true"

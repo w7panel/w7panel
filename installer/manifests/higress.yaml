@@ -1,0 +1,58 @@
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: higress
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/higress-2.0.4.tgz
+  version: v2.0.4
+  targetNamespace: higress-system
+  createNamespace: true
+  set:
+    higress-core.gateway.service.loadBalancerClass: "io.cilium/node"
+    global.ingressClass: "higress"
+    higress-core.gateway.replicas: 1
+    higress-core.gateway.resources.limits.cpu: 0
+    higress-core.gateway.resources.limits.memory: 0
+    higress-core.gateway.resources.requests.cpu: 0
+    higress-core.gateway.resources.requests.memory: 0
+    higress-core.controller.replicas: 1
+    higress-core.controller.resources.requests.cpu: 0
+    higress-core.controller.resources.requests.memory: 0
+    higress-core.controller.resources.limits.cpu: 0
+    higress-core.controller.resources.limits.memory: 0
+    higress-core.pilot.replicaCount: 1
+    higress-core.pilot.resources.requests.cpu: 0
+    higress-core.pilot.resources.requests.memory: 0
+    higress-core.downstream.connectionBufferLimits: 3276800
+    higress-console.replicaCount: 0
+    higress-console.resources.requests.cpu: 0
+    higress-console.resources.requests.memory: 0
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: dis-tls
+  namespace: higress-system
+spec:
+  configPatches:
+  - applyTo: FILTER_CHAIN
+    match:
+      context: GATEWAY
+      listener:
+        name: 0.0.0.0_443
+    patch:
+      operation: MERGE
+      value:
+        transport_socket:
+          name: envoy.transport_sockets.tls
+          typed_config:
+            '@type': type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+            common_tls_context:
+              tls_params:
+                tls_maximum_protocol_version: TLSv1_3
+                tls_minimum_protocol_version: TLSv1_1
+  workloadSelector:
+    labels:
+      app: higress-gateway

@@ -1,0 +1,95 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: longhorn-iscsi-installation
+  namespace: kube-system
+  labels:
+    app: longhorn-iscsi-installation
+  annotations:
+    command: &cmd OS=$(grep -E "^ID_LIKE=" /etc/os-release | cut -d '=' -f 2); if [[ -z "${OS}" ]]; then OS=$(grep -E "^ID=" /etc/os-release | cut -d '=' -f 2); fi; if [[ "${OS}" == *"debian"* ]]; then sudo apt-get update -q -y && sudo apt-get install -q -y cryptsetup open-iscsi && sudo modprobe iscsi_tcp && sudo systemctl -q enable iscsid && sudo systemctl restart iscsid; elif [[ "${OS}" == *"suse"* ]]; then sudo zypper --gpg-auto-import-keys -q refresh && sudo zypper --gpg-auto-import-keys -q install -y cryptsetup open-iscsi && sudo modprobe iscsi_tcp && sudo systemctl -q enable iscsid && sudo systemctl restart iscsid; else sudo yum makecache -q -y && sudo yum --setopt=tsflags=noscripts install -q -y cryptsetup iscsi-initiator-utils && echo "InitiatorName=$(/sbin/iscsi-iname)" > /etc/iscsi/initiatorname.iscsi && sudo modprobe iscsi_tcp && sudo systemctl -q enable iscsid && sudo systemctl restart iscsid; fi && if [ $? -eq 0 ]; then echo "iscsi install successfully"; else echo "iscsi install failed error code $?"; fi
+spec:
+  selector:
+    matchLabels:
+      app: longhorn-iscsi-installation
+  template:
+    metadata:
+      labels:
+        app: longhorn-iscsi-installation
+    spec:
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - name: iscsi-installation
+        command:
+          - nsenter
+          - --mount=/proc/1/ns/mnt
+          - --
+          - bash
+          - -c
+          - *cmd
+        image: busybox:latest
+        securityContext:
+          privileged: true
+      containers:
+      - name: sleep
+        image: rancher/mirrored-pause:3.6
+  updateStrategy:
+    type: RollingUpdate
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: longhorn-nfs-installation
+  namespace: kube-system
+  labels:
+    app: longhorn-nfs-installation
+  annotations:
+    command: &cmd OS=$(grep -E "^ID_LIKE=" /etc/os-release | cut -d '=' -f 2); if [[ -z "${OS}" ]]; then OS=$(grep -E "^ID=" /etc/os-release | cut -d '=' -f 2); fi; if [[ "${OS}" == *"debian"* ]]; then sudo apt-get update -q -y && sudo apt-get install -q -y nfs-common && sudo systemctl -q enable rpcbind && sudo systemctl restart rpcbind; elif [[ "${OS}" == *"suse"* ]]; then sudo zypper --gpg-auto-import-keys -q refresh && sudo zypper --gpg-auto-import-keys -q install -y nfs-client && sudo systemctl -q enable rpcbind && sudo systemctl restart rpcbind; else sudo yum makecache -q -y && sudo yum --setopt=tsflags=noscripts install -q -y nfs-utils && sudo systemctl -q enable rpcbind && sudo systemctl restart rpcbind; fi && if [ $? -eq 0 ]; then echo "nfs client install successfully"; else echo "nfs client install failed error code $?"; fi
+spec:
+  selector:
+    matchLabels:
+      app: longhorn-nfs-installation
+  template:
+    metadata:
+      labels:
+        app: longhorn-nfs-installation
+    spec:
+      hostNetwork: true
+      hostPID: true
+      initContainers:
+      - name: nfs-installation
+        command:
+          - nsenter
+          - --mount=/proc/1/ns/mnt
+          - --
+          - bash
+          - -c
+          - *cmd
+        image: busybox:latest
+        securityContext:
+          privileged: true
+      containers:
+      - name: sleep
+        image: rancher/mirrored-pause:3.6
+  updateStrategy:
+    type: RollingUpdate
+---
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: longhorn
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/longhorn-1.10.0.tgz
+  version: v1.10.0
+  targetNamespace: longhorn-system
+  createNamespace: true
+  set:
+    longhornUI.replicas: 0
+    csi.attacherReplicaCount: 1
+    csi.provisionerReplicaCount: 1
+    csi.resizerReplicaCount: 1
+    csi.snapshotterReplicaCount: 1
+    defaultSettings.storageReservedPercentageForDefaultDisk: "0"
+    defaultSettings.createDefaultDiskLabeledNodes: "true"

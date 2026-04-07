@@ -1,0 +1,19 @@
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: cilium
+  namespace: kube-system
+spec:
+  chart: https://cdn.w7.cc/w7panel/charts/cilium-1.16.4.tgz
+  version: 1.16.4
+  targetNamespace: kube-system
+  bootstrap: true
+  set:
+    operator.replicas: 1
+    nodeIPAM.enabled: "true"
+    ipam.operator.clusterPoolIPv4PodCIDRList: "10.42.0.0/16"
+    kubeProxyReplacement: "true"
+    envoy.enabled: "false"
+    bandwidthManager.enabled: "true"
+    k8sServiceHost: "127.0.0.1"
+    k8sServicePort: "6444"
