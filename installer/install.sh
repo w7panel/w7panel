@@ -348,7 +348,7 @@ k3sInstallServer() {
         --flannel-backend "none" \
         --disable-network-policy \
         --disable-kube-proxy \
-        --disable "local-storage,traefik"
+        --disable "traefik"
 }
 
 k3sInstallAgent() {
