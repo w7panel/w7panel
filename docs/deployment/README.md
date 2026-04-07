@@ -38,3 +38,7 @@ cannot get resource "serviceaccounts" in API group "" in the namespace "default"
 **解决**：
 - 开发模式：设置 `KUBECONFIG` 环境变量
 - 生产模式：确认 ServiceAccount 权限配置正确
+
+## 相关文档
+
+- [部署与运维排障](./troubleshooting.md)

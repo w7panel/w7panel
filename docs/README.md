@@ -49,6 +49,7 @@ docs/
 
 - [API 文档](./api/README.md)
 - [部署文档](./deployment/README.md)
+- [部署排障](./deployment/troubleshooting.md)
 - [开发指南](./development/README.md)
 - [测试文档](./testing/README.md)
 - [版本日志](./changelog/1.0.0.md)

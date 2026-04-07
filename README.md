@@ -161,6 +161,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 - [API 文档](./docs/api/README.md)
 - [部署文档](./docs/deployment/README.md)
+- [部署排障](./docs/deployment/troubleshooting.md)
 - [开发指南](./docs/development/README.md)
 - [测试文档](./docs/testing/README.md)
 - [版本日志](./docs/changelog/1.0.0.md)
@@ -200,7 +201,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 - 如果安装时长期卡在等待步骤，尤其在非大陆地区服务器上，可能是镜像拉取较慢。可先中断等待，调整 `/etc/rancher/k3s/registries.yaml`，然后重启 `k3s.service` 后继续观察 Pod 启动情况。
 
-更完整的使用说明与问题处理方式，请查看 [docs/](./docs/README.md) 下各专题文档。
+更完整的安装、运维与故障处理说明，请查看 [部署排障文档](./docs/deployment/troubleshooting.md) 与 [docs/](./docs/README.md) 下各专题文档。
 
 ## 社区
 
