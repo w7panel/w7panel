@@ -15,3 +15,6 @@ dist/
 backup_repo/
 # codeblitz - submodule: https://github.com/w7panel/codeblitz
 # codeblitz
+
+# AI 工作目录
+.sisyphus/
