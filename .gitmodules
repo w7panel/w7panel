@@ -1,6 +1,6 @@
-[submodule "w7panel"]
-	path = w7panel
-	url = https://github.com/w7panel/w7panel.git
+[submodule "w7panel-server"]
+	path = w7panel-server
+	url = https://github.com/w7panel/w7panel-server.git
 [submodule "w7panel-ui"]
 	path = w7panel-ui
 	url = https://github.com/w7panel/w7panel-ui.git
