@@ -12,7 +12,7 @@ permissions:
 env:
   GO_VERSION: "1.25"
   NODE_VERSION: "20"
-  KO_DOCKER_REPO: ccr.ccs.tencentyun.com/afan-public/w7panel1
+  KO_DOCKER_REPO: ghcr.io/w7panel/w7panel-server
   KO_DEFAULTBASEIMAGE: ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui
 
 jobs:
@@ -62,8 +62,9 @@ jobs:
         env:
           KO_DOCKER_REPO: ${{ env.KO_DOCKER_REPO }}
           KO_DEFAULTBASEIMAGE: ${{ env.KO_DEFAULTBASEIMAGE }}
-          TENCENT_DOCKER_USERNAME: ${{ secrets.TENCENT_DOCKER_USERNAME }}
-          TENCENT_DOCKER_PASSWORD: ${{ secrets.TENCENT_DOCKER_PASSWORD }}
+          DOCKER_USERNAME: ${{ github.actor }}
+          DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+           # ko login ccr.ccs.tencentyun.com -u "${TENCENT_DOCKER_USERNAME}" -p "${TENCENT_DOCKER_PASSWORD}"
         run: |
-          ko login ccr.ccs.tencentyun.com -u "${TENCENT_DOCKER_USERNAME}" -p "${TENCENT_DOCKER_PASSWORD}"
+          ko login ghcr.io -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
           ko build --bare --tags="${GITHUB_REF_NAME}" --tag-only --sbom=none --platform=all
