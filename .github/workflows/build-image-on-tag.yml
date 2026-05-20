@@ -62,6 +62,8 @@ jobs:
         env:
           KO_DOCKER_REPO: ${{ env.KO_DOCKER_REPO }}
           KO_DEFAULTBASEIMAGE: ${{ env.KO_DEFAULTBASEIMAGE }}
+          TENCENT_DOCKER_USERNAME: ${{ secrets.TENCENT_DOCKER_USERNAME }}
+          TENCENT_DOCKER_PASSWORD: ${{ secrets.TENCENT_DOCKER_PASSWORD }}
         run: |
-          ko login ccr.ccs.tencentyun.com -u ${secrets.TENCENT_DOCKER_USERNAME} -p ${secrets.TENCENT_DOCKER_PASSWORD}
+          ko login ccr.ccs.tencentyun.com -u "${TENCENT_DOCKER_USERNAME}" -p "${TENCENT_DOCKER_PASSWORD}"
           ko build --bare --tags="${GITHUB_REF_NAME}" --tag-only --sbom=none --platform=all
