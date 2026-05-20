@@ -40,13 +40,6 @@ jobs:
       - name: Setup ko
         uses: ko-build/setup-ko@v0.8
 
-      # - name: Login registry
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ccr.ccs.tencentyun.com
-      #     username: ${{ secrets.TENCENT_REGISTRY_USERNAME }}
-      #     password: ${{ secrets.TENCENT_REGISTRY_PASSWORD }}
-
       - name: Build frontend
         working-directory: w7panel-ui
         run: |
