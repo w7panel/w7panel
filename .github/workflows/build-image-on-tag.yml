@@ -39,12 +39,12 @@ jobs:
       - name: Setup ko
         uses: ko-build/setup-ko@v0.8
 
-      - name: Login registry
-        uses: docker/login-action@v3
-        with:
-          registry: ccr.ccs.tencentyun.com
-          username: ${{ secrets.TENCENT_REGISTRY_USERNAME }}
-          password: ${{ secrets.TENCENT_REGISTRY_PASSWORD }}
+      # - name: Login registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ccr.ccs.tencentyun.com
+      #     username: ${{ secrets.TENCENT_REGISTRY_USERNAME }}
+      #     password: ${{ secrets.TENCENT_REGISTRY_PASSWORD }}
 
       - name: Build frontend
         working-directory: w7panel-ui
@@ -59,5 +59,9 @@ jobs:
 
       - name: Build and push image
         working-directory: w7panel-server
+        env:
+          KO_DOCKER_REPO: ${{ env.KO_DOCKER_REPO }}
+          KO_DEFAULTBASEIMAGE: ${{ env.KO_DEFAULTBASEIMAGE }}
         run: |
+          ko login ccr.ccs.tencentyun.com -u ${secrets.TENCENT_DOCKER_USERNAME} -p ${secrets.TENCENT_DOCKER_PASSWORD}
           ko build --bare --tags="${GITHUB_REF_NAME}" --tag-only --sbom=none --platform=all
