@@ -16,6 +16,8 @@ permissions:
 env:
   CHART_DIR: charts
   CHART_PACKAGE_DIR: charts
+  ZPK_HOST: zpk.w7.cc
+  ZPK_ARTIFACT: w7panel-offline
 
 jobs:
   release:
@@ -75,8 +77,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ steps.image.outputs.registry }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
@@ -96,8 +98,6 @@ jobs:
         env:
           ZPK_DOCKER_USERNAME: ${{ secrets.ZPK_DOCKER_USERNAME }}
           ZPK_DOCKER_PASSWORD: ${{ secrets.ZPK_DOCKER_PASSWORD }}
-          ZPK_HOST: ${{ secrets.ZPK_HOST }}
-          ZPK_ARTIFACT: ${{ secrets.ZPK_ARTIFACT }}
         run: |
           sudo curl -L --fail -o /usr/local/bin/zpk https://github.com/w7panel/w7panel-zpk/releases/download/latest/zpk_linux_amd64
           sudo chmod +x /usr/local/bin/zpk
@@ -113,11 +113,11 @@ jobs:
             exit 1
           fi
           if [ -z "${ZPK_HOST}" ]; then
-            echo "ZPK_HOST secret is required"
+            echo "ZPK_HOST is required"
             exit 1
           fi
           if [ -z "${ZPK_ARTIFACT}" ]; then
-            echo "ZPK_ARTIFACT secret is required"
+            echo "ZPK_ARTIFACT is required"
             exit 1
           fi
 
