@@ -12,25 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.26-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS builder
 
-ARG LINUX_CC=gcc
-ARG LINUX_CXX=g++
-
-ENV CGO_ENABLED=1
-ENV CC=${LINUX_CC}
-ENV CXX=${LINUX_CXX}
+ARG TARGETOS
+ARG TARGETARCH
 
 WORKDIR /home/w7panel-server
 
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories \
-    && apk add --no-cache build-base
+    && apk add --no-cache build-base zig
 
 COPY w7panel-server/go.mod w7panel-server/go.sum ./
 RUN go mod download
 
 COPY w7panel-server/ ./
-RUN CGO_CFLAGS="-Wno-return-local-address -D_LARGEFILE64_SOURCE" go build -trimpath -ldflags="-s -w" -o /out/w7panel .
+RUN set -eux; \
+    case "${TARGETARCH}" in \
+        amd64) zig_target="x86_64-linux-musl" ;; \
+        arm64) zig_target="aarch64-linux-musl" ;; \
+        *) echo "unsupported TARGETARCH: ${TARGETARCH}" >&2; exit 1 ;; \
+    esac; \
+    CGO_ENABLED=1 \
+    GOOS="${TARGETOS}" \
+    GOARCH="${TARGETARCH}" \
+    CC="zig cc -target ${zig_target}" \
+    CXX="zig c++ -target ${zig_target}" \
+    CGO_CFLAGS="-Wno-return-local-address -D_LARGEFILE64_SOURCE" \
+    go build -trimpath -ldflags="-s -w" -o /out/w7panel .
 
 FROM alpine:3.20 AS final
 
