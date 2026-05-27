@@ -37,7 +37,7 @@ RUN set -eux; \
     GOARCH="${TARGETARCH}" \
     CC="zig cc -target ${zig_target}" \
     CXX="zig c++ -target ${zig_target}" \
-    CGO_CFLAGS="-Wno-return-local-addr -D_LARGEFILE64_SOURCE" \
+    CGO_CFLAGS="-Wno-return-local-addr -D_LARGEFILE64_SOURCE -fno-sanitize=undefined -fno-sanitize=float-cast-overflow" \
     go build -trimpath -ldflags="-s -w" -o /out/w7panel .
 
 FROM alpine:3.20 AS final
