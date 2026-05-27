@@ -1,0 +1,139 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag to use as the image and chart tag"
+        required: true
+
+permissions:
+  contents: write
+
+env:
+  CHART_DIR: charts
+  CHART_PACKAGE_DIR: charts
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build w7panel-ui
+        working-directory: w7panel-ui
+        run: |
+          HUSKY=0 npm install --legacy-peer-deps
+          npm run build
+
+      - name: Copy frontend assets
+        run: |
+          cp -R w7panel-ui/dist/. w7panel-server/kodata/
+
+      - name: Package frontend artifact
+        run: |
+          cd w7panel-ui/dist
+          zip -r ../../frontend.zip .
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Resolve image registry
+        id: image
+        shell: bash
+        run: |
+          repository="$(awk '/^[[:space:]]*repository:/ {print $2; exit}' "${CHART_DIR}/values.yaml")"
+          registry="${repository%%/*}"
+          echo "repository=${repository}" >> "$GITHUB_OUTPUT"
+          echo "registry=${registry}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to image registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.image.outputs.registry }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+
+      - name: Build image and package chart
+        run: |
+          rm -f charts/*.tgz
+          make publish TAG="${{ steps.tag.outputs.value }}"
+
+      - name: Upload Helm package to GitHub Release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.value }}
+          files: charts/*.tgz
+
+      - name: Push zpk
+        env:
+          ZPK_DOCKER_USERNAME: ${{ secrets.ZPK_DOCKER_USERNAME }}
+          ZPK_DOCKER_PASSWORD: ${{ secrets.ZPK_DOCKER_PASSWORD }}
+          ZPK_HOST: ${{ secrets.ZPK_HOST }}
+          ZPK_ARTIFACT: ${{ secrets.ZPK_ARTIFACT }}
+        run: |
+          sudo curl -L --fail -o /usr/local/bin/zpk https://github.com/w7panel/w7panel-zpk/releases/download/latest/zpk_linux_amd64
+          sudo chmod +x /usr/local/bin/zpk
+
+          set -euo pipefail
+
+          if [ -z "${ZPK_DOCKER_USERNAME}" ]; then
+            echo "ZPK_DOCKER_USERNAME secret is required"
+            exit 1
+          fi
+          if [ -z "${ZPK_DOCKER_PASSWORD}" ]; then
+            echo "ZPK_DOCKER_PASSWORD secret is required"
+            exit 1
+          fi
+          if [ -z "${ZPK_HOST}" ]; then
+            echo "ZPK_HOST secret is required"
+            exit 1
+          fi
+          if [ -z "${ZPK_ARTIFACT}" ]; then
+            echo "ZPK_ARTIFACT secret is required"
+            exit 1
+          fi
+
+          HELM_PACKAGE="$(ls charts/*.tgz | head -n 1)"
+          if [ -z "${HELM_PACKAGE}" ]; then
+            echo "helm package not found under charts/"
+            exit 1
+          fi
+
+          if [ ! -f "frontend.zip" ]; then
+            echo "frontend package not found at frontend.zip"
+            exit 1
+          fi
+
+          zpk login --username="${ZPK_DOCKER_USERNAME}" --password="${ZPK_DOCKER_PASSWORD}" --host="${ZPK_HOST}"
+          zpk use "${ZPK_ARTIFACT}"
+          zpk attach add --path="${HELM_PACKAGE}" --type=helm
+          zpk attach add --path="frontend.zip" --type=frontend
+          zpk push
