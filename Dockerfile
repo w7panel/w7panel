@@ -14,6 +14,13 @@
 
 FROM golang:1.26-alpine AS builder
 
+ARG LINUX_CC=gcc
+ARG LINUX_CXX=g++
+
+ENV CGO_ENABLED=1
+ENV CC=${LINUX_CC}
+ENV CXX=${LINUX_CXX}
+
 WORKDIR /home/w7panel-server
 
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories \
@@ -23,7 +30,7 @@ COPY w7panel-server/go.mod w7panel-server/go.sum ./
 RUN go mod download
 
 COPY w7panel-server/ ./
-RUN CGO_CFLAGS="-Wno-return-local-address" go build -trimpath -ldflags="-s -w" -o /out/w7panel .
+RUN CGO_CFLAGS="-Wno-return-local-address -D_LARGEFILE64_SOURCE" go build -trimpath -ldflags="-s -w" -o /out/w7panel .
 
 FROM alpine:3.20 AS final
 
