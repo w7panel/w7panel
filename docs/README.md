@@ -28,6 +28,7 @@ docs/
 ├── api/          # API 接口文档
 ├── deployment/   # 部署文档
 ├── development/  # 开发指南
+│   └── api/      # w7panel-server/app/application API 接口说明
 ├── refactoring/  # 重构方案与历史资料
 ├── testing/      # 测试文档和报告
 └── changelog/    # 版本更新日志
@@ -51,6 +52,12 @@ docs/
 - [部署文档](./deployment/README.md)
 - [部署排障](./deployment/troubleshooting.md)
 - [开发指南](./development/README.md)
+- [w7panel-server/app/application API 接口说明](./development/api/application.md)
+- [w7panel-server/app/auth API 接口说明](./development/api/auth.md)
+- [w7panel-server/app/k3k API 接口说明](./development/api/k3k.md)
+- [w7panel-server/app/k3s-registry API 接口说明](./development/api/k3s-registry.md)
+- [w7panel-server/app/metrics API 接口说明](./development/api/metrics.md)
+- [w7panel-server/app/zpk API 接口说明](./development/api/zpk.md)
 - [测试文档](./testing/README.md)
 - [版本日志](./changelog/1.0.0.md)
 
