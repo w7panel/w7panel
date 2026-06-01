@@ -27,6 +27,12 @@
 | [frontend/api-methods.md](./frontend/api-methods.md) | API 路径配置、axios 拦截器和业务 API 方法说明 |
 | [frontend/wujie-events.md](./frontend/wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
 
+### 示例文档
+
+| 文档 | 说明 |
+|------|------|
+| [examples/README.md](./examples/README.md) | 面板内应用开发示例，说明独立应用仓库、后端服务、前端微应用、Docker 镜像、官方制品库发布和可选 Helm Chart |
+
 ## 项目结构
 
 ```text
@@ -52,6 +58,7 @@ $BASE_DIR/
 ├── codeblitz/                       # Web IDE 源码
 ├── dist/                            # 编译输出目录
 ├── docs/                            # 项目文档
+│   └── development/examples/         # 应用开发示例
 └── tests/                           # 测试脚本
 ```
 
