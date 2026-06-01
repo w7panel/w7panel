@@ -9,6 +9,35 @@
 - 涉及 K8s 资源的组件默认使用当前命名空间 store，并通过 `k8sproxy` 或 `panelApi` 请求后端。
 - 组件方法只在源码中明确暴露或被父组件通过 `ref` 调用时记录。
 
+## 当前覆盖范围
+
+当前 `w7panel-ui/src/components` 下包含通用组件、应用安装/部署组件、域名策略组件、终端日志组件和微前端桥接组件。本文重点记录被多处复用、通过全局组件注册、或对外暴露 Props/Events/Ref 方法的组件。
+
+尚未逐项展开的组件包括：
+
+| 组件 | 源文件 | 说明 |
+|------|--------|------|
+| `ContactUs` | `src/components/contact-us.vue` | 联系我们展示组件 |
+| `ContainerPlugin` | `src/components/container-plugin.vue` | 制品库/容器插件配置，已通过 Wujie `containerPlugin` 事件间接对外 |
+| `CostEdit` | `src/components/cost-edit.vue` | 费用配置编辑 |
+| `DcformDrawer` | `src/components/dcform-drawer.vue` | 表单抽屉 |
+| `DefaultLayout` | `src/components/default-layout.vue` | 组件级默认布局 |
+| `DomainStrategyFilecache` | `src/components/domain-strategy-filecache.vue` | 文件缓存微应用容器，事件详见 `wujie-events.md` |
+| `DomainStrategyImagecache` | `src/components/domain-strategy-imagecache.vue` | 镜像缓存微应用容器，事件详见 `wujie-events.md` |
+| `DomainStrategyPluginFilecache` | `src/components/domain-strategy-plugin-filecache.vue` | 文件缓存策略插件 |
+| `DomainStrategyPluginRatelimit` | `src/components/domain-strategy-plugin-ratelimit.vue` | 限流策略插件 |
+| `DomainStrategyPluginWhitelist` | `src/components/domain-strategy-plugin-whitelist.vue` | 白名单策略插件 |
+| `PermissionEdit` | `src/components/permission-edit.vue` | 权限编辑 |
+| `QuotaConfig` | `src/components/quota-config.vue` | 配额配置 |
+| `QuotaEdit` | `src/components/quota-edit.vue` | 配额编辑 |
+| `TestResource` | `src/components/test-resource.vue` | 资源测试组件 |
+| `WujieModals` | `src/components/wujie-modals.vue` | 微应用通用弹窗和面板能力桥接，事件详见 `wujie-events.md` |
+| `DdcNode` | `src/components/node/ddc-node.vue` | 节点相关业务组件 |
+| `NbPage` | `src/components/node/nb-page.vue` | 节点绑定相关页面组件 |
+| `NdSet` | `src/components/node/nd-set.vue` | 节点设置组件 |
+
+这些组件发生 Props、Events、Ref 方法或对外行为变化时，也需要同步补充到本文。
+
 ## 全局注册组件
 
 ### `Chart`

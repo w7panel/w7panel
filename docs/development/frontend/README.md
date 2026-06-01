@@ -1,6 +1,6 @@
 # w7panel-ui 前端开发文档
 
-本文档整理 `w7panel-ui` 项目中可复用的前端组件、API 封装和 Wujie 微前端事件，方便页面开发、微应用接入和后续组件维护。
+本文档整理 `w7panel-ui` 项目的前端目录、启动入口、API 封装、状态缓存、公共组件和 Wujie 微前端事件，方便页面开发、微应用接入和后续组件维护。
 
 源码目录：`w7panel-ui/src`
 
@@ -9,24 +9,41 @@
 | 文档 | 内容 |
 |------|------|
 | [components.md](./components.md) | 公共组件、全局注册组件、业务组件使用说明 |
-| [api-methods.md](./api-methods.md) | 前端 API 路径配置、请求封装和业务 API 方法 |
 | [wujie-events.md](./wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
+
+说明：当前没有单独的 `api-methods.md`。API 路径配置、请求拦截器和业务 API 方法约定统一维护在本文的“API 调用规范”章节。
 
 ## 前端目录结构
 
 ```text
 w7panel-ui/src/
-├── api/          # axios 拦截器和业务 API 方法
+├── api/          # axios 拦截器和少量业务 API 方法
+│   ├── interceptor.ts
+│   ├── cluster.ts
+│   └── user.ts
 ├── components/   # 公共组件和业务复用组件
 ├── config/       # 全局配置，例如 API 路径配置
 ├── hooks/        # Vue Composition API 复用逻辑
 ├── layout/       # 页面布局
+├── locale/       # i18n 文案
 ├── router/       # 路由配置
+│   ├── routes/   # 页面路由模块
+│   └── app-menus/# 应用菜单
 ├── store/        # Pinia 状态管理
 ├── types/        # 全局类型
 ├── utils/        # 工具方法、认证、本地缓存、事件工具
 └── views/        # 页面模块
 ```
+
+启动入口：
+
+| 文件 | 说明 |
+|------|------|
+| `src/main.ts` | 创建 Vue 应用，注册 Arco、Arco 图标、Pinia、Vue Router、i18n、全局组件、VMdPreview、GoCaptcha，并加载 axios 拦截器 |
+| `src/App.vue` | 应用根组件 |
+| `src/api/interceptor.ts` | axios 全局超时、token 注入、GET 防重、401 刷新 token 和错误提示 |
+| `src/utils/api.ts` | `panelApi`、`k8sproxy` 路径前缀封装 |
+| `src/utils/auth.ts` | token、refresh token、权限、用户信息、K8s 信息和文件/终端权限缓存 |
 
 ## 对外复用原则
 
@@ -47,11 +64,15 @@ w7panel-ui/src/
 
 约定：
 
+- `panelApi` 和 `k8sproxy` 位于 `src/utils/api.ts`，只负责拼接前缀，仍使用全局 axios 拦截器。
+- axios 拦截器位于 `src/api/interceptor.ts`，由 `src/main.ts` 导入后全局生效。
 - 面板业务接口不要写到 `/k8s-proxy/`。
 - K8s 原生资源请求使用 `/k8s-proxy/api/v1/*` 或 `/k8s-proxy/apis/*`。
 - 新增后端接口时，同步新增或更新前端 API 方法，避免页面直接拼接复杂路径。
 - URL 中的 namespace、name、path、labelSelector 必须使用 `encodeURIComponent` 或 axios `params`。
 - 文件上传、WebDAV、压缩下载等接口要明确 token 来源和 Content-Type。
+- GET 请求会按 `url + params` 做防重并共享同一个 Promise；流式请求、手动取消请求不会走防重逻辑。
+- 401 时会取消待处理请求，尝试调用 `/panel-api/v1/auth/refresh-token2` 刷新 token；刷新失败后清理登录态并跳转登录页。
 
 示例：
 
@@ -86,7 +107,8 @@ localStorage key 约定：
 约定：
 
 - 不新增 `offline-*`、`k8soffline-*` 等旧命名 key。
-- 微应用环境需要优先处理 `window.$wujie.props.paneltoken` 等传入 token。
+- 微应用环境下，`src/utils/auth.ts` 会优先读取 `window.microApp.getData().token`。
+- Wujie 微应用容器会通过 props/data 传入 `paneltoken`、`w7PanelToken`、`Authorization`、`requestUrl`、`url` 等字段，具体以容器页面的 `startApp()` 配置为准。
 - refresh token 失败后应走统一退出或重登逻辑，不在页面里各自处理。
 - 不在 console、URL 或 localStorage 中存储明文密码和长期密钥，除非已有协议明确要求。
 
@@ -139,7 +161,7 @@ Props 和 Events：
 
 ## UI 和交互规范
 
-项目使用 Vue 3、TypeScript 和 Arco Design。
+项目使用 Vue 3、TypeScript、Arco Design、Pinia、Vue Router、Wujie、ECharts、xterm、CodeMirror 和 VMdPreview。
 
 约定：
 
@@ -166,6 +188,15 @@ window.$wujie.bus.$on('eventName', handler);
 - 需要响应时使用 callback；有失败路径时明确是否使用 rejectCallback。
 - 新增事件必须更新 `docs/development/frontend/wujie-events.md`。
 - 避免通用事件名冲突；`submit`、`close` 只能在明确生命周期和嵌套场景中使用。
+
+主要注册位置：
+
+| 位置 | 说明 |
+|------|------|
+| `src/components/wujie-modals.vue` | 微应用通用弹窗、文件、日志、构建、域名、OIDC、登录切换等事件 |
+| `src/components/domain-strategy-filecache.vue` | 文件缓存微应用 `submit`、`close` |
+| `src/components/domain-strategy-imagecache.vue` | 镜像缓存微应用 `submit`、`close` |
+| `src/views/app/gpustack/index.vue` | GPUStack 专用事件 |
 
 ## 状态和缓存
 
@@ -202,7 +233,7 @@ window.$wujie.bus.$on('eventName', handler);
 | 检查项 | 说明 |
 |--------|------|
 | 组件 | 是否需要更新 [components.md](./components.md) |
-| API 方法 | 是否需要更新 [api-methods.md](./api-methods.md) |
+| API 方法 | 是否需要更新本文“API 调用规范”章节 |
 | Wujie 事件 | 是否需要更新 [wujie-events.md](./wujie-events.md) |
 | localStorage key | 是否继续使用 `w7panel-*` 命名 |
 | 路径前缀 | 面板业务 API 使用 `/panel-api/v1`，K8s 代理使用 `/k8s-proxy` |

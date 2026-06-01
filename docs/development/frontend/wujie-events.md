@@ -42,7 +42,36 @@ window.$wujie.bus.$emit('checkSession', (token: string) => {
 - `handler` 为空时会跳过注册并输出 warning。
 - `clearAllWujieEvents()` 清理的是当前 hook 模块记录的全部事件；同一页面嵌套多个注册组件时，要确认清理时机不会误清其它仍在使用的事件。
 - 多参数响应遵循 `window.$wujie.bus.$emit(event, data, callback, rejectCallback)` 这种约定，回调不是 Promise。
-- 面板传给微应用的常用 props 包含 `url`、`Authorization`、`paneltoken`、`w7PanelToken`、`isRegister`、`appImage` 等，具体由容器页面 `startApp()` 配置决定。
+- 面板传给微应用的 props 由各容器页面 `startApp()` 或 `setupApp()` 配置决定，常见字段见下表。
+
+常见微应用容器：
+
+| 容器 | 源码位置 | 说明 |
+|------|----------|------|
+| 通用应用组微应用 | `w7panel-ui/src/views/topapp/micro-container.vue` | 启动 `appmicro`，同时挂载 `WujieModals` |
+| 应用详情微应用 | `w7panel-ui/src/views/app/apps/detail.vue`、`w7panel-ui/src/views/app/apps/micro.vue` | 应用详情内嵌微应用 |
+| 应用商店 ZPK 页面 | `w7panel-ui/src/views/app/store/store-zpk.vue` | 应用商店页面内嵌微应用 |
+| GPUStack | `w7panel-ui/src/views/app/gpustack/index.vue` | GPUStack 专用微应用和 worker 管理事件 |
+| 文件/镜像缓存策略 | `w7panel-ui/src/components/domain-strategy-filecache.vue`、`domain-strategy-imagecache.vue` | 域名策略内嵌缓存微应用 |
+
+常见 props：
+
+| 字段 | 说明 |
+|------|------|
+| `url` | 面板代理请求微应用后端服务的地址，可能会把相对 `backendUrl` 拼成当前 origin 下的绝对地址 |
+| `group` | 应用标识分组；如果应用下有多个子应用，该值为主应用标识 |
+| `userid` | 面板登录用户 ID |
+| `openid` | 面板登录用户 openid |
+| `nickname` | 面板登录用户昵称 |
+| `role` | 面板用户角色，取值包括 `founder`、`super`、`normal`、`technician` |
+| `access_token` | 面板登录用户自身维护的 access token，只能用于获取用户信息，不能准确定位 appid |
+| `Authorization` | 应用自身 Basic 认证，通常由应用配置中的 `username/password` 生成 |
+| `paneltoken` | 面板用户 token，来自 `getToken()` |
+| `w7PanelToken` | Console 第三方持续交付 token，部分容器通过 `/panel-api/v1/auth/console/info` 获取 |
+| `isRegister` | Console 注册状态 |
+| `requestUrl` | 微应用环境下 axios baseURL 或资源访问基准地址，部分容器传入 |
+| `appImage` | 应用镜像 |
+| `domain` | 微应用绑定域名，GPUStack 等场景使用 |
 
 ## 通用弹窗和面板能力事件
 
