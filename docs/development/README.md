@@ -10,13 +10,22 @@
 
 | 模块 | 文档 | 说明 |
 |------|------|------|
-| 通用约定 | [api/README.md](./api/README.md) | API 鉴权、成功响应、错误响应和参数位置说明 |
+| 通用约定与开发规范 | [api/README.md](./api/README.md) | API 路由分层、鉴权、响应格式、安全、前后端同步和测试规范 |
 | application | [api/application.md](./api/application.md) | `w7panel-server/app/application` 接口 |
 | auth | [api/auth.md](./api/auth.md) | `w7panel-server/app/auth` 接口 |
 | k3k | [api/k3k.md](./api/k3k.md) | `w7panel-server/app/k3k` 接口 |
 | k3s-registry | [api/k3s-registry.md](./api/k3s-registry.md) | `w7panel-server/app/k3s-registry` 接口 |
 | metrics | [api/metrics.md](./api/metrics.md) | `w7panel-server/app/metrics` 接口 |
 | zpk | [api/zpk.md](./api/zpk.md) | `w7panel-server/app/zpk` 接口 |
+
+### 前端文档
+
+| 文档 | 说明 |
+|------|------|
+| [frontend/README.md](./frontend/README.md) | `w7panel-ui` 前端文档入口，包含页面、组件、API、状态、Wujie 和提交流程规范 |
+| [frontend/components.md](./frontend/components.md) | 前端公共组件和业务复用组件说明 |
+| [frontend/api-methods.md](./frontend/api-methods.md) | API 路径配置、axios 拦截器和业务 API 方法说明 |
+| [frontend/wujie-events.md](./frontend/wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
 
 ## 项目结构
 
@@ -68,6 +77,7 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - 页面放在 `w7panel-ui/src/views/`
 - 通用组件放在 `w7panel-ui/src/components/`
 - 业务逻辑复用优先放在 `w7panel-ui/src/hooks/`
+- 可复用组件、API 方法和 Wujie 微前端事件说明见 [frontend/README.md](./frontend/README.md)
 
 前端 API 示例：
 

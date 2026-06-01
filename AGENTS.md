@@ -70,6 +70,8 @@ docs/
 ├── api/                # API接口文档
 ├── deployment/         # 部署文档
 ├── development/        # 开发指南
+│   ├── api/            # w7panel-server/app API 接口说明
+│   └── frontend/       # w7panel-ui 组件、API 方法和 Wujie 微前端事件说明
 └── testing/            # 测试文档
 ```
 

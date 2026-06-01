@@ -28,7 +28,8 @@ docs/
 ├── api/          # API 接口文档
 ├── deployment/   # 部署文档
 ├── development/  # 开发指南
-│   └── api/      # w7panel-server/app/application API 接口说明
+│   ├── api/      # w7panel-server/app API 接口说明
+│   └── frontend/ # w7panel-ui 组件、API 方法和 Wujie 微前端事件说明
 ├── refactoring/  # 重构方案与历史资料
 ├── testing/      # 测试文档和报告
 └── changelog/    # 版本更新日志
@@ -52,6 +53,7 @@ docs/
 - [部署文档](./deployment/README.md)
 - [部署排障](./deployment/troubleshooting.md)
 - [开发指南](./development/README.md)
+- [前端开发文档](./development/frontend/README.md)
 - [w7panel-server/app/application API 接口说明](./development/api/application.md)
 - [w7panel-server/app/auth API 接口说明](./development/api/auth.md)
 - [w7panel-server/app/k3k API 接口说明](./development/api/k3k.md)
