@@ -1,10 +1,21 @@
-# API 开发约定与通用规范
+# API 开发文档
 
-本文档用于约束 `w7panel-server/app` 下业务 API 的设计、实现、联调和文档维护。新增或修改接口时，应先确认路由归属、鉴权、响应格式和前端同步范围。
+本文档是 `w7panel-server/app` 业务 API 的文档入口和通用开发约定。新增或修改接口时，应先确认路由归属、鉴权方式、响应格式、前端同步范围和文档更新位置。
 
-## 目录和职责
+## 文档目录
 
-后端源码目录按业务模块拆分：
+| 文档 | 对应模块 | 说明 |
+|------|----------|------|
+| [application.md](./application.md) | `w7panel-server/app/application` | OpenAPI、命名空间、Helm、配置、文件、应用和面板核心能力 |
+| [auth.md](./auth.md) | `w7panel-server/app/auth` | 登录、注册、刷新 token、用户信息、OIDC 等认证能力 |
+| [k3k.md](./k3k.md) | `w7panel-server/app/k3k` | K3k 用户、集群初始化、集群状态和权限信息 |
+| [k3s-registry.md](./k3s-registry.md) | `w7panel-server/app/k3s-registry` | Docker Registry v2 兼容入口、镜像仓库管理和 containerd 操作代理 |
+| [metrics.md](./metrics.md) | `w7panel-server/app/metrics` | CPU、内存、磁盘使用量和 metrics 组件安装状态 |
+| [zpk.md](./zpk.md) | `w7panel-server/app/zpk` | ZPK 配置、列表、安装、升级、构建和应用管理 |
+
+## 模块结构
+
+后端源码按业务模块拆分：
 
 ```text
 w7panel-server/app/{module}/
@@ -23,7 +34,7 @@ w7panel-server/app/{module}/
 
 约定：
 
-- Controller 只做 HTTP 层工作：参数读取、校验、调用服务、转换响应。
+- Controller 只处理 HTTP 层工作：参数读取、校验、调用服务、转换响应。
 - 可复用业务逻辑放入 service，不在 Controller 中堆叠跨模块流程。
 - K8s 资源对象转换成前端需要的业务字段后再返回，公开接口尤其不能直接透出完整资源对象。
 
@@ -51,7 +62,7 @@ w7panel-server/app/{module}/
 | 创建任务 | `POST /panel-api/v1/zpk/buildimage/job` | 明确任务对象 |
 | K8s 原生资源 | `/k8s-proxy/apis/apps/v1/namespaces/{ns}/deployments` | 保持 K8s API 路径 |
 
-## 鉴权
+## 鉴权和安全
 
 除明确标注“无需鉴权”的接口外，请求头必须携带：
 
@@ -64,7 +75,7 @@ Authorization: Bearer <token>
 - `LOCAL_MOCK=true` 只改变 K8s 调用方式，不改变用户认证逻辑。
 - 公开接口必须使用 `/panel-api/v1/noauth/*` 前缀，并只返回业务允许公开的字段。
 - 需要调用 K8s API 的接口必须明确 token 来源：用户 token、ServiceAccount token、webdavToken 或自定义 token。
-- 不在日志中输出完整 token、密码、密钥、OIDC code、registry password。
+- 不在日志、URL、响应或前端可见字段中输出完整 token、密码、密钥、OIDC code、registry password。
 
 ## 请求参数
 
@@ -77,18 +88,18 @@ Authorization: Bearer <token>
 | 文件上传 | multipart/form-data | 明确文件字段名和大小限制 |
 | 表单兼容接口 | form tag | 仅在历史兼容或简单提交时使用 |
 
-`form` 表示 Controller 使用 `form` tag 绑定，通常支持 query、form-urlencoded 或 multipart form，具体取决于 HTTP 方法和 Content-Type。`json` 表示 JSON body。
+说明：
 
-参数规范：
-
+- `form` 表示 Controller 使用 `form` tag 绑定，通常支持 query、form-urlencoded 或 multipart form，具体取决于 HTTP 方法和 Content-Type。
+- `json` 表示 JSON body。
 - namespace、name、kind、podName、containerName 等 K8s 标识必须校验为空情况。
 - 用户输入路径必须清理和限制访问范围，文件相关接口要处理符号链接、特殊文件和目录规模。
 - 布尔值不要混用字符串和 boolean，确需兼容时在 Controller 层统一转换。
 - 大对象列表必须考虑分页、limit 或字段裁剪，避免直接返回超大 K8s 对象。
 
-## 成功响应
+## 响应格式
 
-`w7panel-server/main.go` 覆盖了框架默认成功响应处理器，成功响应会直接返回业务数据。
+`w7panel-server/main.go` 覆盖了框架默认成功响应处理器，成功响应直接返回业务数据。
 
 普通成功：
 
@@ -104,8 +115,6 @@ Authorization: Bearer <token>
 }
 ```
 
-## 错误响应
-
 错误响应仍使用框架默认格式：
 
 ```json
@@ -118,8 +127,8 @@ Authorization: Bearer <token>
 响应规范：
 
 - 字段名保持稳定，修改字段含义时必须同步前端、文档和 changelog。
-- 公开接口返回业务字段，不返回完整 K8s metadata、status、managedFields。
-- WebDAV 等标准协议接口必须遵守协议响应，例如 `PROPFIND` 返回 XML。
+- 公开接口返回业务字段，不返回完整 K8s `metadata`、`status`、`managedFields`。
+- WebDAV、Docker Registry v2、OIDC 等标准协议接口必须遵守各自协议响应，不要强行包成普通 JSON。
 - 列表接口应说明排序、分页、过滤规则；没有分页时说明数据规模边界。
 
 ## 错误处理和日志
@@ -147,7 +156,7 @@ slog.Warn("get pod failed", "namespace", namespace, "pod", podName, "error", err
 - 修改 K8s 资源时明确使用 `PUT`、strategic merge patch 或 JSON Patch，不混用语义。
 - 涉及 namespace 的接口必须使用当前用户上下文或显式参数，不允许默认误写其它 namespace。
 
-## 文件和 WebDAV 接口
+## 文件和 WebDAV
 
 限制：
 
@@ -173,6 +182,7 @@ slog.Warn("get pod failed", "namespace", namespace, "pod", podName, "error", err
 | 新增接口 | 是否需要新增 `src/api/` 或 `src/utils/api.ts` 方法 |
 | 修改路由 | 搜索旧路径调用并替换 |
 | 修改响应字段 | 搜索字段使用处、类型定义和 UI 展示 |
+| 修改字段含义 | 检查按钮状态、权限判断、读写逻辑是否一致 |
 | 修改鉴权方式 | 检查 token 获取、刷新、错误拦截 |
 | 修改文件/WebDAV 字段 | 检查文件管理、Codeblitz、Wujie 微应用调用 |
 
@@ -181,7 +191,27 @@ slog.Warn("get pod failed", "namespace", namespace, "pod", podName, "error", err
 ```bash
 rg "permission-agent|permissionUrl|compressUrl|webdavUrl" w7panel-ui/src
 rg "/panel-api/v1|/k8s-proxy" w7panel-ui/src
+rg "offline|k8soffline" .
 ```
+
+## 文档维护
+
+新增或修改接口时，同步维护对应模块文档：
+
+```text
+docs/development/api/{module}.md
+```
+
+接口文档至少包含：
+
+- 接口功能
+- 请求方法和路径
+- 鉴权要求
+- 请求参数说明
+- 响应参数说明
+- 必要的响应示例、边界限制或特殊逻辑说明
+
+新增模块时，需要同时更新本文档的“文档目录”表格。
 
 ## 测试和验证
 
