@@ -1,6 +1,6 @@
 # 开发指南
 
-本文档是 W7Panel 开发资料入口，面向后端、前端、Web IDE、应用示例、联调测试和文档维护。更完整的用户、部署、测试和版本资料见 [docs/README.md](../README.md)。
+本文档是 W7Panel 开发资料入口，面向后端、前端、Web IDE 静态资源、应用示例、联调测试和文档维护。更完整的用户、部署、测试和版本资料见 [docs/README.md](../README.md)。
 
 ## 快速入口
 
@@ -46,17 +46,19 @@ $BASE_DIR/
 │   │   ├── metrics/                 # 指标 API
 │   │   └── zpk/                     # ZPK 应用 API
 │   ├── common/                      # 公共服务、中间件和工具
-│   ├── install/                     # 安装资源和 Helm Charts
-│   └── scripts/                     # 构建脚本
+│   ├── kodata/                      # 后端静态资源、CRD、内置 Chart、Web IDE 插件包
+│   └── install/                     # 安装相关资源
 ├── w7panel-ui/                      # 前端源码，Vue 3 + TypeScript + Arco Design
+│   ├── config/                      # Vite 和构建配置
+│   ├── scripts/                     # 前端构建辅助脚本
 │   ├── src/api/                     # API 调用封装
 │   ├── src/components/              # 公共组件
 │   ├── src/hooks/                   # 复用逻辑
 │   ├── src/router/                  # 路由配置
 │   └── src/views/                   # 页面模块
-├── codeblitz/                       # Web IDE 源码
-├── charts/                          # Helm Charts
-├── installer/                       # 安装器相关资源
+├── codeblitz/                       # Web IDE 源码占位目录；当前静态包在 w7panel-server/kodata/plugin/codeblitz.zip
+├── charts/                          # w7panel Helm Chart
+├── installer/                       # 安装脚本、离线清单和系统配置
 ├── docs/                            # 项目文档
 └── tests/                           # 测试脚本和测试资料
 ```
@@ -87,7 +89,7 @@ export CAPTCHA_ENABLED=false
 export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 ```
 
-`LOCAL_MOCK=true` 只改变 K8s 调用方式，不改变用户认证逻辑；除公开接口外，业务 API 仍需要用户 token。
+当前实现中，`w7panel-server/common/middleware/auth.go` 在 `LOCAL_MOCK=true` 时会从 `KUBECONFIG` 或默认路径读取 token 并填充 `k8s_token`，用于本地开发测试。新增接口不要依赖该行为作为生产鉴权逻辑；生产环境必须使用真实用户 token 或 ServiceAccount。
 
 ## 开发规范
 
@@ -99,6 +101,8 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 | 路由注册 | `w7panel-server/app/{module}/provider.go` |
 | 公共服务 | `w7panel-server/common/service/` |
 | 中间件 | `w7panel-server/common/middleware/` |
+| 静态资源 | `w7panel-server/kodata/` |
+| 开发脚本 | `w7panel-server/dev-tools/scripts/` |
 
 约定：
 
@@ -180,6 +184,7 @@ rg "localStorage\\.|sessionStorage\\." w7panel-ui/src
 
 ```bash
 cd $BASE_DIR/w7panel-server
+mkdir -p $BASE_DIR/dist
 go build -o $BASE_DIR/dist/w7panel .
 go test ./...
 ```
@@ -204,6 +209,17 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 ./w7panel-ctl.sh start
 ```
 
+如果当前 `dist/` 只有手动编译出的二进制、还没有复制启动脚本，可以直接启动：
+
+```bash
+cd $BASE_DIR/dist
+export LOCAL_MOCK=true
+export CAPTCHA_ENABLED=false
+export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
+export KO_DATA_PATH=$BASE_DIR/w7panel-server/kodata
+./w7panel server:start
+```
+
 停止服务优先使用：
 
 ```bash
@@ -216,7 +232,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 ```bash
 cd $BASE_DIR/tests
-bash compress-ui-test.sh all
+bash run.sh
 ```
 
 ## 调试排查
@@ -240,7 +256,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 | 问题 | 检查方向 |
 |------|----------|
-| 接口 401 | token 是否存在、是否走了公开接口、`LOCAL_MOCK` 是否被误认为可绕过用户认证 |
+| 接口 401 | token 是否存在、是否走了公开接口、`LOCAL_MOCK` 下是否正确读取到 kubeconfig token |
 | 接口 404 | 路由是否注册，前缀是否为 `/panel-api/v1/` 或 `/k8s-proxy/` |
 | 前端字段为空 | 后端响应字段、前端类型定义、页面取值路径是否一致 |
 | K8s 权限错误 | `LOCAL_MOCK`、`KUBECONFIG`、ServiceAccount、RBAC 是否正确 |
