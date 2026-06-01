@@ -1,39 +1,39 @@
 # 开发指南
 
-本文档汇总 W7Panel 开发相关资料，面向后端、前端、Web IDE、部署联调和接口文档维护。
+本文档是 W7Panel 开发资料入口，面向后端、前端、Web IDE、应用示例、联调测试和文档维护。更完整的用户、部署、测试和版本资料见 [docs/README.md](../README.md)。
 
 ## 快速入口
 
-### API 文档
+### 后端 API
 
-`docs/development/api/` 按 `w7panel-server/app` 下的模块目录拆分接口文档。每个模块文档包含接口功能、请求参数和响应参数说明。
+`docs/development/api/` 按 `w7panel-server/app` 下的业务模块拆分接口文档。新增或修改接口时，同步更新对应模块文档。
 
 | 模块 | 文档 | 说明 |
 |------|------|------|
-| 通用约定与开发规范 | [api/README.md](./api/README.md) | API 路由分层、鉴权、响应格式、安全、前后端同步和测试规范 |
-| application | [api/application.md](./api/application.md) | `w7panel-server/app/application` 接口 |
-| auth | [api/auth.md](./api/auth.md) | `w7panel-server/app/auth` 接口 |
-| k3k | [api/k3k.md](./api/k3k.md) | `w7panel-server/app/k3k` 接口 |
-| k3s-registry | [api/k3s-registry.md](./api/k3s-registry.md) | `w7panel-server/app/k3s-registry` 接口 |
-| metrics | [api/metrics.md](./api/metrics.md) | `w7panel-server/app/metrics` 接口 |
-| zpk | [api/zpk.md](./api/zpk.md) | `w7panel-server/app/zpk` 接口 |
+| 通用约定 | [api/README.md](./api/README.md) | API 路由分层、鉴权、响应格式、安全、前后端同步和测试规范 |
+| application | [api/application.md](./api/application.md) | 面板核心业务接口 |
+| auth | [api/auth.md](./api/auth.md) | 登录、刷新、用户信息等认证接口 |
+| k3k | [api/k3k.md](./api/k3k.md) | K3k 集群相关接口 |
+| k3s-registry | [api/k3s-registry.md](./api/k3s-registry.md) | K3s 镜像仓库接口 |
+| metrics | [api/metrics.md](./api/metrics.md) | 资源指标接口 |
+| zpk | [api/zpk.md](./api/zpk.md) | ZPK 应用接口 |
 
-### 前端文档
+### 前端
 
 | 文档 | 说明 |
 |------|------|
-| [frontend/README.md](./frontend/README.md) | `w7panel-ui` 前端文档入口，包含页面、组件、API、状态、Wujie 和提交流程规范 |
-| [frontend/components.md](./frontend/components.md) | 前端公共组件和业务复用组件说明 |
-| [frontend/api-methods.md](./frontend/api-methods.md) | API 路径配置、axios 拦截器和业务 API 方法说明 |
+| [frontend/README.md](./frontend/README.md) | `w7panel-ui` 前端开发入口，包含目录、API、鉴权、组件、页面、Wujie 和提交流程规范 |
+| [frontend/components.md](./frontend/components.md) | 公共组件和业务复用组件说明 |
 | [frontend/wujie-events.md](./frontend/wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
 
-### 示例文档
+### 示例和专题
 
 | 文档 | 说明 |
 |------|------|
-| [examples/README.md](./examples/README.md) | 面板内应用开发示例，说明独立应用仓库、后端服务、前端微应用、Docker 镜像、官方制品库发布和可选 Helm Chart |
+| [examples/README.md](./examples/README.md) | 面板内应用开发示例，覆盖独立应用仓库、后端服务、前端微应用、镜像发布和可选 Helm Chart |
+| [CHANNELLOCAL_PERFORMANCE_ANALYSIS.md](./CHANNELLOCAL_PERFORMANCE_ANALYSIS.md) | ChannelLocal 性能分析专题 |
 
-## 项目结构
+## 仓库结构
 
 ```text
 $BASE_DIR/
@@ -47,57 +47,27 @@ $BASE_DIR/
 │   │   └── zpk/                     # ZPK 应用 API
 │   ├── common/                      # 公共服务、中间件和工具
 │   ├── install/                     # 安装资源和 Helm Charts
-│   ├── scripts/                     # 构建脚本
-│   └── kodata/                      # 静态资源
+│   └── scripts/                     # 构建脚本
 ├── w7panel-ui/                      # 前端源码，Vue 3 + TypeScript + Arco Design
-│   ├── src/api/                     # 前端 API 调用封装
-│   ├── src/views/                   # 页面
+│   ├── src/api/                     # API 调用封装
 │   ├── src/components/              # 公共组件
-│   ├── src/hooks/                   # Hooks
-│   └── src/router/                  # 路由配置
+│   ├── src/hooks/                   # 复用逻辑
+│   ├── src/router/                  # 路由配置
+│   └── src/views/                   # 页面模块
 ├── codeblitz/                       # Web IDE 源码
-├── dist/                            # 编译输出目录
+├── charts/                          # Helm Charts
+├── installer/                       # 安装器相关资源
 ├── docs/                            # 项目文档
-│   └── development/examples/         # 应用开发示例
-└── tests/                           # 测试脚本
+└── tests/                           # 测试脚本和测试资料
 ```
 
-说明：历史文档中可能仍出现 `w7panel/` 作为后端目录名；当前开发文档按 `w7panel-server/` 表述。
+说明：外层目录名通常是 `w7panel`，后端源码目录是 `w7panel-server/`。历史文档或部署路径里出现的 `w7panel/` 可能指仓库根目录，需要结合上下文判断。
 
-## 开发规范
+## 开发前准备
 
-### 后端
+### 同步代码
 
-- 控制器目录：`w7panel-server/app/{module}/http/`
-- 路由注册：`w7panel-server/app/{module}/provider.go`
-- 公共服务：`w7panel-server/common/service/`
-- 中间件：`w7panel-server/common/middleware/`
-- 日志使用 `log/slog` 键值对格式：
-
-```go
-slog.Info("操作成功", "user", userID, "action", "create")
-```
-
-### 前端
-
-- API 封装放在 `w7panel-ui/src/api/`
-- 页面放在 `w7panel-ui/src/views/`
-- 通用组件放在 `w7panel-ui/src/components/`
-- 业务逻辑复用优先放在 `w7panel-ui/src/hooks/`
-- 可复用组件、API 方法和 Wujie 微前端事件说明见 [frontend/README.md](./frontend/README.md)
-
-前端 API 示例：
-
-```typescript
-// src/api/example.ts
-export function getExampleList() {
-  return axios.get('/panel-api/v1/example');
-}
-```
-
-## 开发流程
-
-### 1. 开发前同步代码
+每次开发前先同步 `dev-v1`。本文中的 `$BASE_DIR` 指仓库根目录：
 
 ```bash
 cd $BASE_DIR
@@ -105,53 +75,104 @@ git fetch origin dev-v1
 git pull origin dev-v1
 ```
 
-如果本地分支和远端分支已分叉，需要先明确使用 merge、rebase 或 fast-forward 策略，再执行 `git pull`。
+如果本地分支和远端分支已分叉，先确认使用 merge、rebase 还是 fast-forward，再执行 `git pull`。
 
-### 2. 后端 API 修改
+### 默认测试模式
 
-修改、新增或删除后端接口时，需要同步检查：
+无特别要求时，部署测试使用测试模式：
 
-| 检查项 | 说明 |
-|--------|------|
-| 路由前缀 | 面板业务 API 使用 `/panel-api/v1/`，K8s 代理使用 `/k8s-proxy/` |
-| 鉴权 | 除公开接口外，业务接口需要用户 token |
-| 前端调用 | 检查 `w7panel-ui/src/api/` 和相关页面是否需要同步 |
-| 文档 | 更新 `docs/development/api/{module}.md` |
-| 版本日志 | 更新 `docs/changelog/{version}.md` |
+```bash
+export LOCAL_MOCK=true
+export CAPTCHA_ENABLED=false
+export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
+```
+
+`LOCAL_MOCK=true` 只改变 K8s 调用方式，不改变用户认证逻辑；除公开接口外，业务 API 仍需要用户 token。
+
+## 开发规范
+
+### 后端
+
+| 类型 | 位置 |
+|------|------|
+| Controller | `w7panel-server/app/{module}/http/` |
+| 路由注册 | `w7panel-server/app/{module}/provider.go` |
+| 公共服务 | `w7panel-server/common/service/` |
+| 中间件 | `w7panel-server/common/middleware/` |
+
+约定：
+
+- 面板业务 API 使用 `/panel-api/v1/`。
+- K8s 原生代理使用 `/k8s-proxy/`，不要放入面板业务接口。
+- 公开接口使用 `/panel-api/v1/noauth/*`，只返回允许公开的业务字段。
+- WebDAV 等标准协议接口必须保持协议响应格式，例如 `PROPFIND` 返回 XML。
+- 日志使用 `log/slog` 键值对格式，不输出完整 token、密码、密钥和 OIDC code。
+
+```go
+slog.Info("create app success", "namespace", namespace, "name", name)
+```
+
+### 前端
+
+| 类型 | 位置 |
+|------|------|
+| API 封装 | `w7panel-ui/src/api/` |
+| 页面 | `w7panel-ui/src/views/` |
+| 公共组件 | `w7panel-ui/src/components/` |
+| 复用逻辑 | `w7panel-ui/src/hooks/` |
+| 鉴权和本地状态 | `w7panel-ui/src/utils/auth.ts` |
+
+约定：
+
+- 页面优先使用已有 API 封装，不在页面内散落复杂路径。
+- URL 参数使用 axios `params` 或 `encodeURIComponent`。
+- localStorage/sessionStorage key 使用 `w7panel-*` 命名，不新增 `offline-*`、`k8soffline-*` 等旧命名。
+- 新增公共组件、Wujie 事件或可复用前端能力时，同步更新 [frontend/README.md](./frontend/README.md) 及相关子文档。
+
+## 前后端同步
+
+后端改动后必须检查前端影响：
+
+| 后端变化 | 前端检查 |
+|----------|----------|
+| 新增接口 | 是否需要新增 `src/api/` 方法和页面调用 |
+| 修改路由 | 搜索旧路径并同步替换 |
+| 修改响应字段 | 检查类型定义、页面取值和展示逻辑 |
+| 修改字段含义 | 检查按钮状态、权限判断、读写逻辑是否一致 |
+| 修改鉴权 | 检查 token 获取、刷新、拦截器和错误处理 |
+| 修改 WebDAV、压缩、权限接口 | 检查 `webdavUrl`、`compressUrl`、`permissionUrl`、`webdavToken` 使用处 |
 
 常用搜索：
 
 ```bash
-rg "接口路径或字段名" w7panel-ui/src
-rg "接口路径或字段名" w7panel-server
+rg "接口路径或字段名" w7panel-server w7panel-ui/src
+rg "permission-agent|permissionUrl|compressUrl|webdavUrl" w7panel-ui/src
+rg "offline|k8soffline" .
+rg "localStorage\\.|sessionStorage\\." w7panel-ui/src
 ```
 
-### 3. 前端修改
+## 文档维护
 
-后端字段、URL、鉴权方式变化后，前端需要同步检查：
+开发过程中按变更类型同步文档：
 
-| 检查项 | 说明 |
-|--------|------|
-| API 封装 | `src/api/` 中的路径和参数是否匹配后端 |
-| 类型定义 | TypeScript 类型是否覆盖新增或变更字段 |
-| 页面使用 | 页面是否仍使用旧字段、旧路径或旧状态含义 |
-| 构建验证 | 修改后执行前端构建或相关检查 |
+| 变更类型 | 需要更新 |
+|----------|----------|
+| 新增、修改、删除 API | `docs/development/api/{module}.md`，必要时同步 `docs/api/README.md` |
+| 新增前端公共组件 | `docs/development/frontend/components.md` |
+| 新增 Wujie 事件 | `docs/development/frontend/wujie-events.md` |
+| 修改构建、部署、环境变量 | `docs/deployment/README.md` |
+| 新增或修改测试 | `docs/testing/README.md` 或 `tests/README.md` |
+| 新增功能模块或用户流程变化 | `docs/user-guide/` |
+| 完成开发 | `docs/changelog/{version}.md` |
 
-### 4. 文档维护
-
-新增接口文档时按模块目录命名：
-
-```text
-docs/development/api/{app子目录名}.md
-```
-
-文档内容至少包含：
+新增接口文档至少包含：
 
 - 接口功能
 - 请求方法和路径
 - 请求参数说明
 - 响应参数说明
-- 必要的响应示例或特殊逻辑说明
+- 鉴权要求
+- 必要的响应示例、边界限制或特殊逻辑说明
 
 ## 常用命令
 
@@ -160,6 +181,7 @@ docs/development/api/{app子目录名}.md
 ```bash
 cd $BASE_DIR/w7panel-server
 go build -o $BASE_DIR/dist/w7panel .
+go test ./...
 ```
 
 ### 前端
@@ -172,7 +194,7 @@ npm run build
 
 ### 启动服务
 
-默认开发和部署测试使用测试模式：
+推荐通过启动脚本启动：
 
 ```bash
 cd $BASE_DIR/dist
@@ -182,6 +204,14 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 ./w7panel-ctl.sh start
 ```
 
+停止服务优先使用：
+
+```bash
+./w7panel-ctl.sh stop
+```
+
+不要直接使用 `pkill -9` 或 `kill -9` 停止服务，避免子进程无法优雅退出。
+
 ### 测试
 
 ```bash
@@ -189,7 +219,7 @@ cd $BASE_DIR/tests
 bash compress-ui-test.sh all
 ```
 
-## 调试
+## 调试排查
 
 ### 查看日志
 
@@ -206,21 +236,24 @@ curl -H "Authorization: Bearer $TOKEN" \
   "http://localhost:8080/panel-api/v1/example"
 ```
 
-### 常见问题排查
+### 常见问题
 
 | 问题 | 检查方向 |
 |------|----------|
-| 接口 401 | token 是否存在、是否走了公开接口、LOCAL_MOCK 是否错误绕过认证假设 |
-| 接口 404 | 路由是否注册、前缀是否为 `/panel-api/v1/` 或 `/k8s-proxy/` |
+| 接口 401 | token 是否存在、是否走了公开接口、`LOCAL_MOCK` 是否被误认为可绕过用户认证 |
+| 接口 404 | 路由是否注册，前缀是否为 `/panel-api/v1/` 或 `/k8s-proxy/` |
 | 前端字段为空 | 后端响应字段、前端类型定义、页面取值路径是否一致 |
-| K8s 权限错误 | `LOCAL_MOCK`、`KUBECONFIG`、ServiceAccount 和 RBAC 是否正确 |
+| K8s 权限错误 | `LOCAL_MOCK`、`KUBECONFIG`、ServiceAccount、RBAC 是否正确 |
+| WebDAV 行为异常 | 方法语义、XML 响应、token、agent URL、特殊文件处理是否正确 |
 
 ## 提交前检查
 
 | 检查项 | 命令或说明 |
 |--------|------------|
 | 文档格式 | `git diff --check` |
-| 后端编译 | `cd $BASE_DIR/w7panel-server && go build` |
+| 后端编译和测试 | `cd $BASE_DIR/w7panel-server && go test ./...` |
 | 前端构建 | `cd $BASE_DIR/w7panel-ui && npm run build` |
+| 旧命名检查 | `rg "offline|k8soffline" .` |
+| API 路径检查 | 确认面板业务 API 使用 `/panel-api/v1/`，K8s 代理使用 `/k8s-proxy/` |
 | 接口文档 | 确认新增或变更 API 已更新到 `docs/development/api/` |
-| 变更日志 | 确认 `docs/changelog/{version}.md` 已记录 |
+| 版本日志 | 确认 `docs/changelog/{version}.md` 已记录 |
