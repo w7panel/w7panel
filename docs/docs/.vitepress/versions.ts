@@ -1,1 +1,1 @@
-export default ["1.X"];
+export default ["1.x"];
