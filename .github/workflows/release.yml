@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "*"
+      - "v*"
   workflow_dispatch:
     inputs:
       tag:
@@ -12,12 +12,15 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 env:
   CHART_DIR: charts
   CHART_PACKAGE_DIR: charts
   ZPK_HOST: zpk.w7.cc
   ZPK_ARTIFACT: w7panel-offline
+  IMAGE_PUSH_REGISTRY: ${{ vars.IMAGE_PUSH_REGISTRY || 'ghcr.io' }}
+  HELM_PACKAGE_IMAGE_REGISTRY: ${{ vars.HELM_PACKAGE_IMAGE_REGISTRY || 'ghcr.registry.cdn.w7.cc' }}
 
 jobs:
   release:
@@ -59,29 +62,35 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Resolve image registry
-        id: image
-        shell: bash
-        run: |
-          repository="$(awk '/^[[:space:]]*repository:/ {print $2; exit}' "${CHART_DIR}/values.yaml")"
-          registry="${repository%%/*}"
-          echo "repository=${repository}" >> "$GITHUB_OUTPUT"
-          echo "registry=${registry}" >> "$GITHUB_OUTPUT"
-
       - name: Login to image registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ steps.image.outputs.registry }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ env.IMAGE_PUSH_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
       - name: Build image and package chart
+        shell: bash
         run: |
+          set -euo pipefail
+
+          RELEASE_TAG="${{ steps.tag.outputs.value }}"
+          RELEASE_VERSION="${RELEASE_TAG#v}"
+          IMAGE_NAME="${GITHUB_REPOSITORY,,}"
+          IMAGE_REPOSITORY="${IMAGE_PUSH_REGISTRY}/${IMAGE_NAME}"
+          HELM_PACKAGE_IMAGE_REPOSITORY="${HELM_PACKAGE_IMAGE_REGISTRY}/${IMAGE_NAME}"
+
           rm -f charts/*.tgz
-          make publish TAG="${{ steps.tag.outputs.value }}"
+          make publish \
+            IMAGE_REPOSITORY="${IMAGE_REPOSITORY}" \
+            IMAGE_TAG="${RELEASE_TAG}" \
+            HELM_PACKAGE_IMAGE_REPOSITORY="${HELM_PACKAGE_IMAGE_REPOSITORY}" \
+            HELM_PACKAGE_IMAGE_TAG="${RELEASE_TAG}" \
+            HELM_CHART_VERSION="${RELEASE_VERSION}" \
+            HELM_APP_VERSION="${RELEASE_TAG}"
 
       - name: Upload Helm package to GitHub Release assets
         uses: softprops/action-gh-release@v2

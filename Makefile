@@ -7,7 +7,11 @@ CHART_IMAGE_TAG ?= $(shell awk '/^[[:space:]]*tag:/ {gsub(/"/, "", $$2); print $
 TAG ?=
 IMAGE_REPOSITORY ?= $(CHART_IMAGE_REPOSITORY)
 IMAGE_TAG ?= $(if $(TAG),$(TAG),$(CHART_IMAGE_TAG))
-CHART_PACKAGE_VERSION ?= $(patsubst v%,%,$(IMAGE_TAG))
+HELM_PACKAGE_IMAGE_REPOSITORY ?= $(IMAGE_REPOSITORY)
+HELM_PACKAGE_IMAGE_TAG ?= $(IMAGE_TAG)
+HELM_CHART_VERSION ?= $(patsubst v%,%,$(IMAGE_TAG))
+HELM_APP_VERSION ?= $(IMAGE_TAG)
+CHART_PACKAGE_VERSION ?= $(HELM_CHART_VERSION)
 PLATFORMS ?= linux/amd64,linux/arm64
 TEST_PLATFORM ?= linux/amd64
 DOCKERFILE ?= Dockerfile
@@ -30,6 +34,10 @@ help:
 	@echo "  CHART_PACKAGE_VERSION Helm chart package version, default: $(CHART_PACKAGE_VERSION)"
 	@echo "  IMAGE_REPOSITORY   Image repository, default: $(IMAGE_REPOSITORY)"
 	@echo "  IMAGE_TAG          Image tag, default: $(IMAGE_TAG)"
+	@echo "  HELM_PACKAGE_IMAGE_REPOSITORY Image repository written into Helm package, default: $(HELM_PACKAGE_IMAGE_REPOSITORY)"
+	@echo "  HELM_PACKAGE_IMAGE_TAG Image tag written into Helm package, default: $(HELM_PACKAGE_IMAGE_TAG)"
+	@echo "  HELM_CHART_VERSION Helm chart version alias, default: $(HELM_CHART_VERSION)"
+	@echo "  HELM_APP_VERSION   Helm app version, default: $(HELM_APP_VERSION)"
 	@echo "  TAG                Image tag alias, default: empty"
 	@echo "  PLATFORMS          Push build platforms, default: $(PLATFORMS)"
 	@echo "  TEST_PLATFORM      Local test build platform, default: $(TEST_PLATFORM)"
@@ -46,8 +54,8 @@ package-chart:
 	@tmp_dir=$$(mktemp -d); \
 	trap 'rm -rf "$$tmp_dir"' EXIT; \
 	cp -R "$(CHART_DIR)" "$$tmp_dir/$(CHART_NAME)"; \
-	IMAGE_REPOSITORY="$(IMAGE_REPOSITORY)" IMAGE_TAG="$(IMAGE_TAG)" CHART_PACKAGE_VERSION="$(CHART_PACKAGE_VERSION)" perl -0pi -e 's/(^version:\s*).*/$${1}$$ENV{CHART_PACKAGE_VERSION}/m; s/(^appVersion:\s*).*/$${1}$$ENV{IMAGE_TAG}/m; s/(^image:\n(?:^[ \t].*\n)*?^[ \t]+repository:\s*).*/$${1}$$ENV{IMAGE_REPOSITORY}/m; s/(^image:\n(?:^[ \t].*\n)*?^[ \t]+tag:\s*).*/$${1}"$$ENV{IMAGE_TAG}"/m' "$$tmp_dir/$(CHART_NAME)/Chart.yaml" "$$tmp_dir/$(CHART_NAME)/values.yaml"; \
-	helm package "$$tmp_dir/$(CHART_NAME)" --destination "$(CHART_PACKAGE_DIR)" --version "$(CHART_PACKAGE_VERSION)" --app-version "$(IMAGE_TAG)"
+	HELM_PACKAGE_IMAGE_REPOSITORY="$(HELM_PACKAGE_IMAGE_REPOSITORY)" HELM_PACKAGE_IMAGE_TAG="$(HELM_PACKAGE_IMAGE_TAG)" CHART_PACKAGE_VERSION="$(CHART_PACKAGE_VERSION)" HELM_APP_VERSION="$(HELM_APP_VERSION)" perl -0pi -e 's/(^version:\s*).*/$${1}$$ENV{CHART_PACKAGE_VERSION}/m; s/(^appVersion:\s*).*/$${1}$$ENV{HELM_APP_VERSION}/m; s/(^image:\n(?:^[ \t].*\n)*?^[ \t]+repository:\s*).*/$${1}$$ENV{HELM_PACKAGE_IMAGE_REPOSITORY}/m; s/(^image:\n(?:^[ \t].*\n)*?^[ \t]+tag:\s*).*/$${1}"$$ENV{HELM_PACKAGE_IMAGE_TAG}"/m' "$$tmp_dir/$(CHART_NAME)/Chart.yaml" "$$tmp_dir/$(CHART_NAME)/values.yaml"; \
+	helm package "$$tmp_dir/$(CHART_NAME)" --destination "$(CHART_PACKAGE_DIR)" --version "$(CHART_PACKAGE_VERSION)" --app-version "$(HELM_APP_VERSION)"
 
 build-image:
 	docker buildx build --platform $(PLATFORMS) -f $(DOCKERFILE) -t $(IMAGE_REPOSITORY):$(IMAGE_TAG) --push .
