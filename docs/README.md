@@ -1,6 +1,23 @@
 # W7Panel 文档中心
 
-这里汇总项目的用户文档、开发文档、部署文档与测试资料。项目总览、能力介绍、安装入口与快速导航已统一整理到仓库根目录的 [README.md](../README.md)。
+这里汇总项目的用户文档、开发文档、部署文档与测试资料。项目总览、能力介绍、安装入口与快速导航已统一整理到仓库根目录的 [README.md](https://github.com/w7panel/w7panel/blob/dev-v1/README.md)。
+
+## 文档前端
+
+`docs/docs/` 目录已接入 VitePress 文档前端项目，侧边栏索引位于 [docs/src/1.x/sidebar.js](./docs/src/1.x/sidebar.js)。
+
+```bash
+cd docs/docs
+npm install
+npm run dev
+```
+
+构建静态文档：
+
+```bash
+cd docs/docs
+npm run build
+```
 
 ## 文档目录
 
@@ -72,5 +89,5 @@ docs/
 
 ## 说明
 
-- 如果你想先了解产品能力、技术架构、适用场景和安装方式，请先阅读 [../README.md](../README.md)。
+- 如果你想先了解产品能力、技术架构、适用场景和安装方式，请先阅读仓库根目录的 [README.md](https://github.com/w7panel/w7panel/blob/dev-v1/README.md)。
 - 如果你已经明确要查找某类文档，可以直接从本页进入对应子目录。
