@@ -42,3 +42,28 @@ cannot get resource "serviceaccounts" in API group "" in the namespace "default"
 ## 相关文档
 
 - [部署与运维排障](./troubleshooting.md)
+
+## GitHub Actions 镜像构建
+
+仓库支持通过 Git tag 自动构建并推送镜像。
+
+工作流文件：
+
+- `/.github/workflows/build-image-on-tag.yml`
+
+触发方式：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+前置配置：
+
+- 配置 GitHub Secrets `TENCENT_REGISTRY_USERNAME`
+- 配置 GitHub Secrets `TENCENT_REGISTRY_PASSWORD`
+
+默认构建参数：
+
+- `KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel1`
+- `KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui`
