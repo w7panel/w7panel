@@ -1,9 +1,9 @@
 exports = module.exports = [
   {
-    text: '开始使用',
+    text: '目录',
     collapsible: true,
     items: [
-      { text: '立即开始', link: '/1.x/' },
+      { text: '使用文档', link: '/user-guide/' },
     ]
   }
 ]

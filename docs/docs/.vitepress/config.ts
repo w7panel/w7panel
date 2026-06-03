@@ -1,8 +1,6 @@
 import path from 'path'
 import process from 'node:process'
-import versions from './versions'
 
-const latest = versions[0]
 const docsBase = normalizeBase(process.env.VITEPRESS_BASE || '/')
 
 function normalizeBase(base: string) {
@@ -16,21 +14,25 @@ const nav = [
     link: '/'
   },
   {
-    text: '文档',
-    activeMatch: `^/([0-9]\.x)/`,
-    items: versions.map((version) => ({
-      text: version,
-      link: `/${version}/`
-    }))
+    text: '使用文档',
+    activeMatch: `^/user-guide/`,
+    link: '/user-guide/'
+  },
+  {
+    text: '开发文档',
+    activeMatch: `^/development/`,
+    link: '/development/'
   }
 ]
 
-export const sidebar = versions.reduce(
-  (sidebars, version) => ({
+const sidebarDirs = ['user-guide', 'development']
+
+export const sidebar = sidebarDirs.reduce(
+  (sidebars, dir) => ({
     ...sidebars,
-    [`/${version}/`]: require(path.join(
+    [`/${dir}/`]: require(path.join(
       __dirname,
-      `../src/${version}/sidebar`
+      `../src/${dir}/sidebar`
     ))
   }),
   {}

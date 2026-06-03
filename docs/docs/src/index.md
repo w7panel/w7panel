@@ -5,11 +5,7 @@ title: W7Panel - 云原生应用管理平台
 ---
 
 <script lang="ts" setup>
-import versions from '@theme/../versions'
 import {withBase} from 'vitepress'
-
-let latestVersion = versions[0]
-
 </script>
 
 <section class="text-center flex flex-col flex-1 px-4 md:px-12">
@@ -37,7 +33,7 @@ let latestVersion = versions[0]
         </code>
       </div>
       <a
-        :href="withBase(`/${latestVersion}/`)"
+        :href="withBase('/user-guide/')"
         class="inline-flex items-center space-around text-white bg-indigo-500 border-0 py-2 px-8 focus:outline-none hover:bg-indigo-600 rounded text-lg"
       >
         <span>立即开始</span>
