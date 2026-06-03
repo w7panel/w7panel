@@ -3,6 +3,12 @@ import process from 'node:process'
 import versions from './versions'
 
 const latest = versions[0]
+const docsBase = normalizeBase(process.env.VITEPRESS_BASE || '/')
+
+function normalizeBase(base: string) {
+  const withLeadingSlash = base.startsWith('/') ? base : `/${base}`
+  return withLeadingSlash.endsWith('/') ? withLeadingSlash : `${withLeadingSlash}/`
+}
 
 const nav = [
   {
@@ -34,6 +40,7 @@ export default {
   lang: 'zh-CN',
   title: 'W7Panel',
   description: '基于 Kubernetes 的云原生应用管理平台文档',
+  base: docsBase,
   srcDir: 'src',
   srcExclude: [],
   scrollOffset: 'header',
@@ -41,7 +48,7 @@ export default {
   ignoreDeadLinks: [],
 
   head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', href: `${docsBase}favicon.ico` }],
     // google analytics, without tracing dev
     ...(process?.argv?.[2] === 'dev' ? [] : [
       [

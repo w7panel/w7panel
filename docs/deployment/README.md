@@ -43,13 +43,13 @@ cannot get resource "serviceaccounts" in API group "" in the namespace "default"
 
 - [部署与运维排障](./troubleshooting.md)
 
-## GitHub Actions 镜像构建
+## GitHub Actions 发布流程
 
-仓库支持通过 Git tag 自动构建并推送镜像。
+仓库支持通过 Git tag 或手动触发 Release workflow，自动构建前端、文档、镜像和 Helm Chart，并发布文档到 GitHub Pages。
 
 工作流文件：
 
-- `/.github/workflows/build-image-on-tag.yml`
+- `/.github/workflows/release.yml`
 
 触发方式：
 
@@ -58,12 +58,26 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
+也可以在 GitHub Actions 页面手动运行 `Release` workflow，并填写 `tag`。
+
+主要流程：
+
+- 构建 `w7panel-ui`，并同步产物到 `w7panel-server/kodata/`
+- 构建 `docs/docs` VitePress 文档项目
+- 打包并推送镜像、Helm Chart 和 ZPK 附件
+- 将 `docs/docs/.vitepress/dist` 发布到 GitHub Pages
+
 前置配置：
 
-- 配置 GitHub Secrets `TENCENT_REGISTRY_USERNAME`
-- 配置 GitHub Secrets `TENCENT_REGISTRY_PASSWORD`
+- GitHub Pages Source 需要设置为 GitHub Actions
+- 配置 GitHub Secrets `ZPK_DOCKER_USERNAME`
+- 配置 GitHub Secrets `ZPK_DOCKER_PASSWORD`
+- 如使用非默认镜像仓库，可配置仓库变量 `IMAGE_PUSH_REGISTRY`
+- 如使用非默认 Helm 包镜像仓库，可配置仓库变量 `HELM_PACKAGE_IMAGE_REGISTRY`
+- 如 GitHub Pages 发布到域名根路径或自定义路径，可配置仓库变量 `DOCS_BASE_PATH`
 
 默认构建参数：
 
-- `KO_DOCKER_REPO=ccr.ccs.tencentyun.com/afan-public/w7panel1`
-- `KO_DEFAULTBASEIMAGE=ccr.ccs.tencentyun.com/afan-public/ubuntu:24.04-offlineui`
+- `IMAGE_PUSH_REGISTRY=ghcr.io`
+- `HELM_PACKAGE_IMAGE_REGISTRY=ghcr.registry.cdn.w7.cc`
+- `DOCS_BASE_PATH=/${仓库名}/`

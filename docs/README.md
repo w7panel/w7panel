@@ -8,16 +8,22 @@
 
 ```bash
 cd docs/docs
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 构建静态文档：
 
 ```bash
 cd docs/docs
-npm run build
+pnpm run build
 ```
+
+发布流程：
+
+- `.github/workflows/release.yml` 会在发布时构建 `docs/docs`。
+- 构建产物 `docs/docs/.vitepress/dist` 会上传并部署到 GitHub Pages。
+- GitHub Pages 默认 base path 为 `/${仓库名}/`，可通过仓库变量 `DOCS_BASE_PATH` 覆盖。
 
 ## 文档目录
 

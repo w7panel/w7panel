@@ -13,10 +13,13 @@ on:
 permissions:
   contents: write
   packages: write
+  pages: write
+  id-token: write
 
 env:
   CHART_DIR: charts
   CHART_PACKAGE_DIR: charts
+  DOCS_DIR: docs/docs
   ZPK_HOST: zpk.w7.cc
   ZPK_ARTIFACT: w7panel-offline
   IMAGE_PUSH_REGISTRY: ${{ vars.IMAGE_PUSH_REGISTRY || 'ghcr.io' }}
@@ -54,6 +57,27 @@ jobs:
         run: |
           HUSKY=0 npm install --legacy-peer-deps
           npm run build
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Build docs
+        working-directory: ${{ env.DOCS_DIR }}
+        env:
+          VITEPRESS_BASE: ${{ vars.DOCS_BASE_PATH || format('/{0}/', github.event.repository.name) }}
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload docs to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ env.DOCS_DIR }}/.vitepress/dist
 
       - name: Copy frontend assets
         run: |
@@ -135,3 +159,15 @@ jobs:
           zpk use "${ZPK_ARTIFACT}"
           zpk attach add --path="${HELM_PACKAGE}" --type=helm
           zpk push
+
+  deploy-docs:
+    needs: release
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy docs to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
