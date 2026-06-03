@@ -1,4 +1,35 @@
-# w7panel-server/app/zpk API 文档
+# 应用管理与 ZPK API
+
+本文档说明 ZPK 应用配置、列表、安装、升级、构建镜像和应用管理相关 API。ZPK 是面板应用安装和交付的主要入口，底层通常会关联 Helm Release、Kubernetes 资源、容器镜像构建和微应用静态资源。
+
+## 整体使用方式
+
+ZPK 接口用于从应用仓库读取安装配置，并完成安装、升级、构建和应用状态管理。开发时先读取配置确认安装参数，再根据应用类型决定直接安装、先构建镜像，或联动 Helm、容器镜像和静态资源接口。
+
+### 基本流程
+
+1. 调用 `/panel-api/v1/zpk/config` 读取仓库配置，确认应用名称、命名空间、部署项、镜像构建、PVC、域名和依赖项。
+2. 需要构建镜像时，调用 ZPK buildimage 接口创建构建任务，并结合 [container-images.md](./container-images.md) 查看镜像能力。
+3. 安装或升级应用时，调用 `/panel-api/v1/zpk/install`，后端根据配置应用 Helm 或 Kubernetes 资源。
+4. 安装后通过 ZPK 列表、详情、升级等接口管理应用。
+5. 如果应用带微前端静态包，再结合 [microapp-static.md](./microapp-static.md) 查询静态资源状态或触发下载。
+
+### 场景选择
+
+| 场景 | 使用接口 | 说明 |
+|------|----------|------|
+| 读取安装配置 | `/panel-api/v1/zpk/config` | 根据仓库地址返回安装表单和依赖 |
+| 查看已安装应用 | `/panel-api/v1/zpk/` | 按 `source=zpk` 查询 Helm Release |
+| 安装或升级 | `/panel-api/v1/zpk/install` | 提交安装参数 |
+| 构建镜像 | `/panel-api/v1/zpk/buildimage/*` | 创建镜像构建 Job/CronJob |
+| 应用生命周期 | ZPK 管理接口 | 列表、升级、删除或状态查询 |
+
+### 使用边界
+
+- ZPK 配置来自远程或本地仓库，调用前要明确 `repoUrl` 和第三方 CD token 来源。
+- 安装和升级会修改 Kubernetes 资源，必须明确 namespace、releaseName 和依赖关系。
+- 构建镜像涉及 Registry、containerd、Job/CronJob，失败排查需要联动容器镜像文档。
+- 微应用前端包和回源代理不在本文重复维护，见 [microapp-static.md](./microapp-static.md)。
 
 ## ZPK 配置
 

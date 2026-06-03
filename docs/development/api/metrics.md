@@ -1,4 +1,32 @@
-# w7panel-server/app/metrics API 文档
+# 指标 API
+
+本文档说明 `w7panel-server/app/metrics` 模块提供的资源使用量和 metrics 组件安装状态接口。指标接口主要服务于面板资源概览、云主机资源展示和运维判断。
+
+## 整体使用方式
+
+指标接口用于查询当前用户上下文下的 CPU、内存、磁盘使用量，以及 metrics 组件是否已安装。开发时先确认 metrics 组件状态，再调用资源用量接口展示面板聚合指标。
+
+### 基本流程
+
+1. 使用用户 token 调用 metrics 接口。
+2. 需要判断能力是否可用时，先调用 `/panel-api/v1/metrics/installed`。
+3. 展示 CPU/内存资源时调用 `/panel-api/v1/metrics/usage/normal`。
+4. 展示磁盘资源时调用 `/panel-api/v1/metrics/usage/disk`。
+5. 如果 metrics 不可用，前端应展示降级状态，不要把空值误认为真实资源为 0。
+
+### 场景选择
+
+| 场景 | 使用接口 | 说明 |
+|------|----------|------|
+| CPU/内存用量 | `/panel-api/v1/metrics/usage/normal` | 返回 usage 和 total |
+| 磁盘用量 | `/panel-api/v1/metrics/usage/disk` | 返回 disk usage 和 total |
+| metrics 安装状态 | `/panel-api/v1/metrics/installed` | 返回组件状态和访问地址 |
+
+### 使用边界
+
+- 指标数据是面板聚合结果，不等同于 Kubernetes Metrics API 的原始响应。
+- 获取底层指标失败时，部分接口可能返回默认或局部结果，前端需要结合状态字段判断。
+- 指标展示涉及当前用户或云主机上下文，不能跨用户直接复用。
 
 ## 资源使用量
 

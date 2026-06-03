@@ -72,17 +72,20 @@ docs/
 
 ### 开发与部署文档
 
-- [API 文档](./api/README.md)
 - [部署文档](./deployment/README.md)
 - [部署排障](./deployment/troubleshooting.md)
 - [开发指南](./development/README.md)
+- [API 文档](./api/README.md)
+- [API 调用凭据与认证接口说明](./development/api/credentials.md)
+- [集群运维 API 接口说明](./development/api/cluster-ops.md)
+- [指标 API 接口说明](./development/api/metrics.md)
+- [Longhorn API 接口说明](./development/api/longhorn.md)
+- [容器文件管理 API 接口说明](./development/api/container-files.md)
+- [容器镜像管理 API 接口说明](./development/api/container-images.md)
+- [应用管理 API 接口说明](./development/api/zpk.md)
 - [前端开发文档](./development/frontend/README.md)
 - [w7panel-server/app/application API 接口说明](./development/api/application.md)
-- [w7panel-server/app/auth API 接口说明](./development/api/auth.md)
-- [w7panel-server/app/k3k API 接口说明](./development/api/k3k.md)
-- [w7panel-server/app/k3s-registry API 接口说明](./development/api/k3s-registry.md)
-- [w7panel-server/app/metrics API 接口说明](./development/api/metrics.md)
-- [w7panel-server/app/zpk API 接口说明](./development/api/zpk.md)
+- [云主机 API 接口说明](./development/api/k3k.md)
 - [测试文档](./testing/README.md)
 - [版本日志](./changelog/1.0.0.md)
 

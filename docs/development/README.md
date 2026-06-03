@@ -6,17 +6,30 @@
 
 ### 后端 API
 
-`docs/development/api/` 按 `w7panel-server/app` 下的业务模块拆分接口文档。新增或修改接口时，同步更新对应模块文档。
+`docs/development/api/` 以业务专题为主、模块文档为辅组织接口说明。新增或修改接口时，优先更新对应业务专题；无法归入专题或需要从 Controller 反查实现时，再维护模块文档。
+
+业务专题：
+
+| 专题 | 文档 | 说明 |
+|------|------|------|
+| 调用凭据 | [api/credentials.md](./api/credentials.md) | 用户 token、webdavToken、微应用 props、OIDC token、LOCAL_MOCK |
+| 集群运维 | [api/cluster-ops.md](./api/cluster-ops.md) | Helm、YAML、终端、代理、DNS、GPU、指标 |
+| 指标 | [api/metrics.md](./api/metrics.md) | CPU、内存、磁盘使用量和 metrics 组件安装状态 |
+| Longhorn | [api/longhorn.md](./api/longhorn.md) | Longhorn 安装、卷状态、副本筛选、attach/detach、快照和文件系统操作 |
+| 容器文件管理 | [api/container-files.md](./api/container-files.md) | WebDAV、压缩解压、权限修改、分片上传和文件编辑器 |
+| 容器镜像管理 | [api/container-images.md](./api/container-images.md) | Registry、containerd 镜像操作、容器 commit、ZPK 构建镜像 |
+| 应用管理 | [api/zpk.md](./api/zpk.md) | ZPK 配置、列表、安装、升级、构建和应用管理 |
+| 微应用静态资源 | [api/microapp-static.md](./api/microapp-static.md) | 微应用信息、后端代理、静态资源状态、下载和回源 |
+| OAuth/OIDC | [api/oauth-oidc.md](./api/oauth-oidc.md) | OIDC Provider、Client 管理、授权码、Console OAuth |
+| 云主机 | [api/k3k.md](./api/k3k.md) | 云主机用户、CKM/CVM、同步、菜单、套餐和订单入口 |
+
+模块文档：
 
 | 模块 | 文档 | 说明 |
 |------|------|------|
-| 通用约定 | [api/README.md](./api/README.md) | API 路由分层、鉴权、响应格式、安全、前后端同步和测试规范 |
+| 通用约定 | [api/conventions.md](./api/conventions.md) | API 路由分层、鉴权、响应格式、安全、前后端同步和测试规范 |
 | application | [api/application.md](./api/application.md) | 面板核心业务接口 |
-| auth | [api/auth.md](./api/auth.md) | 登录、刷新、用户信息等认证接口 |
-| k3k | [api/k3k.md](./api/k3k.md) | K3k 集群相关接口 |
-| k3s-registry | [api/k3s-registry.md](./api/k3s-registry.md) | K3s 镜像仓库接口 |
-| metrics | [api/metrics.md](./api/metrics.md) | 资源指标接口 |
-| zpk | [api/zpk.md](./api/zpk.md) | ZPK 应用接口 |
+| audit | [api/audit.md](./api/audit.md) | 登录日志、操作日志和审计状态 |
 
 ### 前端
 
