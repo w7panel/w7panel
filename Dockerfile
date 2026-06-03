@@ -23,6 +23,7 @@ RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsing
     && apk add --no-cache build-base zig
 
 COPY w7panel-server/go.mod w7panel-server/go.sum ./
+COPY w7panel-server/mod/w7panel-ckm/go.mod w7panel-server/mod/w7panel-ckm/go.sum ./mod/w7panel-ckm/
 RUN go mod download
 
 COPY w7panel-server/ ./
