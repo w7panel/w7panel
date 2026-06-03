@@ -139,7 +139,7 @@ export default {
       text: 'Apache-2.0 License',
       link: 'https://opensource.org/licenses/MIT'
     },
-    copyright: `Copyright © 2013-${new Date().getFullYear()} 微擎 <div data-v-ebd81002="" class="df ai-c jc-c df-ww padding-20 c-99 fs-12 mt-10" style="gap: 15px;"><a data-v-ebd81002="" href="https://beian.miit.gov.cn/" class="c-99" target="_blank">ICP备案：皖ICP备19002904号</a>  <a data-v-ebd81002="" href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34130202000406" class="c-99" target="_blank">皖公网安备34130202000406号</a></div>`
+    copyright: `Copyright © 2013-${new Date().getFullYear()} 微擎<br><span style="display:inline-flex;flex-wrap:wrap;justify-content:center;gap:15px;margin-top:10px;color:#999;font-size:12px;"><a href="https://beian.miit.gov.cn/" style="color:#999;" target="_blank" rel="noopener noreferrer">ICP备案：皖ICP备19002904号</a><a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34130202000406" style="color:#999;" target="_blank" rel="noopener noreferrer">皖公网安备34130202000406号</a></span>`
   },
 
   vite: {
