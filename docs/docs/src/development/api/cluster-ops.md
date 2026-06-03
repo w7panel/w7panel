@@ -1,10 +1,10 @@
 # 集群资源与运维 API
 
-本文档汇总集群资源、Helm、YAML、代理、DNS、GPU、终端和诊断类 API。这些接口分布在 `app/application`、`app/k3k`、`app/metrics` 等模块中，通常由面板页面直接调用。Longhorn 接口已拆分到 [longhorn.md](./longhorn.md)。
+本文档汇总集群资源、Helm、YAML、终端、集群侧代理、DNS、GPU 和诊断类 API。这些接口主要分布在 `app/application` 模块中，通常由面板集群运维页面直接调用。已经拆到独立专题的 Longhorn、metrics、微应用、容器文件、容器镜像等接口不在本文重复维护。
 
 ## 整体使用方式
 
-集群运维接口面向 Kubernetes 原生资源和面板聚合能力。开发时先判断是要直接访问 K8s API，还是调用面板业务封装：原生资源走 `/k8s-proxy/`，Helm、YAML、终端、代理、DNS、GPU、指标等走 `/panel-api/v1/` 下的业务接口。
+集群运维接口面向 Kubernetes 原生资源和面板聚合能力。开发时先判断是要直接访问 K8s API，还是调用面板业务封装：原生资源走 `/k8s-proxy/`，Helm、YAML、终端、集群侧代理、DNS、GPU 等走 `/panel-api/v1/` 下的业务接口。
 
 ### 基本流程
 
@@ -12,7 +12,7 @@
 2. 查询原生 K8s 对象时优先走 `/k8s-proxy/api/*` 或 `/k8s-proxy/apis/*`。
 3. 安装 Helm、应用 YAML、终端连接、服务代理等面板能力，调用对应 `/panel-api/v1/*` 接口。
 4. 涉及长连接或代理接口时，按原始协议处理响应，不额外假设 JSON 包装。
-5. 涉及 Longhorn 卷操作时跳转到 [longhorn.md](./longhorn.md)，不要在集群运维文档重复维护。
+5. 涉及 Longhorn、metrics、微应用、文件、镜像等专题接口时跳转对应文档，不要在集群运维文档重复维护。
 
 ### 场景选择
 
@@ -22,8 +22,8 @@
 | Helm Release 管理 | Helm 相关 `/panel-api/v1/*` | 面板封装 Helm list/detail/install/uninstall |
 | YAML 应用和回滚 | YAML 相关接口 | 面板处理 manifest 应用、回滚和 Compose 转换 |
 | Pod/Node 终端 | TTY、Exec 接口 | 通常涉及 WebSocket 或执行流 |
-| Service/Pod 代理 | proxy 接口 | 透传目标服务响应 |
-| DNS、GPU、指标 | 对应业务接口 | 返回面板聚合后的业务字段 |
+| Service/Pod/Common 代理 | proxy 接口 | 透传目标服务响应 |
+| DNS、GPU、诊断 | 对应业务接口 | 返回面板聚合后的业务字段 |
 
 ### 使用边界
 
@@ -73,11 +73,9 @@ Authorization: Bearer <token>
 | Helm | Helm Release 列表、详情、安装、卸载、复用 values |
 | YAML 和 Compose | 应用 YAML、回滚、Docker Compose 转换 |
 | 终端与执行 | Pod TTY、Node TTY、Exec、ExecAll |
-| 代理 | Service/Pod/Common proxy、kubeconfig、microapp proxy |
+| 代理 | K8s API proxy、Service/Pod/Common proxy、proxy-no、proxy-url、kubeconfig |
 | DNS 和网络诊断 | DNS 解析、DNS zone/record、数据库连接测试、etcd ping |
-| Longhorn | 已拆分到 [longhorn.md](./longhorn.md) |
 | GPU | GPU 开关、HAMI/GPU Operator、GPU summary、设备和 GPUStack worker |
-| 指标 | CPU、内存、磁盘、metrics 安装状态 |
 
 ## K8s 原生代理
 
@@ -87,11 +85,14 @@ K8s 原生资源请求应走 `/k8s-proxy/`，不要把原生资源 API 放入面
 |------|------|------|------|
 | `ANY` | `/k8s-proxy/*path` | 需要 token | 代理到 Kubernetes API Server |
 
-常见请求：
+### 请求路径
+
+`/k8s-proxy/*path` 会去掉 `/k8s-proxy` 前缀后，把剩余路径作为 Kubernetes API Server 路径。例如：
 
 ```http
 GET /k8s-proxy/api/v1/namespaces/default/pods
 GET /k8s-proxy/apis/apps/v1/namespaces/default/deployments
+GET /k8s-proxy/api/v1/namespaces/default/services/nginx:80/proxy/health
 ```
 
 查询参数：
@@ -100,7 +101,30 @@ GET /k8s-proxy/apis/apps/v1/namespaces/default/deployments
 |------|------|------|------|------|
 | `local` | query | 否 | string | `true` 或 `1` 时强制使用本地 K8s 客户端 |
 
-响应：透传 Kubernetes API 响应。中间件可能对部分响应做过滤，调用方应按 K8s 原生对象解析。
+### 转发行为
+
+| 项 | 说明 |
+|----|------|
+| token 来源 | 从用户 token 解析 `k8s_token`，再创建对应 K8s client |
+| `Authorization` | 如果请求头带 `Bearer`，后端会替换为当前 K8s client 的 bearer token |
+| 方法和 body | 原始 HTTP method、query、body 会继续传给 Kubernetes API Server |
+| `local=true` | 强制走本地 K8s client，主要用于开发或特殊资源读取 |
+| 响应 | 透传 Kubernetes API 响应；调用方应按 K8s 原生对象、watch 流或 service proxy 响应解析 |
+
+### 适用场景
+
+| 场景 | 示例 |
+|------|------|
+| 读取原生资源 | `GET /k8s-proxy/api/v1/namespaces/default/pods` |
+| 修改原生资源 | `PATCH /k8s-proxy/apis/apps/v1/namespaces/default/deployments/nginx` |
+| K8s Service proxy | `GET /k8s-proxy/api/v1/namespaces/default/services/nginx:80/proxy/` |
+| CRD 管理 | `GET /k8s-proxy/apis/&lt;group&gt;/&lt;version&gt;/...` |
+
+使用边界：
+
+- 只用于 Kubernetes 原生 API 路径，不要在 `/k8s-proxy/` 下新增面板业务接口。
+- Service proxy 返回的是目标服务响应，不一定是 JSON。
+- watch、exec、log 等流式接口需要前端按原协议处理。
 
 ## 命名空间
 
@@ -451,33 +475,163 @@ Content-Type: application/json
 
 ## 代理接口
 
+集群侧代理接口用于从面板访问集群内 Service、Pod 或指定主机。除 `proxy-no` 和 `proxy-url` 的特殊说明外，代理响应会透传目标状态码、Header 和 Body；目标不是 JSON 时，前端不能按普通业务 JSON 解析。
+
+### 代理入口对比
+
+| 入口 | 鉴权 | 是否经过 K3K Agent 转发 | 目标 | 典型用途 |
+|------|------|--------------------------|------|----------|
+| `/k8s-proxy/*path` | 需要用户 token | 否，直接通过 K8s client 代理到 API Server | Kubernetes API Server | 原生 K8s 资源和 K8s service proxy |
+| `/panel-api/v1/namespaces/:namespace/services/:name/proxy/*path` | 需要用户 token | K3K token 下会先转发到子集群 Agent | 集群内 Service DNS | 访问当前用户集群内服务 |
+| `/panel-api/v1/namespaces/:namespace/services/:name/proxy-root/*path` | 需要用户 token | 不经过 `middleware.Proxy` | root 集群 Service DNS | 强制访问 root 集群服务 |
+| `/panel-api/v1/namespaces/:namespace/services/:name/proxy-no/*path` | 可无用户 token | 有 token 且为 K3K token 时会转发到子集群 Agent | 集群内 Service DNS | 微应用、公开回调或服务自身鉴权场景 |
+| `/panel-api/v1/namespaces/:namespace/pods/:name/proxy/*path` | 需要用户 token | K3K token 下会先转发到子集群 Agent | Pod IP | 直接访问某个 Pod 暴露端口 |
+| `/panel-api/v1/:name/proxy/*path` | 需要用户 token | 不经过 `middleware.Proxy` | `:name` 中指定的 host:port | Agent、文件管理等直接 host 代理 |
+| `/panel-api/v1/proxy-url/` | 当前未挂用户鉴权 | 否 | query 中的完整 URL | Helm chart 等远程文本拉取 |
+| `/panel-api/v1/kubeconfig` | 需要用户 token | K3K token 下会先转发到子集群 Agent | 当前用户上下文 Kubeconfig | 前端下载 kubeconfig |
+
+### 通用转发规则
+
+| 项 | 说明 |
+|----|------|
+| 方法 | Service、Pod、Common、proxy-no 路由注册了 WebDAV 方法集合，包含常见 `GET`、`POST`、`PUT`、`DELETE`、`PATCH`、`HEAD`、`OPTIONS` 等 |
+| query/body | 原始 query 和 body 透传给目标服务 |
+| Header | 原始 Header 透传；`Destination` Header 会针对 WebDAV 路径做改写 |
+| Host | 反向代理会把 `Host` 设置为目标地址 host |
+| CORS | 代理响应会删除目标响应中的 `Access-Control-Allow-Origin` |
+| 错误 | 代理连接失败返回 HTTP `502`，body 形如 `{"code":502,"error":"..."}` |
+
 ### Service proxy
+
+#### ANY `/panel-api/v1/namespaces/:namespace/services/:name/proxy/*path`
+
+功能：代理访问当前用户上下文中的 Kubernetes Service。K3K 集群 token 下，`middleware.Proxy` 会先把请求转发到对应子集群 Agent，再由子集群侧访问 Service。
 
 路径参数：
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `namespace` | string | Service namespace |
-| `name` | string | Service 名称和端口，支持 `svc`、`svc:8080`、`https:svc:443` |
-| `path` | string | 目标路径 |
+| 参数 | 位置 | 必填 | 类型 | 说明 |
+|------|------|------|------|------|
+| `namespace` | path | 是 | string | Service namespace |
+| `name` | path | 是 | string | Service 名称、协议和端口，支持 `svc`、`svc:8080`、`https:svc:443` |
+| `path` | path | 是 | string | 目标服务路径，空路径按 `/` 处理 |
 
-转发目标：`&lt;schema&gt;://&lt;service&gt;.&lt;namespace&gt;.svc:&lt;port&gt;/&lt;path&gt;`，默认 `schema=http`、`port=80`。
+`name` 解析规则：
 
-响应：透传目标服务状态、Header 和 Body；代理会删除目标响应中的 `Access-Control-Allow-Origin`。
+| 形式 | 解析结果 |
+|------|----------|
+| `svc` | `http://svc.<namespace>.svc:80` |
+| `svc:8080` | `http://svc.<namespace>.svc:8080` |
+| `https:svc:443` | `https://svc.<namespace>.svc:443` |
+
+请求示例：
+
+```http
+GET /panel-api/v1/namespaces/default/services/nginx:8080/proxy/api/health?debug=1
+Authorization: Bearer <token>
+```
+
+响应：透传目标服务状态、Header 和 Body。
+
+#### ANY `/panel-api/v1/namespaces/:namespace/services/:name/proxy-root/*path`
+
+功能：代理访问 root 集群 Service。该入口需要用户 token，但不挂 `middleware.Proxy`，因此不会因 K3K token 自动转到子集群 Agent。
+
+请求参数同 `proxy/*path`。
+
+典型用途：K3K 或子集群用户仍需要访问主集群里的共享服务时使用。调用前应确认当前用户有访问该 root 集群服务的业务权限。
 
 ### Pod proxy
 
+#### ANY `/panel-api/v1/namespaces/:namespace/pods/:name/proxy/*path`
+
+功能：通过 Pod IP 访问指定 Pod。K3K 集群 token 下会先转发到子集群 Agent。
+
 路径参数：
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `namespace` | string | Pod namespace |
-| `name` | string | Pod 名称和端口，支持 `pod`、`pod:8080` |
-| `path` | string | 目标路径 |
+| 参数 | 位置 | 必填 | 类型 | 说明 |
+|------|------|------|------|------|
+| `namespace` | path | 是 | string | Pod namespace |
+| `name` | path | 是 | string | Pod 名称和端口，支持 `pod`、`pod:8080` |
+| `path` | path | 是 | string | 目标路径，空路径按 `/` 处理 |
 
-转发目标：Pod IP + 端口。Pod IP 为空时返回错误。
+`name` 解析规则：
 
-### GET `/panel-api/v1/proxy-url/`
+| 形式 | 解析结果 |
+|------|----------|
+| `pod-name` | `http://&lt;podIP&gt;:80` |
+| `pod-name:8080` | `http://&lt;podIP&gt;:8080` |
+
+处理逻辑：
+
+| 步骤 | 说明 |
+|------|------|
+| 1 | 使用当前 `k8s_token` 创建 K8s client |
+| 2 | 按 namespace/name 读取 Pod |
+| 3 | 使用 `pod.status.podIP` 和端口拼接目标地址 |
+| 4 | Pod IP 为空时返回服务端错误 |
+
+请求示例：
+
+```http
+GET /panel-api/v1/namespaces/default/pods/nginx-xxx:8080/proxy/metrics
+Authorization: Bearer <token>
+```
+
+### Common proxy
+
+#### ANY `/panel-api/v1/:name/proxy/*path`
+
+功能：按 `:name` 中的 host、协议和端口直接代理，不自动拼接 Kubernetes Service DNS。该入口需要用户 token，但不经过 `middleware.Proxy`，常用于文件管理 Agent 等需要直接访问目标 host 的场景。
+
+路径参数：
+
+| 参数 | 位置 | 必填 | 类型 | 说明 |
+|------|------|------|------|------|
+| `name` | path | 是 | string | 目标 host、协议和端口，支持 `host`、`host:8000`、`http:host:8000` |
+| `path` | path | 是 | string | 目标路径，空路径按 `/` 处理 |
+
+`name` 解析规则：
+
+| 形式 | 解析结果 |
+|------|----------|
+| `10.0.0.10` | `http://10.0.0.10:80` |
+| `10.0.0.10:8000` | `http://10.0.0.10:8000` |
+| `https:example.com:443` | `https://example.com:443` |
+
+请求示例：
+
+```http
+GET /panel-api/v1/10.0.0.10:8000/proxy/panel-api/v1/files/webdav-agent/123/agent/etc/hosts
+Authorization: Bearer <token>
+```
+
+### No-auth Service proxy
+
+#### ANY `/panel-api/v1/namespaces/:namespace/services/:name/proxy-no/*path`
+
+功能：免面板登录代理访问 Service。该入口不挂 `middleware.Auth`，用于服务自身已经有鉴权、微应用公开入口、回调入口等场景。
+
+路径参数同 Service proxy。
+
+鉴权和转发行为：
+
+| 场景 | 行为 |
+|------|------|
+| 请求不带 token | 直接访问 root 集群 Service DNS |
+| 请求带 K3K token 且当前不是子 Agent | 先转发到子集群 Agent，并附加 `PANEL_ROLE`、`PANEL_USERNAME` Header |
+| 请求带非 K3K token | 直接访问 root 集群 Service DNS |
+
+安全边界：
+
+- `proxy-no` 不做面板用户认证，目标服务必须自己校验权限或只暴露安全内容。
+- 不应把管理类、写操作类、内部敏感接口直接暴露为 `proxy-no`。
+- 如果目标服务依赖面板用户身份，应通过 token 或服务端注入 Header 明确处理，不要假设一定有用户上下文。
+
+### URL 内容拉取
+
+#### GET `/panel-api/v1/proxy-url/`
+
+功能：通过后端发起 GET 请求并返回远程响应 body 字符串。当前路由未挂 `middleware.Auth`，主要用于读取远程 chart、配置或文本资源。
 
 请求参数：
 
@@ -485,9 +639,24 @@ Content-Type: application/json
 |------|------|------|------|------|
 | `proxyUrl` | query/form | 是 | string | 要请求的完整 URL |
 
-响应：远程 URL 的响应 body 字符串；请求失败时返回空字符串。
+响应：HTTP `200` 文本。远程请求失败时返回空字符串。
 
-### GET `/panel-api/v1/kubeconfig`
+请求示例：
+
+```http
+GET /panel-api/v1/proxy-url/?proxyUrl=https%3A%2F%2Fcharts.example.com%2Findex.yaml
+```
+
+使用边界：
+
+- 该接口只返回远程 body 字符串，不透传远程状态码和 Header。
+- 新增调用时要避免把内网敏感地址、带 token 的 URL 或用户可控任意地址直接传入。
+
+### Kubeconfig
+
+#### GET `/panel-api/v1/kubeconfig`
+
+功能：根据当前用户 token 生成 kubeconfig。K3K token 下会经过 `middleware.Proxy` 转到子集群 Agent，由子集群上下文生成 kubeconfig。
 
 请求参数：
 
@@ -495,7 +664,19 @@ Content-Type: application/json
 |------|------|------|------|------|
 | `apiServerUrl` | query | 否 | string | kubeconfig 中使用的 API Server 地址 |
 
-响应：kubeconfig 内容或结构，取决于 `client.ToKubeconfig` 返回值。
+响应：`client.ToKubeconfig(apiServerUrl)` 返回的 kubeconfig 结构。
+
+请求示例：
+
+```http
+GET /panel-api/v1/kubeconfig?apiServerUrl=https://api.example.com
+Authorization: Bearer <token>
+```
+
+使用边界：
+
+- kubeconfig 可用于访问集群，前端下载和日志记录时不能泄露其中 token。
+- `apiServerUrl` 只影响生成配置中的 server 地址，不改变当前用户实际权限。
 
 ## DNS 和诊断
 
@@ -613,22 +794,6 @@ Content-Type: application/json
 | `serviceType` | string | Service 类型，可能为空 |
 | `externalIPs` | array&lt;string&gt; | 外部 IP 列表 |
 
-## Longhorn
-
-Longhorn 接口已拆分到独立文档，详细请求参数、响应字段、Longhorn Backend action body 和调用注意见 [longhorn.md](./longhorn.md)。
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/longhorn/need-delete-replica` | 获取需要删除的副本 |
-| `GET` | `/panel-api/v1/longhorn/volumes/status` | Longhorn 卷状态 |
-| `POST` | `/panel-api/v1/longhorn/install` | 安装 Longhorn |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/attach` | attach 卷 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/detach` | detach 卷 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/cancel-expansion` | 取消扩容 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/trim-filesystem` | trim 文件系统 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/snapshot-delete` | 删除快照 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/snapshot-purge` | 清理快照 |
-
 ## GPU
 
 ### POST `/panel-api/v1/gpu/enabled-gpu`
@@ -709,61 +874,6 @@ Longhorn 接口已拆分到独立文档，详细请求参数、响应字段、Lo
 | `password` | query/form/body | 否 | string | - | 预留字段，当前创建容器时未写入环境变量 |
 
 成功响应：当前实现返回空数组 `[]`。
-
-## 指标
-
-指标接口详见 [metrics.md](./metrics.md)。
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/metrics/usage/normal` | 当前 token 资源 CPU/内存用量 |
-| `GET` | `/panel-api/v1/metrics/usage/disk` | 当前 token 磁盘用量 |
-| `GET` | `/panel-api/v1/metrics/usage/cvm/:namespace/name/:name/normal` | 指定 CVM CPU/内存用量 |
-| `GET` | `/panel-api/v1/metrics/usage/cvm/:namespace/name/:name/disk` | 指定 CVM 磁盘用量 |
-| `GET` | `/panel-api/v1/metrics/installed` | metrics 组件安装状态 |
-| `GET` | `/panel-api/v1/metrics/state` | metrics 展示/安装状态 |
-
-### GET `/panel-api/v1/metrics/usage/normal`
-
-响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `cpu.usage` | int64 | CPU 已用，milliValue |
-| `cpu.total` | int64 | CPU 总量，milliValue |
-| `memory.usage` | int64 | 内存已用，bytes |
-| `memory.total` | int64 | 内存总量，bytes |
-
-### GET `/panel-api/v1/metrics/usage/disk`
-
-响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `disk.usage` | number | 磁盘已用 |
-| `disk.total` | number | 磁盘总量 |
-
-### GET `/panel-api/v1/metrics/installed`
-
-响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `installed` | bool | metrics Helm Release 是否存在 |
-| `baseUrl` | string | metrics 服务代理地址 |
-| `namespace` | string | metrics 所在 namespace |
-
-### GET `/panel-api/v1/metrics/state`
-
-响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `canShowClusterMetrics` | bool | 是否可展示集群指标 |
-| `canShowNodeMetrics` | bool | 是否可展示节点指标 |
-| `canShowPodMetrics` | bool | 是否可展示 Pod 指标 |
-| `needInstallMetricsInDashboard` | bool | Dashboard 是否需要安装 metrics |
-| `needInstallMetricsInApp` | bool | 应用内是否需要安装 metrics |
 
 ## 开发检查
 

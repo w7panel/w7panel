@@ -13,7 +13,7 @@
 | 专题 | 文档 | 说明 |
 |------|------|------|
 | 调用凭据 | [api/credentials.md](./api/credentials.md) | 用户 token、webdavToken、微应用 props、OIDC token、LOCAL_MOCK |
-| 集群运维 | [api/cluster-ops.md](./api/cluster-ops.md) | Helm、YAML、终端、代理、DNS、GPU、指标 |
+| 集群运维 | [api/cluster-ops.md](./api/cluster-ops.md) | Helm、YAML、终端、集群侧代理、DNS、GPU、诊断 |
 | 指标 | [api/metrics.md](./api/metrics.md) | CPU、内存、磁盘使用量和 metrics 组件安装状态 |
 | Longhorn | [api/longhorn.md](./api/longhorn.md) | Longhorn 安装、卷状态、副本筛选、attach/detach、快照和文件系统操作 |
 | 容器文件管理 | [api/container-files.md](./api/container-files.md) | WebDAV、压缩解压、权限修改、分片上传和文件编辑器 |

@@ -20,7 +20,6 @@ exports = module.exports = [
         items: [
           { text: '集群资源', link: '/development/api/cluster-ops' },
           { text: '存储', link: '/development/api/longhorn' },
-          { text: '集群指标', link: '/development/api/metrics' },
           { text: '文件管理', link: '/development/api/container-files' },
           { text: '镜像管理', link: '/development/api/container-images' },
           {
@@ -31,6 +30,7 @@ exports = module.exports = [
               { text: '订单与超卖', link: '/development/api/orders' },
             ]
           },
+          { text: '集群指标', link: '/development/api/metrics' },
         ]
       },
       { text: '微应用', link: '/development/api/microapp-static' },
