@@ -48,6 +48,39 @@ window.$wujie.bus.$emit('openPage', {
 });
 ```
 
+微应用侧推荐封装：
+
+```ts
+export function getWujieBus() {
+  return window.$wujie?.bus;
+}
+
+export function emitPanelEvent(eventName: string, payload?: unknown) {
+  return new Promise((resolve, reject) => {
+    const bus = getWujieBus();
+    if (!bus) {
+      reject(new Error('Wujie bus is not available'));
+      return;
+    }
+
+    bus.$emit(eventName, payload, resolve, reject);
+  });
+}
+```
+
+使用方式：
+
+```ts
+// 无回调事件：打开面板弹窗
+window.$wujie?.bus?.$emit('openPage', {
+  title: '帮助',
+  src: 'https://example.com/help',
+});
+
+// 有回调事件：按 Promise 处理成功和失败
+await emitPanelEvent('buildImage', buildPayload);
+```
+
 带响应回调的调用示例：
 
 ```ts
@@ -62,6 +95,9 @@ window.$wujie.bus.$emit('checkSession', (token: string) => {
 - `clearAllWujieEvents()` 清理的是当前 hook 模块记录的全部事件；同一页面嵌套多个注册组件时，要确认清理时机不会误清其它仍在使用的事件。
 - 多参数响应遵循 `window.$wujie.bus.$emit(event, data, callback, rejectCallback)` 这种约定，回调不是 Promise。
 - 面板传给微应用的 props 由各容器页面 `startApp()` 或 `setupApp()` 配置决定，常见字段见 [microapps.md](./microapps.md)。
+- 微应用触发事件前要判断 `window.$wujie?.bus` 是否存在；独立运行调试时可以降级为空实现或提示当前不在面板容器内。
+- 微应用不要假设所有事件都有回调；是否有响应以本文每个事件的“响应”说明为准。
+- payload 优先传对象，不要传位置参数数组，后续扩展字段时更稳定。
 
 ## 通用弹窗和面板能力事件
 

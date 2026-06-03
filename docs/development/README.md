@@ -39,7 +39,7 @@
 | [frontend/conventions.md](./frontend/conventions.md) | 前端目录、API、页面、UI、状态、性能和提交流程规范 |
 | [frontend/auth-state.md](./frontend/auth-state.md) | 前端 token 注入、刷新、本地缓存和权限状态 |
 | [frontend/microapps.md](./frontend/microapps.md) | 微应用容器、Wujie props、token 边界、后端代理和接入流程 |
-| [frontend/components.md](./frontend/components.md) | 公共组件和业务复用组件说明 |
+| [frontend/components.md](./frontend/components.md) | 前端组件文档入口，组件明细按类型拆分 |
 | [frontend/wujie-events.md](./frontend/wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
 
 ### 示例和专题

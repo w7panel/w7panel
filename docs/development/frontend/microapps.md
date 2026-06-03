@@ -55,6 +55,77 @@
 | `appImage` | 应用镜像 |
 | `domain` | 微应用绑定域名，GPUStack 等场景使用 |
 
+### props 怎么用
+
+微应用侧不要从 URL query 中反推面板上下文，优先从 Wujie props 读取。建议在微应用入口统一封装一次，页面和请求方法都从封装里取值。
+
+```ts
+type W7PanelMicroAppProps = {
+  url?: string;
+  requestUrl?: string;
+  group?: string;
+  userid?: string | number;
+  openid?: string;
+  nickname?: string;
+  role?: string;
+  paneltoken?: string;
+  w7PanelToken?: string;
+  access_token?: string;
+  Authorization?: string;
+  domain?: string;
+};
+
+export function getPanelProps(): W7PanelMicroAppProps {
+  return window.$wujie?.props || {};
+}
+
+export function getPanelToken() {
+  return getPanelProps().paneltoken || '';
+}
+
+export function getMicroBackendBaseURL() {
+  const props = getPanelProps();
+  return props.requestUrl || props.url || '';
+}
+```
+
+请求面板 API 时使用 `paneltoken` 作为 Bearer token：
+
+```ts
+const token = getPanelToken();
+
+await fetch('/panel-api/v1/auth/userinfo', {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+});
+```
+
+请求微应用自己的后端时使用 `url` 或 `requestUrl`，再按微应用自身协议决定是否带 `Authorization`：
+
+```ts
+const baseURL = getMicroBackendBaseURL();
+const appAuth = getPanelProps().Authorization;
+
+await fetch(`${baseURL}/api/status`, {
+  headers: appAuth ? { Authorization: appAuth } : {},
+});
+```
+
+使用用户、角色、应用组等上下文时，也从 props 读取：
+
+```ts
+const { group, userid, nickname, role, domain } = getPanelProps();
+```
+
+约定：
+
+- `paneltoken` 只用于请求面板 API。
+- `url` / `requestUrl` 只表示微应用后端代理地址，不代表面板 API 前缀。
+- `Authorization` 是微应用自身认证，通常不是 Bearer 用户 token。
+- `w7PanelToken` 和 `access_token` 只在对应 Console/OIDC 场景使用。
+- 微应用初始化时要允许 props 暂时为空，必要时等 Wujie 挂载后再发起请求。
+
 ## token 边界
 
 | 字段 | 能否请求面板 API | 说明 |
@@ -63,6 +134,67 @@
 | `w7PanelToken` | 不可以 | Console 第三方持续交付 token |
 | `access_token` | 不建议 | Console/OIDC access token，只能按对应协议使用 |
 | `Authorization` | 不可以 | 微应用自身 Basic 认证 |
+
+### 微应用中怎么授权
+
+微应用在面板内运行时，面板通过 Wujie props 注入 `paneltoken`。微应用请求面板 API 时，把 `paneltoken` 放到 Bearer 请求头。
+
+fetch 示例：
+
+```ts
+async function requestPanelAPI(path: string, init: RequestInit = {}) {
+  const token = getPanelToken();
+  return fetch(path, {
+    ...init,
+    headers: {
+      ...(init.headers || {}),
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+await requestPanelAPI('/panel-api/v1/auth/userinfo');
+```
+
+axios 示例：
+
+```ts
+import axios from 'axios';
+
+export const panelRequest = axios.create({
+  baseURL: '/panel-api/v1',
+});
+
+panelRequest.interceptors.request.use((config) => {
+  const token = getPanelToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+await panelRequest.get('/auth/userinfo');
+```
+
+微应用请求自身后端时不要使用 `paneltoken`，而是使用 `url` / `requestUrl` 和微应用自身认证：
+
+```ts
+const props = getPanelProps();
+const baseURL = getMicroBackendBaseURL();
+
+await fetch(`${baseURL}/api/status`, {
+  headers: props.Authorization ? { Authorization: props.Authorization } : {},
+});
+```
+
+微应用内授权边界：
+
+| 场景 | 使用 token | 说明 |
+|------|------------|------|
+| 请求面板 API | `paneltoken` | `Authorization: Bearer <paneltoken>` |
+| 请求微应用后端 | `Authorization` 或微应用自有 token | 通过 `url` / `requestUrl` 访问 |
+| Console/OIDC 协议 | `w7PanelToken` / `access_token` | 只按对应协议使用 |
+| 刷新面板登录态 | 不建议微应用直接处理 | 优先由面板主应用和统一拦截器处理 |
 
 约定：
 
@@ -77,6 +209,45 @@
 
 ```ts
 window.$wujie.bus.$emit('eventName', payload, callback, rejectCallback);
+```
+
+建议微应用侧封装一个事件工具，避免页面里到处直接访问 `window.$wujie`：
+
+```ts
+export function emitPanelEvent<TPayload = unknown, TResult = unknown>(
+  eventName: string,
+  payload?: TPayload,
+) {
+  return new Promise<TResult>((resolve, reject) => {
+    const bus = window.$wujie?.bus;
+    if (!bus) {
+      reject(new Error('Wujie bus is not available'));
+      return;
+    }
+
+    bus.$emit(
+      eventName,
+      payload,
+      (result: TResult) => resolve(result),
+      (error: unknown) => reject(error),
+    );
+  });
+}
+```
+
+不需要回调的事件可以直接触发：
+
+```ts
+window.$wujie?.bus?.$emit('openPage', {
+  title: '帮助文档',
+  src: 'https://example.com/help',
+});
+```
+
+需要回调的事件建议通过 Promise 包一层：
+
+```ts
+await emitPanelEvent('buildImage', buildPayload);
 ```
 
 面板侧注册和清理事件见 [wujie-events.md](./wujie-events.md)。新增事件时需要同时确认：
