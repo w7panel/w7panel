@@ -84,6 +84,7 @@ docs/
 - [容器镜像管理 API 接口说明](./development/api/container-images.md)
 - [应用管理 API 接口说明](./development/api/zpk.md)
 - [前端开发文档](./development/frontend/README.md)
+- [前端微应用接入说明](./development/frontend/microapps.md)
 - [w7panel-server/app/application API 接口说明](./development/api/application.md)
 - [云主机 API 接口说明](./development/api/k3k.md)
 - [测试文档](./testing/README.md)
