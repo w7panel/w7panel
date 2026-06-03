@@ -67,7 +67,7 @@ jobs:
       - name: Build docs
         working-directory: ${{ env.DOCS_DIR }}
         env:
-          VITEPRESS_BASE: ${{ vars.DOCS_BASE_PATH || '/' }}
+          VITEPRESS_BASE: ${{ vars.DOCS_BASE_PATH || format('/{0}/', github.event.repository.name) }}
         run: |
           pnpm install --frozen-lockfile
           pnpm run build
