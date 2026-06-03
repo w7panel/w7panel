@@ -31,6 +31,35 @@ ZPK 接口用于从应用仓库读取安装配置，并完成安装、升级、�
 - 构建镜像涉及 Registry、containerd、Job/CronJob，失败排查需要联动容器镜像文档。
 - 微应用前端包和回源代理不在本文重复维护，见 [microapp-static.md](./microapp-static.md)。
 
+## 通用说明
+
+### 鉴权
+
+除明确标注为回调或公开兼容入口的接口外，ZPK 接口均需要用户 token：
+
+```http
+Authorization: Bearer <user-token>
+```
+
+### 响应格式
+
+接口直接返回安装配置、Helm Release、环境变量、Job/CronJob 等业务对象，不额外包裹统一 `data` 字段。操作成功时部分接口返回 `"success"`。
+
+### 参数位置
+
+安装、传统应用安装和构建任务通常使用 JSON body 或 form/query 参数混合绑定；具体以各接口请求参数表为准。涉及 URL、OCI 路径和 Chart 名称时必须做好 URL 编码。
+
+## 能力概览
+
+| 能力 | 说明 |
+|------|------|
+| 安装配置 | 读取 ZPK 安装表单、依赖、域名、存储和镜像配置 |
+| 应用列表与安装 | 查询已安装 ZPK 应用，提交安装或升级 |
+| 传统应用和外部依赖 | 查询传统应用环境、安装传统应用、读取外部依赖环境 |
+| Helm/OCI | 内存仓库、Chart 元信息和 OCI 文件下载 |
+| 镜像构建 | 创建构建镜像 Job/CronJob，处理构建成功回调 |
+| 本地地址 | 获取本地 ZPK 访问地址 |
+
 ## ZPK 配置
 
 ### GET `/panel-api/v1/zpk/config`
@@ -324,7 +353,7 @@ ZPK 接口用于从应用仓库读取安装配置，并完成安装、升级、�
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `identifie` | string | 应用标识 |
-| `zpkUrl` | string | 内存态 ZPK 地址，格式为 `memory://<identifie>` |
+| `zpkUrl` | string | 内存态 ZPK 地址，格式为 `memory://&lt;identifie&gt;` |
 
 ## Chart 元信息
 

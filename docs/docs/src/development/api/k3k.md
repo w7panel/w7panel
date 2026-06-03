@@ -32,17 +32,50 @@
 - 同步接口当前未挂载用户鉴权中间件，部署侧应限制来源。
 - 历史未注册接口不作为可调用 API 维护，具体以 `app/k3k/provider.go` 为准。
 
-## 路由概览
+## 通用说明
 
-| 类型 | 接口 |
+### 鉴权与凭据
+
+云主机接口默认使用面板用户 token，传递方式和其他面板业务 API 一致：
+
+```http
+Authorization: Bearer <user-token>
+```
+
+凭据来源、刷新方式和兼容取 token 位置见 [credentials.md](./credentials.md)。本文不重复说明登录、refresh token 和前端注入逻辑。
+
+| 接口类型 | 鉴权 | 说明 |
+|----------|------|------|
+| 用户信息、初始化、CKM/CVM、菜单 | `Authorization: Bearer <user-token>` | 经过 `middleware.Auth`，后端从 token 解析 K3k 用户和命名空间 |
+| 切换云主机用户 | `Authorization: Bearer <founder-or-w7panel-token>` | 路由经过 `middleware.Auth`，Controller 内限制 Founder 或 `w7panel` 用户 |
+| CVM/CKM 登录 | `Authorization: Bearer <user-token>` | 返回目标 K3k 用户 token 和 refreshToken |
+| 同步接口 | 无用户 token | 当前路由未挂 `middleware.Auth`，应由部署侧限制来源 |
+| 套餐列表 | 无用户 token | 公开展示商店可用资源套餐 |
+
+使用边界：
+
+- `k3k/login` 和 `cvm/:namespace/action/:name/login` 返回的是目标云主机用户 token，可作为后续面板 API 的用户 token 使用。
+- `refreshToken` 只用于刷新登录态，不用于普通业务 API。
+- 同步接口不应暴露到公网或不可信网络。
+- `idc-list` 无需用户 token，但只用于展示套餐，不代表用户可购买或可操作资源。
+
+### 响应格式
+
+云主机接口成功时直接返回业务对象，不额外包裹 `code`、`data`、`message`。用户信息和菜单返回 `K3kUser.ToArray()` 生成的字段 map；登录类接口返回目标用户 `token`、`expire`、`isK3kUser`、`refreshToken` 等字段；同步和初始化类接口多返回 JSON 字符串 `"success"`；套餐列表返回 `types.Params` 结构。
+
+### 参数位置
+
+用户信息、菜单和套餐列表接口通常无请求参数。`/panel-api/v1/k3k/login` 使用 form 参数；CKM/CVM 列表按 query 指定 namespace；详情和登录操作使用 path 中的 namespace、name；同步接口使用 form 参数，具体字段见对应接口说明。
+
+## 能力概览
+
+| 能力 | 说明 |
 |------|------|
-| K3k 用户与集群 | `/panel-api/v1/k3k/info`、`/panel-api/v1/userinfo`、`/panel-api/v1/k3k/init`、`/panel-api/v1/k3k/login` |
-| K3k 同步 | `/panel-api/v1/k3k/sync-*` |
-| CKM/CVM | `/panel-api/v1/k3k/ckm`、`/panel-api/v1/k3k/cvm`、详情和登录入口 |
-| 菜单与套餐 | `/panel-api/v1/menu`、`/panel-api/v1/idc-list` |
-| 云主机订单和资源超卖 | 见 [orders.md](./orders.md) |
-
-说明：历史文档中的 `init-cluster`、`wh`、`whjob`、`storage/resize` 当前未在 `app/k3k/provider.go` 注册，不作为可调用 API 维护。
+| 用户与集群 | 查询当前云主机用户、角色、权限和 K3k 集群信息 |
+| 用户切换 | Founder 或 `w7panel` 用户切换到指定云主机用户 |
+| 同步 | 主集群和 K3k 子集群之间同步 Ingress、ConfigMap、Secret、MicroApp 等资源 |
+| CKM/CVM | 查询云主机实例列表、详情，并登录指定 CVM/CKM |
+| 菜单与套餐 | 查询当前用户菜单权限和可展示资源套餐 |
 
 ## 用户与集群
 
@@ -50,7 +83,7 @@
 
 功能：获取当前 token 对应的 K3k 用户、集群、角色和功能权限信息。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -85,7 +118,7 @@
 
 功能：兼容入口，行为同 `/panel-api/v1/k3k/info`。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -95,7 +128,7 @@
 
 功能：初始化当前 K3k 用户对应的集群。当前 Controller 返回成功，实际初始化逻辑保留在代码注释中，调用前需要结合实现确认预期效果。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -109,7 +142,7 @@
 
 功能：创始人或 `w7panel` 用户切换登录到指定 K3k 用户，返回该用户 token。
 
-认证：需要 founder 或 `w7panel` 用户 token。
+鉴权：`Authorization: Bearer &lt;founder-or-w7panel-token&gt;`。路由经过 `middleware.Auth`，Controller 内要求当前用户为 Founder 或用户名为 `w7panel`。
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -118,7 +151,7 @@
 | 参数 | 位置 | 必填 | 类型 | 说明 |
 |------|------|------|------|------|
 | `k3kUserName` | form | 是 | string | 目标 K3k 用户名，即 ServiceAccount 名称 |
-| `cvmName` | form | 否 | string | 关联的 CVM/CKM 名称 |
+| `cvmName` | form | 是 | string | 关联的 CVM/CKM 名称 |
 
 响应参数：
 
@@ -132,6 +165,8 @@
 ## 同步接口
 
 同步接口用于在主集群和 K3k 子集群之间同步资源。以下接口当前未挂载用户鉴权中间件，调用方应限制来源并避免暴露到不可信网络。
+
+鉴权：无需用户 token。
 
 通用请求参数：
 
@@ -160,7 +195,7 @@
 
 功能：获取 CKM 列表。Founder 可通过 `namespace` 查询指定命名空间；非 Founder 强制使用当前 token 所属命名空间。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -174,7 +209,7 @@
 
 功能：旧版 CVM 列表入口，行为同 `/panel-api/v1/k3k/ckm`。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：同 `/panel-api/v1/k3k/ckm`。
 
@@ -184,7 +219,7 @@
 
 功能：获取指定 CKM 详情。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -199,7 +234,7 @@
 
 功能：旧版 CVM 详情入口，行为同 `/panel-api/v1/k3k/ckm/v1/:namespace/info/:name`。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：同 CKM 详情接口。
 
@@ -209,7 +244,7 @@
 
 功能：登录指定 CVM/CKM，返回对应 K3k 用户 token。K3k 子集群用户不能再次登录 CVM。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -233,7 +268,7 @@
 
 功能：返回当前用户权限信息，数据来源同 `K3kUser.ToArray()`。
 
-认证：`Authorization: Bearer <user-token>`
+鉴权：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -243,7 +278,7 @@
 
 功能：获取可展示在商店中的 IDC/K3k 集群资源套餐列表。只返回未设置 `w7.cc/showInShop` 或该 label 为 `true` 的策略。
 
-认证：无需用户 token。
+鉴权：无需用户 token。
 
 请求参数：无。
 

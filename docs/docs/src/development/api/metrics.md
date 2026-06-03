@@ -28,6 +28,33 @@
 - 获取底层指标失败时，部分接口可能返回默认或局部结果，前端需要结合状态字段判断。
 - 指标展示涉及当前用户或云主机上下文，不能跨用户直接复用。
 
+## 通用说明
+
+### 鉴权
+
+metrics 接口均需要用户 token：
+
+```http
+Authorization: Bearer <user-token>
+```
+
+### 响应格式
+
+接口直接返回指标或状态业务对象，不额外包裹统一 `data` 字段。metrics 组件不可用时，安装状态接口返回状态说明；查询类接口可能返回错误。
+
+### 参数位置
+
+当前 metrics 查询接口主要依赖当前 token 上下文，不需要额外 body；如后续增加 namespace、cluster 等参数，应明确标注 query/form/json 来源。
+
+## 能力概览
+
+| 能力 | 说明 |
+|------|------|
+| CPU/内存用量 | 查询当前集群或云主机可展示的 CPU、内存使用量和总量 |
+| 磁盘用量 | 查询磁盘使用量和总量 |
+| metrics 安装状态 | 检查 VictoriaMetrics/metrics 组件是否可用及访问地址 |
+| 展示状态 | 返回前端展示 metrics 能力时需要的状态字段 |
+
 ## 资源使用量
 
 ### GET `/panel-api/v1/metrics/usage/normal`

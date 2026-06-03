@@ -65,19 +65,19 @@ Authorization: Bearer <user-token>
 | `detach`、`cancel-expansion`、`trim-filesystem`、`snapshot-delete`、`snapshot-purge` | 成功返回 `null` |
 | Longhorn Backend 非 200 | 返回服务端错误，错误内容为 Longhorn Backend 响应体 |
 
-## 接口清单
+### 参数位置
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/longhorn/need-delete-replica` | 根据磁盘选择器和节点 ID 获取需要删除的 Longhorn Replica |
-| `GET` | `/panel-api/v1/longhorn/volumes/status` | 获取 PVC 对应的 Longhorn 卷状态聚合 |
-| `POST` | `/panel-api/v1/longhorn/install` | 从内置 YAML 安装 Longhorn |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/attach` | 挂载 Longhorn 卷 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/detach` | 卸载 Longhorn 卷 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/cancel-expansion` | 取消卷扩容 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/trim-filesystem` | 对卷执行文件系统 trim |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/snapshot-delete` | 删除指定快照 |
-| `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/snapshot-purge` | 清理卷快照 |
+查询接口主要使用 query/form 参数；卷操作接口的 `volumeName` 位于 path，action 所需参数按接口说明放在 JSON body 或空 body；安装接口可通过 query/form 传入可选 namespace。所有接口都需要通过 Header 携带用户 token。
+
+## 能力概览
+
+| 能力 | 说明 |
+|------|------|
+| 副本筛选 | 根据磁盘选择器和节点 ID 找出可清理 Longhorn Replica |
+| 卷状态 | 聚合 PVC、Longhorn Volume、Snapshot、Engine、Replica 等状态 |
+| 安装 | 从 `KO_DATA_PATH` 内置 YAML 安装 Longhorn |
+| 卷挂载 | attach、detach 指定 Longhorn 卷 |
+| 卷维护 | 取消扩容、trim 文件系统、删除和清理快照 |
 
 ## 查询接口
 
@@ -175,10 +175,10 @@ curl 'http://localhost:8080/panel-api/v1/longhorn/volumes/status' \
 | 1 | 使用 root SDK 创建 Longhorn client |
 | 2 | 读取 Volume、Snapshot、Engine、VolumeAttachment 列表 |
 | 3 | 跳过未绑定 PVC 的 Volume |
-| 4 | 使用 key `<pvcName>:<namespace>` 聚合状态 |
+| 4 | 使用 key `&lt;pvcName&gt;:&lt;namespace&gt;` 聚合状态 |
 | 5 | 计算快照大小、是否扩容中、是否存在 `longhorn-ui` lock、当前挂载节点 |
 
-响应参数：对象 map，key 为 `<pvcName>:<namespace>`，value 为卷状态对象。
+响应参数：对象 map，key 为 `&lt;pvcName&gt;:&lt;namespace&gt;`，value 为卷状态对象。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -511,7 +511,7 @@ null
 
 ## 开发检查
 
-- 修改 Longhorn 路由时同步更新 [cluster-ops.md](./cluster-ops.md) 的接口清单和 [application.md](./application.md) 的路由归属索引。
+- 修改 Longhorn 路由时同步更新 [cluster-ops.md](./cluster-ops.md) 中的 Longhorn 跳转说明和本文能力概览。
 - 修改卷状态字段时同步检查前端 PVC/存储页面对 `size`、`isLock`、`attachedNodeId` 等字段的使用。
 - 新增 Longhorn action 时，文档中要写清楚面板请求参数和实际发送给 Longhorn Backend 的 action body。
 - 不要在日志或响应中输出不必要的集群内部错误堆栈，Longhorn Backend 响应体可用于定位但需要避免泄露敏感信息。

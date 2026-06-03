@@ -57,6 +57,10 @@ Authorization: Bearer <token>
 
 Docker Registry v2 接口必须保持标准协议响应，不要改成面板 JSON 格式。
 
+### 参数位置
+
+Registry v2 兼容入口按 Docker Distribution 协议使用 path、query、Header 和 body。面板 Registry 管理接口按各自参数表使用 path、query/form 或 JSON body；构建镜像、导入、导出推送等操作类接口以接口明细中的“位置”列为准。
+
 ## 能力概览
 
 | 能力 | 说明 |
@@ -180,7 +184,7 @@ Docker Registry v2 接口必须保持标准协议响应，不要改成面板 JSO
 | `target.mediaType` | string | manifest/config media type |
 | `target.digest` | string | digest |
 | `target.size` | int64 | descriptor size |
-| `labels` | object<string,string> | 镜像 labels |
+| `labels` | object&lt;string,string&gt; | 镜像 labels |
 | `createdAt` | string | 创建时间 |
 | `updatedAt` | string | 更新时间 |
 
@@ -240,7 +244,7 @@ source=registry.local.w7.cc/default/app:v1&target=registry.local.w7.cc/default/a
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
 | `name` | 是 | string | 镜像引用 |
-| `labels` | 是 | object<string,string> | label 键值 |
+| `labels` | 是 | object&lt;string,string&gt; | label 键值 |
 | `replace` | 是 | bool | 是否替换全部 labels；`true` 时 field path 为 `labels`，否则只更新传入 key |
 
 请求示例：
@@ -338,15 +342,6 @@ push image status: complete: 1024, total: 2048, err: <nil>
 
 ## ZPK 构建镜像
 
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/panel-api/v1/zpk/buildimage/job` | 创建一次性镜像构建 Job |
-| `POST` | `/panel-api/v1/zpk/buildimage/cronjob` | 创建定时构建 CronJob |
-| `ANY` | `/panel-api/v1/zpk/build-image-success` | 构建成功回调/兼容入口 |
-| `GET` | `/panel-api/v1/zpk/local-url` | 获取本地 ZPK URL |
-
 ### POST `/panel-api/v1/zpk/buildimage/job`
 
 功能：创建 Kubernetes `batch/v1 Job`，使用 Kaniko 构建并推送镜像。
@@ -372,7 +367,7 @@ push image status: complete: 1024, total: 2048, err: <nil>
 | `hostNetwork` | 否 | bool | 是否使用 hostNetwork；也影响 `--insecure --insecure-pull` |
 | `hostAliases` | 否 | array | Kubernetes `corev1.HostAlias` 列表 |
 | `title` | 否 | string | Job annotation 标题 |
-| `labels` | 否 | object<string,string> | 写入 Job labels |
+| `labels` | 否 | object&lt;string,string&gt; | 写入 Job labels |
 | `buildJobName` | 否 | string | Job 名称；为空时由底层生成 |
 | `schedule` | 否 | string | 仅 CronJob 使用 |
 | `dockerRegistrySecretName` | 否 | string | Docker config Secret 名称；会从 `default` namespace 读取 `.dockerconfigjson` 填充账号 |

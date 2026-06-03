@@ -50,9 +50,9 @@ docs/user-guide/
 docs/
 ├── api/          # API 接口文档
 ├── deployment/   # 部署文档
-├── development/  # 开发指南
-│   ├── api/      # w7panel-server/app API 接口说明
-│   └── frontend/ # w7panel-ui 组件、API 方法和 Wujie 微前端事件说明
+├── docs/         # VitePress 文档前端
+│   └── src/
+│       └── development/ # 开发指南、API、前端组件和 Wujie 微前端事件说明
 ├── refactoring/  # 重构方案与历史资料
 ├── testing/      # 测试文档和报告
 └── changelog/    # 版本更新日志
@@ -74,19 +74,19 @@ docs/
 
 - [部署文档](./deployment/README.md)
 - [部署排障](./deployment/troubleshooting.md)
-- [开发指南](./development/README.md)
+- [开发指南](./docs/src/development/)
 - [API 文档](./api/README.md)
-- [API 调用凭据与认证接口说明](./development/api/credentials.md)
-- [集群运维 API 接口说明](./development/api/cluster-ops.md)
-- [指标 API 接口说明](./development/api/metrics.md)
-- [Longhorn API 接口说明](./development/api/longhorn.md)
-- [容器文件管理 API 接口说明](./development/api/container-files.md)
-- [容器镜像管理 API 接口说明](./development/api/container-images.md)
-- [应用管理 API 接口说明](./development/api/zpk.md)
-- [前端开发文档](./development/frontend/README.md)
-- [前端微应用接入说明](./development/frontend/microapps.md)
-- [w7panel-server/app/application API 接口说明](./development/api/application.md)
-- [云主机 API 接口说明](./development/api/k3k.md)
+- [API 调用凭据与认证接口说明](./docs/src/development/api/credentials.md)
+- [集群运维 API 接口说明](./docs/src/development/api/cluster-ops.md)
+- [指标 API 接口说明](./docs/src/development/api/metrics.md)
+- [Longhorn API 接口说明](./docs/src/development/api/longhorn.md)
+- [容器文件管理 API 接口说明](./docs/src/development/api/container-files.md)
+- [容器镜像管理 API 接口说明](./docs/src/development/api/container-images.md)
+- [应用管理 API 接口说明](./docs/src/development/api/zpk.md)
+- [前端开发文档](./docs/src/development/frontend/)
+- [前端微应用接入说明](./docs/src/development/frontend/microapps.md)
+- [w7panel-server/app/application API 接口说明](./docs/src/development/api/application.md)
+- [云主机 API 接口说明](./docs/src/development/api/k3k.md)
 - [测试文档](./testing/README.md)
 - [版本日志](./changelog/1.0.0.md)
 

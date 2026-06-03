@@ -29,15 +29,9 @@
 - 时间参数当前不做格式转换，建议使用 RFC3339。
 - 审计日志可能包含路径、方法、错误信息等排障字段，不应记录完整 token、密码或密钥。
 
-## 概览
+## 通用说明
 
-| 能力 | 接口 | 说明 |
-|------|------|------|
-| 日志状态 | `GET /panel-api/v1/audit/logs/status` | 查看审计日志能力是否启用，以及 VictoriaLogs 是否可访问 |
-| 登录日志 | `GET /panel-api/v1/audit/login-logs` | 查询用户登录成功/失败记录 |
-| 操作日志 | `GET /panel-api/v1/audit/operation-logs` | 查询用户写操作记录 |
-
-## 鉴权
+### 鉴权
 
 所有接口都注册了 `middleware.Auth`，请求必须携带有效用户 token。
 
@@ -47,7 +41,7 @@ Authorization: Bearer <token>
 
 `LOCAL_MOCK=true` 只改变 K8s API 调用方式，不跳过用户认证。审计查询接口在测试模式下同样需要 token。
 
-## 响应格式
+### 响应格式
 
 审计接口当前直接返回业务对象，不额外包裹 `code`、`data`、`message`。例如状态接口直接返回：
 
@@ -61,7 +55,11 @@ Authorization: Bearer <token>
 
 查询 VictoriaLogs 失败时接口返回 HTTP `500`，错误内容由框架统一处理；常见原因包括 `logs.base_url` 为空、VictoriaLogs 不可达、VictoriaLogs 返回非 2xx 状态。
 
-## 配置项
+### 参数位置
+
+状态接口不需要请求参数。登录日志和操作日志查询参数统一放在 query 中，分页、用户、租户、时间、方法、路径等过滤字段见“通用查询参数”。本文不使用 JSON body。
+
+### 配置项
 
 审计日志依赖 `w7panel-server/config.yaml` 中的 `logs` 配置：
 
@@ -73,6 +71,14 @@ Authorization: Bearer <token>
 | `logs.batch_size` | `LOGS_BATCH_SIZE` | `1` | 预留批量配置，当前审计写入按单条 JSON Line 写入 |
 
 状态接口会访问 `{logs.base_url}/health`。登录和操作日志写入使用 `{logs.base_url}/insert/jsonline`，查询使用 `{logs.base_url}/select/logsql/query`。
+
+## 能力概览
+
+| 能力 | 说明 |
+|------|------|
+| 审计状态 | 检查 VictoriaLogs 连接、配置和审计可用状态 |
+| 登录日志 | 查询登录成功/失败记录，支持用户、时间、状态等过滤 |
+| 操作日志 | 查询写操作审计记录，支持方法、路径、用户和租户过滤 |
 
 ## 通用查询参数
 
@@ -87,8 +93,8 @@ Authorization: Bearer <token>
 | `success` | query | 否 | string | - | `true`/`false` 按布尔条件查询，其它值按字符串精确匹配 | 成功状态 |
 | `method` | query | 否 | string | - | 按字符串精确匹配，建议传大写 HTTP 方法 | HTTP 方法过滤，主要用于操作日志 |
 | `path` | query | 否 | string | - | 按字符串精确匹配 | 请求路径过滤，主要用于操作日志 |
-| `startTime` | query | 否 | string | - | 拼接为 `time:>="<startTime>"`，不做格式转换 | 开始时间 |
-| `endTime` | query | 否 | string | - | 拼接为 `time:<="<endTime>"`，不做格式转换 | 结束时间 |
+| `startTime` | query | 否 | string | - | 拼接为 `time:>="&lt;startTime&gt;"`，不做格式转换 | 开始时间 |
+| `endTime` | query | 否 | string | - | 拼接为 `time:&lt;="<endTime&gt;"`，不做格式转换 | 结束时间 |
 
 时间建议使用 RFC3339 格式，例如 `2026-06-03T00:00:00Z`。接口当前不会校验时间格式，格式是否可用由 VictoriaLogs LogSQL 决定。
 
@@ -115,14 +121,12 @@ Authorization: Bearer <token>
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `list` | array<object> | 日志列表。每个元素为 VictoriaLogs 查询结果解码后的字段 map |
+| `list` | array&lt;object&gt; | 日志列表。每个元素为 VictoriaLogs 查询结果解码后的字段 map |
 | `total` | int | 满足过滤条件的总数，由 `stats count() as total` 查询得到 |
 | `page` | int | 归一化后的当前页码 |
 | `pageSize` | int | 归一化后的每页条数 |
 
 VictoriaLogs 查询结果可能包含 `_time` 或写入字段 `time`。前端展示应优先兼容 `_time`，同时兼容 `time`。
-
-## 接口清单
 
 ### GET `/panel-api/v1/audit/logs/status`
 
@@ -362,4 +366,4 @@ curl -s "http://localhost:8080/panel-api/v1/audit/operation-logs?page=1&pageSize
 - 新增可写接口后，如需更友好的操作说明，应同步补充 `common/service/audit/route_descriptions.go`。
 - 新增日志字段后，需要同步更新本文档、前端展示字段和相关测试。
 - 查询接口应控制分页和时间范围，避免一次返回过大日志。
-- 如果新增日志类型，需要同步更新本文档和 [README.md](./README.md) 的目录。
+- 如果新增日志类型，需要同步更新本文档和 [index.md](./) 的目录。

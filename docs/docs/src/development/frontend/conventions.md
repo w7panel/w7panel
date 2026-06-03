@@ -33,7 +33,7 @@
 - 不新增 `offline-*`、`k8soffline-*` 等旧 localStorage/sessionStorage key，具体 key 约定见 [auth-state.md](./auth-state.md)。
 - token、密码、密钥、OIDC code 不要输出到 console、URL 或长期缓存。
 - 终端、日志、轮询、Wujie 事件必须在组件卸载、弹窗关闭或 deactivated 时清理。
-- 前端文档只记录前端契约；后端接口请求响应字段以 [../api/README.md](../api/README.md) 下专题文档为准。
+- 前端文档只记录前端契约；后端接口请求响应字段以 [../api/](../api/) 下专题文档为准。
 
 ## 目录结构
 

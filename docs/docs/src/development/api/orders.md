@@ -31,15 +31,32 @@
 - 资源超卖接口返回的是面板聚合值，不等同于 Kubernetes 原始 allocatable。
 - 订单类接口属于云主机业务入口，不在 API 首页作为独立专题暴露。
 
-## 路由概览
+## 通用说明
 
-| 类型 | 接口 |
+### 鉴权
+
+| 接口类型 | 鉴权 |
+|----------|------|
+| 订单通知 | 无需用户 token |
+| 授权订单 | `Authorization: Bearer <user-token>` |
+| 资源超卖 | `Authorization: Bearer <user-token>` |
+
+### 响应格式
+
+订单通知成功返回 JSON 字符串 `"success"`。授权订单接口透传 Console 订单结果。资源超卖接口直接返回配置或资源聚合对象。
+
+### 参数位置
+
+订单通知当前实现未绑定参数。授权订单使用 form 参数；资源超卖查询接口不需要 body。
+
+## 能力概览
+
+| 能力 | 说明 |
 |------|------|
-| 订单通知 | `/panel-api/v1/k3k/order/notify`、`/k8s/k3k/order/notify` |
-| 授权订单 | `/panel-api/v1/k3k/order/license` |
-| 资源超卖 | `/panel-api/v1/k3k/overselling/config`、`/panel-api/v1/k3k/overselling/current-resource` |
-
-说明：历史文档中的 `order/price`、`order/base`、`order/renew`、`order/expand`、`order/refresh`、`overselling/check` 当前未在 `app/k3k/provider.go` 注册，不作为可调用 API 维护。
+| 订单通知 | 接收云主机订单支付回调，当前实现直接返回成功 |
+| 授权订单 | 创建面板授权购买订单并透传 Console 返回结果 |
+| 资源超卖配置 | 查询当前资源超卖配置 |
+| 当前资源 | 按超卖配置计算并返回当前可用资源 |
 
 ## 订单接口
 
@@ -75,7 +92,7 @@
 
 功能：创建面板授权购买订单。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -93,7 +110,7 @@
 
 功能：获取资源超卖配置。读取失败时返回默认配置。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -111,7 +128,7 @@
 
 功能：获取按超卖配置计算后的当前可用资源。读取失败时返回全 0。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 

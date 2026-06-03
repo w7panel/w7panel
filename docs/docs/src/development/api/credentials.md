@@ -9,9 +9,9 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 ### 基本流程
 
 1. 登录面板，调用 `/panel-api/v1/login` 获取 `token` 和 `refreshToken`。
-2. 普通面板 API 请求统一携带 `Authorization: Bearer <token>`。
+2. 普通面板 API 请求统一携带 `Authorization: Bearer &lt;token&gt;`。
 3. token 过期后，使用 `/panel-api/v1/auth/refresh-token2` 和 `refreshToken` 换取新 token。
-4. 进入容器文件、WebDAV、压缩、权限修改等场景时，先从容器信息接口获取 `webdavToken`，再用 `Authorization: Bearer <webdavToken>` 调用文件类接口。
+4. 进入容器文件、WebDAV、压缩、权限修改等场景时，先从容器信息接口获取 `webdavToken`，再用 `Authorization: Bearer &lt;webdavToken&gt;` 调用文件类接口。
 5. 微应用内调用面板 API 时优先使用 Wujie props 或 micro-app data 传入的 `paneltoken`；调用微应用自身后端时使用该微应用自己的 Basic 认证或业务 token。
 6. OIDC Client 按标准 OAuth/OIDC 流程获取 `access_token`，只用于 OIDC `/userinfo` 等协议接口，不等同于面板用户 token。
 
@@ -20,15 +20,15 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 | 场景 | 使用凭据 | 获取方式 | 传递方式 |
 |------|----------|----------|----------|
 | 登录、初始化用户、刷新 token | 无用户 token 或 refresh token | 登录接口返回 `refreshToken` | form `refreshToken` |
-| 普通面板业务 API | 用户 token | `/panel-api/v1/login` 或刷新接口 | `Authorization: Bearer <user-token>` |
-| K8s 代理和面板聚合接口 | 用户 token | 前端登录态或微应用 `paneltoken` | `Authorization: Bearer <user-token>` |
-| 容器文件、WebDAV、压缩、权限修改 | webdavToken | 容器 PID/文件入口相关接口返回 | `Authorization: Bearer <webdavToken>` |
+| 普通面板业务 API | 用户 token | `/panel-api/v1/login` 或刷新接口 | `Authorization: Bearer &lt;user-token&gt;` |
+| K8s 代理和面板聚合接口 | 用户 token | 前端登录态或微应用 `paneltoken` | `Authorization: Bearer &lt;user-token&gt;` |
+| 容器文件、WebDAV、压缩、权限修改 | webdavToken | 容器 PID/文件入口相关接口返回 | `Authorization: Bearer &lt;webdavToken&gt;` |
 | 后端服务访问 Kubernetes | ServiceAccount token | Pod 内自动挂载 | 后端内部使用，不暴露给前端 |
 | `LOCAL_MOCK=true` 开发测试 | kubeconfig token | `KUBECONFIG` 或默认 kubeconfig 路径 | 中间件注入 `k8s_token` |
 | Console 签名登录 | ConsoleSignature | Console 请求签名 | 签名请求头/参数 |
 | Console OAuth 登录/绑定 | Console OAuth code | `/auth/console/oauth` 跳转后回调 | query/form `code` |
 | 微应用自身后端 | 微应用 Basic 认证 | MicroApp/ZPK 配置 | `Authorization: Basic ...` |
-| OIDC 第三方 Client | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer <oidc-token>` |
+| OIDC 第三方 Client | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer &lt;oidc-token&gt;` |
 
 ### 使用边界
 
@@ -40,9 +40,9 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 - OIDC `access_token` 只服务于 OIDC 协议，不保证能调用面板业务 API。
 - 不要在 URL、日志、响应体、localStorage 调试输出中暴露完整 token、密码、密钥或 OIDC code。
 
-## 通用约定
+## 通用说明
 
-### 认证请求头
+### 鉴权
 
 多数面板业务 API 默认使用 Bearer token：
 
@@ -59,7 +59,16 @@ Authorization: Bearer <user-token>
 | 3 | header `AuthorizationX` | `AuthorizationX: Bearer xxx` | 兼容入口 |
 | 4 | header `Authorization` | `Authorization: Bearer xxx` | 标准入口，优先用于新增接口 |
 
-### 认证失败响应
+### 响应格式
+
+当前项目接口存在两类成功响应：
+
+| 形态 | 示例 | 说明 |
+|------|------|------|
+| 直接业务对象 | `{"token":"...","expire":1710000000}` | `JsonResponseWithoutError` 返回，登录、用户信息、Console 信息等接口常用 |
+| 字符串成功 | `"success"` | `JsonSuccessResponse` 返回，注册、绑定、导入证书等操作类接口常用 |
+
+新增文档时应按实际 controller 返回形态描述，不要默认包一层 `data`。
 
 缺少 token 或 TokenReview 校验失败时，`middleware.Auth` 返回：
 
@@ -72,30 +81,35 @@ Authorization: Bearer <user-token>
 
 TokenReview 失败时 `msg` 后会拼接具体错误信息。
 
-### 成功响应形态
+### 参数位置
 
-当前项目接口存在两类成功响应：
+登录、刷新 token、注册、密码修改等接口多使用 form 参数；当前用户信息、初始化状态等查询接口通常无 body；Console OAuth 登录/回调常用 query/form；Console proxy 会透传原始 path、query、Header 和 body。具体参数位置以各接口明细表为准。
 
-| 形态 | 示例 | 说明 |
-|------|------|------|
-| 直接业务对象 | `{"token":"...","expire":1710000000}` | `JsonResponseWithoutError` 返回，登录、用户信息、Console 信息等接口常用 |
-| 字符串成功 | `"success"` | `JsonSuccessResponse` 返回，注册、绑定、导入证书等操作类接口常用 |
+## 能力概览
 
-新增文档时应按实际 controller 返回形态描述，不要默认包一层 `data`。
+| 能力 | 说明 |
+|------|------|
+| 登录与刷新 | 用户登录、Console 签名登录和 refresh token 换新 token |
+| 当前用户信息 | 查询当前 token 对应用户、角色、集群和权限信息 |
+| 用户初始化与注册 | 初始化用户、注册用户和初始化状态判断 |
+| 密码管理 | 重置密码和修改当前用户密码 |
+| Console 凭据 | Console OAuth、绑定、注册、证书、代理和第三方 CD token |
+| LOCAL_MOCK | 开发测试模式下 kubeconfig token 注入和安全边界 |
+| 公开接口和微应用凭据 | 公开 noauth 接口说明、Wujie props 中各类 token 边界 |
 
 ## 凭据类型
 
 | 凭据 | 来源 | 传递方式 | 适用范围 | 说明 |
 |------|------|----------|----------|------|
-| 用户 token | `/panel-api/v1/login`、`/panel-api/v1/auth/refresh-token2`、浏览器 `w7panel-token` | `Authorization: Bearer <token>` | 面板业务 API、K8s 代理、文件管理、应用管理 | 多数接口的默认凭据 |
+| 用户 token | `/panel-api/v1/login`、`/panel-api/v1/auth/refresh-token2`、浏览器 `w7panel-token` | `Authorization: Bearer &lt;token&gt;` | 面板业务 API、K8s 代理、文件管理、应用管理 | 多数接口的默认凭据 |
 | refresh token | 登录接口返回，浏览器保存为 `w7panel-refresh-token` | form `refreshToken` | 刷新用户 token | 只用于刷新登录态，不用于普通业务 API |
 | ServiceAccount token | Pod 内 `/var/run/secrets/kubernetes.io/serviceaccount/token` | 后端内部使用 | 生产环境服务访问 Kubernetes API | 不应暴露给前端 |
 | kubeconfig token | `KUBECONFIG` 指向的 kubeconfig | `LOCAL_MOCK` 中间件注入 `k8s_token` | `LOCAL_MOCK=true` 开发测试 | 用于本地模式模拟 K8s token |
-| webdavToken | `/panel-api/v1/pid` 返回 | `Authorization: Bearer <webdavToken>` | WebDAV、压缩、权限修改、文件编辑器 | 用于目标容器文件系统访问，字段来源见 [container-files.md](container-files.md) |
+| webdavToken | `/panel-api/v1/pid` 返回 | `Authorization: Bearer &lt;webdavToken&gt;` | WebDAV、压缩、权限修改、文件编辑器 | 用于目标容器文件系统访问，字段来源见 [container-files.md](container-files.md) |
 | ConsoleSignature | Console 签名中间件 | 签名请求头/参数 | `/panel-api/v1/auth/login` | 用于控制台签名登录 |
 | Console 第三方 CD token | `/panel-api/v1/auth/console/info` | 微应用 props `w7PanelToken` | 微应用、制品库、第三方持续交付 | 不等同于面板用户 token |
 | 微应用 Basic 认证 | MicroApp/ZPK 配置中的 `username/password` | `Authorization: Basic ...` | 微应用自身后端 | 不用于面板 API |
-| OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer <oidc-token>` | OIDC `/userinfo` | 只能按 OIDC 协议获取用户信息 |
+| OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer &lt;oidc-token&gt;` | OIDC `/userinfo` | 只能按 OIDC 协议获取用户信息 |
 
 ## 前端 token 注入
 
@@ -231,7 +245,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/auth/refresh-token2' \
 
 功能：返回当前 token 对应的 K3k 用户、角色、集群和功能权限信息。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -326,7 +340,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/userinfo' \
 
 功能：校验指定用户旧密码后重置该用户密码。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -348,7 +362,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/userinfo' \
 
 功能：修改当前登录用户密码。当前用户已有密码注解时会校验原密码。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -383,7 +397,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/userinfo' \
 
 | 请求头 | 响应 |
 |--------|------|
-| `Accept: application/json` | 返回 `{"url":"<redirect-url>"}` |
+| `Accept: application/json` | 返回 `{"url":"&lt;redirect-url&gt;"}` |
 | 其他 | HTTP 302 跳转到 Console OAuth 地址 |
 
 JSON 响应示例：
@@ -421,7 +435,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：把当前面板用户与 Console OAuth 授权结果绑定。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -440,7 +454,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：返回面板与 Console 的注册、授权、第三方 CD token 和证书信息。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -491,7 +505,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：把当前面板注册到 Console。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -512,7 +526,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：导入证书内容。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -532,7 +546,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：从 Console 按 licenseId 导入证书。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -552,7 +566,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：校验证书状态。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -582,7 +596,7 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 功能：把优惠码请求代理到 Console 第三方 CD SDK。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 

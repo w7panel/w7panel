@@ -191,7 +191,7 @@ await fetch(`${baseURL}/api/status`, {
 
 | 场景 | 使用 token | 说明 |
 |------|------------|------|
-| 请求面板 API | `paneltoken` | `Authorization: Bearer <paneltoken>` |
+| 请求面板 API | `paneltoken` | `Authorization: Bearer &lt;paneltoken&gt;` |
 | 请求微应用后端 | `Authorization` 或微应用自有 token | 通过 `url` / `requestUrl` 访问 |
 | Console/OIDC 协议 | `w7PanelToken` / `access_token` | 只按对应协议使用 |
 | 刷新面板登录态 | 不建议微应用直接处理 | 优先由面板主应用和统一拦截器处理 |

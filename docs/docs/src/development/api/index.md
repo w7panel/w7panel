@@ -1,6 +1,6 @@
 # API 开发文档
 
-`docs/development/api/` 是 `w7panel-server/app` 业务 API 的文档入口。接口说明以业务专题为主、模块文档为辅；新增或修改接口时，先更新对应专题文档，再按需维护模块文档。
+`docs/docs/src/development/api/` 是 `w7panel-server/app` 业务 API 的文档入口。接口说明以业务专题为主、模块文档为辅；新增或修改接口时，先更新对应专题文档，再按需维护模块文档。
 
 开发约定见 [conventions.md](./conventions.md)，包括路由分层、鉴权、安全、请求参数、响应格式、前后端同步和测试要求。
 
@@ -25,7 +25,7 @@
 
 | 文档 | 对应模块 | 说明 |
 |------|----------|------|
-| [application.md](./application.md) | `w7panel-server/app/application` | application 模块路由归属索引、OpenAPI、验证码和公开站点接口 |
+| [application.md](./application.md) | `w7panel-server/app/application` | OpenAPI、验证码和公开站点接口 |
 | [audit.md](./audit.md) | `w7panel-server/app/audit` | 登录日志、操作日志和审计状态 |
 
 ## 维护规则

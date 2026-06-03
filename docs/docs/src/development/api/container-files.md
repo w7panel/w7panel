@@ -10,7 +10,7 @@
 
 1. 使用用户 token 调用 `/panel-api/v1/pid`，传入 namespace、节点 IP、Pod/容器信息。
 2. 后端返回 `pid`、`subPid`、`webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
-3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer <webdavToken>`。
+3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer &lt;webdavToken&gt;`。
 4. Codeblitz 编辑器通过 query 参数接收 `api-url`、`api-base-path` 和 `api-token`。
 5. 挂载文件、分片上传、下载复制等场景按各自接口处理，不要手动拼生产代理路径。
 
@@ -56,6 +56,10 @@ Authorization: Bearer <webdavToken>
 当前后端成功响应处理器直接返回业务对象，不额外包裹 `code`、`data`、`message`。WebDAV 接口必须保持 WebDAV 标准响应，`PROPFIND` 返回 XML，`GET` 返回文件流，不能改成普通 JSON。
 
 错误响应通常由框架统一处理；显式校验错误常见 HTTP 状态码为 `400`，服务端错误为 `500`，下载文件不存在为 `404`。
+
+### 参数位置
+
+`/panel-api/v1/pid` 主要使用 query/form 参数。WebDAV 接口通过 path 表示目标 PID 和容器内路径，Header 承载 `Depth`、`Destination`、`Overwrite` 等协议参数，`PUT` body 为文件内容。压缩、权限、分片上传和挂载文件接口按各自参数表使用 JSON body、form 或 multipart。
 
 ## 能力概览
 
@@ -181,7 +185,7 @@ Authorization: Bearer <webdavToken>
 
 | Header | 必填 | 说明 |
 |--------|------|------|
-| `Authorization: Bearer <webdavToken>` | 是 | 文件访问 token |
+| `Authorization: Bearer &lt;webdavToken&gt;` | 是 | 文件访问 token |
 | `Depth` | `PROPFIND` 时常用 | `0` 或 `1` |
 | `Destination` | `MOVE`/`COPY` 时必填 | 目标 URL 或目标路径；代理层会改写 WebDAV Destination 路径 |
 | `Overwrite` | `MOVE`/`COPY` 时可选 | 是否覆盖目标 |
@@ -235,29 +239,13 @@ hello
 
 ## 压缩解压
 
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/panel-api/v1/files/compress-agent/:pid/compress` | 压缩主进程 rootfs 内文件或目录 |
-| `POST` | `/panel-api/v1/files/compress-agent/:pid/extract` | 解压主进程 rootfs 内压缩包 |
-| `POST` | `/panel-api/v1/files/compress-agent/:pid/subagent/:subpid/compress` | 压缩子进程 rootfs 内文件或目录 |
-| `POST` | `/panel-api/v1/files/compress-agent/:pid/subagent/:subpid/extract` | 解压子进程 rootfs 内压缩包 |
-
-路径参数：
-
-| 参数 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `pid` | 是 | string | 主进程 PID |
-| `subpid` | 子进程接口必填 | string | 子进程 PID |
-
 ### POST `/compress`
 
 请求体可用 JSON 或 form：
 
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `sources` | 是 | array<string> | 要压缩的容器内路径列表 |
+| `sources` | 是 | array&lt;string&gt; | 要压缩的容器内路径列表 |
 | `output` | 是 | string | 输出压缩包容器内路径 |
 
 格式由 `output` 扩展名决定：
@@ -324,22 +312,6 @@ Content-Type: application/json
 成功响应：JSON 字符串 `"success"`。
 
 ## 权限修改
-
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/panel-api/v1/files/permission-agent/:pid/chmod` | 修改主进程 rootfs 文件权限 |
-| `POST` | `/panel-api/v1/files/permission-agent/:pid/chown` | 修改主进程 rootfs 文件 owner |
-| `POST` | `/panel-api/v1/files/permission-agent/:pid/subagent/:subpid/chmod` | 修改子进程 rootfs 文件权限 |
-| `POST` | `/panel-api/v1/files/permission-agent/:pid/subagent/:subpid/chown` | 修改子进程 rootfs 文件 owner |
-
-路径参数：
-
-| 参数 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `pid` | 是 | string | 主进程 PID |
-| `subpid` | 子进程接口必填 | string | 子进程 PID |
 
 ### POST `/chmod`
 
@@ -413,7 +385,7 @@ Content-Type: application/json
 | Header | 说明 |
 |--------|------|
 | `Content-Type` | `application/octet-stream` |
-| `Content-Disposition` | `attachment; filename=<服务端文件完整路径>` |
+| `Content-Disposition` | `attachment; filename=&lt;服务端文件完整路径&gt;` |
 
 错误：文件不存在返回 `404`。
 
@@ -575,7 +547,7 @@ Content-Type: application/json
 | 场景 | 状态码 | 说明 |
 |------|--------|------|
 | 分片目录不存在 | `400` | `chunk directory not found` |
-| 缺少指定分片 | `400` | `missing chunk <index>` |
+| 缺少指定分片 | `400` | `missing chunk &lt;index&gt;` |
 | 创建目录/文件失败 | `500` | 返回底层错误 |
 
 ## 挂载文件接口
@@ -604,7 +576,7 @@ Content-Type: application/json
 | `apiVersion` | string | 工作负载 apiVersion |
 | `kind` | string | 工作负载 kind |
 | `name` | string | 工作负载名称 |
-| `mounts` | array<object> | 挂载说明列表 |
+| `mounts` | array&lt;object&gt; | 挂载说明列表 |
 
 `mounts[]` 字段：
 
@@ -618,7 +590,7 @@ Content-Type: application/json
 | `readOnly` | bool | 是否只读 |
 | `sourceType` | string | 来源类型：`configMap`、`secret`、`serviceAccountToken` |
 | `sourceName` | string | ConfigMap/Secret 名称 |
-| `files` | array<object> | 文件列表 |
+| `files` | array&lt;object&gt; | 文件列表 |
 
 `mounts[].files[]` 字段：
 
@@ -760,7 +732,7 @@ Content-Type: application/json
 | `path` | query/form/body | 是 | string | 已挂载文件的容器内绝对路径 |
 | `mode` | query/form/body | 是 | string | 文件权限，例如 `0644` |
 
-成功响应：JSON 字符串 `"success"`。若路径没有挂载，返回错误：`path <path> 没有挂载`。
+成功响应：JSON 字符串 `"success"`。若路径没有挂载，返回错误：`path &lt;path&gt; 没有挂载`。
 
 ## 开发检查
 

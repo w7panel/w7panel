@@ -129,17 +129,6 @@ Authorization: Bearer <token>
 
 ## Helm
 
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/helm/releases` | Helm Release 列表 |
-| `GET` | `/panel-api/v1/helm/releases/:name` | Helm Release 详情 |
-| `POST` | `/panel-api/v1/helm/releases/:name` | 使用仓库安装 Release |
-| `DELETE` | `/panel-api/v1/helm/releases/:name` | 卸载 Release |
-| `PUT` | `/panel-api/v1/helm/releases/:name/reuse` | 复用 values 更新 Release |
-| `GET` | `/panel-api/v1/app-info` | 当前面板 Helm/Deployment 信息 |
-
 ### GET `/panel-api/v1/helm/releases`
 
 请求参数：
@@ -258,14 +247,6 @@ Content-Type: application/json
 
 ## YAML、Compose 和回滚
 
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/panel-api/v1/yaml` | 直接提交 Kubernetes YAML |
-| `PUT` | `/panel-api/v1/rollback` | 回滚资源 |
-| `POST` | `/panel-api/v1/kcompose` | Docker Compose 转换为 Kubernetes YAML |
-
 ### POST `/panel-api/v1/yaml`
 
 功能：读取请求原始 body 作为 YAML 并应用到集群。
@@ -340,18 +321,6 @@ services:
 
 ## 终端与执行
 
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/tty` | 面板本地/K3K server TTY，WebSocket |
-| `GET` | `/panel-api/v1/nodetty` | 节点 TTY，WebSocket |
-| `GET` | `/panel-api/v1/exec` | Pod 执行命令，支持 WebSocket 或普通 HTTP |
-| `POST` | `/panel-api/v1/exec2` | Pod 执行命令，支持复杂 payload |
-| `POST` | `/panel-api/v1/exec-all` | 批量执行命令，不支持 WebSocket |
-| `GET` | `/panel-api/v1/nodepid` | 获取节点 PID 信息 |
-| `POST` | `/panel-api/v1/cp` | Pod 与临时目录之间复制文件 |
-
 ### GET/POST `/panel-api/v1/exec`
 
 `GET /exec` 和 `POST /exec2` 使用同一个控制器方法。
@@ -363,7 +332,7 @@ services:
 | `namespace` | query/form/body | 是 | string | Pod 命名空间 |
 | `podName` | query/form/body | 是 | string | Pod 名称 |
 | `containerName` | query/form/body | 是 | string | 容器名称 |
-| `command` | query/form/body | 是 | array<string> | 命令数组，例如 `["/bin/sh","-c","ls -la"]` |
+| `command` | query/form/body | 是 | array&lt;string&gt; | 命令数组，例如 `["/bin/sh","-c","ls -la"]` |
 | `tty` | query/form/body | 否 | bool | 是否以 TTY 模式执行 |
 
 普通 HTTP 响应：命令输出文本。
@@ -395,10 +364,10 @@ Content-Type: application/json
 | 参数 | 位置 | 必填 | 类型 | 说明 |
 |------|------|------|------|------|
 | `namespace` | query/form/body | 是 | string | 命名空间 |
-| `podNames` | query/form/body | 否 | array<string> | Pod 名称数组 |
+| `podNames` | query/form/body | 否 | array&lt;string&gt; | Pod 名称数组 |
 | `podName` | query/form/body | 否 | string | 单个 Pod 名称；当 `podNames` 为空时会转为单元素数组 |
 | `containerName` | query/form/body | 是 | string | 容器名称 |
-| `command` | query/form/body | 是 | array<string> | 命令数组 |
+| `command` | query/form/body | 是 | array&lt;string&gt; | 命令数组 |
 | `tty` | query/form/body | 否 | bool | 是否 TTY |
 
 约束：不支持 WebSocket；`podNames` 和 `podName` 至少传一个。
@@ -482,19 +451,6 @@ Content-Type: application/json
 
 ## 代理接口
 
-### 接口清单
-
-| 方法 | 路径 | 鉴权 | 说明 |
-|------|------|------|------|
-| 多方法 | `/panel-api/v1/namespaces/:namespace/services/:name/proxy-root/*path` | 需要 token | Service proxy，路径按根路径转发 |
-| 多方法 | `/panel-api/v1/namespaces/:namespace/services/:name/proxy/*path` | 需要 token | Service proxy |
-| 多方法 | `/panel-api/v1/namespaces/:namespace/pods/:name/proxy/*path` | 需要 token | Pod proxy |
-| 多方法 | `/panel-api/v1/:name/proxy/*path` | 需要 token | Common proxy |
-| `ANY` | `/panel-api/v1/proxy-url/` | 当前路由未注册 Auth | 读取远程 URL 内容 |
-| `GET` | `/panel-api/v1/kubeconfig` | 需要 token + Proxy middleware | 获取 kubeconfig |
-| `ANY` | `/panel-api/v1/namespaces/:namespace/services/:name/proxy-no/*path` | 无 Auth | 无鉴权 Service proxy，历史/TODO 风险接口 |
-| 多方法 | `/panel-api/v1/microapp/:name/proxy/*path` | 需要 token | 微应用 proxy |
-
 ### Service proxy
 
 路径参数：
@@ -505,7 +461,7 @@ Content-Type: application/json
 | `name` | string | Service 名称和端口，支持 `svc`、`svc:8080`、`https:svc:443` |
 | `path` | string | 目标路径 |
 
-转发目标：`<schema>://<service>.<namespace>.svc:<port>/<path>`，默认 `schema=http`、`port=80`。
+转发目标：`&lt;schema&gt;://&lt;service&gt;.&lt;namespace&gt;.svc:&lt;port&gt;/&lt;path&gt;`，默认 `schema=http`、`port=80`。
 
 响应：透传目标服务状态、Header 和 Body；代理会删除目标响应中的 `Access-Control-Allow-Origin`。
 
@@ -550,11 +506,11 @@ Content-Type: application/json
 | `POST` | `/panel-api/v1/pinyin` | `words` query/form，必填 | 拼音转换结果数组 |
 | `GET` | `/panel-api/v1/dnsip` | `domain` query/form，必填 | IP 地址数组；解析失败返回 `[]` |
 | `GET` | `/panel-api/v1/dns-cname` | `domain` query/form，必填 | CNAME 数组；解析失败返回 `[]` |
-| `GET` | `/panel-api/v1/myip` | 无 | `{ "ip": "<出口IP>" }`，失败时可能为空 |
+| `GET` | `/panel-api/v1/myip` | 无 | `{ "ip": "&lt;出口IP&gt;" }`，失败时可能为空 |
 | `POST` | `/panel-api/v1/db-conn-test` | `dsn` query/form，必填 | `{ "canConnect": true/false, "msg": "错误信息" }` |
 | `POST` | `/panel-api/v1/ping-etcd` | `url` query/form，必填 | `{ "canConnect": true/false, "msg": "错误信息" }` |
 
-`ping-etcd` 会自动补齐尾部 `/`，并请求 `<url>/health`，HTTP 状态码 `200` 视为可连接。
+`ping-etcd` 会自动补齐尾部 `/`，并请求 `&lt;url&gt;/health`，HTTP 状态码 `200` 视为可连接。
 
 ### DNS Zone
 
@@ -655,7 +611,7 @@ Content-Type: application/json
 | `enabled` | bool | 是否启用 |
 | `serviceName` | string | Service 名称 |
 | `serviceType` | string | Service 类型，可能为空 |
-| `externalIPs` | array<string> | 外部 IP 列表 |
+| `externalIPs` | array&lt;string&gt; | 外部 IP 列表 |
 
 ## Longhorn
 
@@ -674,21 +630,6 @@ Longhorn 接口已拆分到独立文档，详细请求参数、响应字段、Lo
 | `POST` | `/panel-api/v1/longhorn/volumes/:volumeName/snapshot-purge` | 清理快照 |
 
 ## GPU
-
-### 接口清单
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `POST` | `/panel-api/v1/gpu/enabled-gpu` | 开启/关闭 GPU |
-| `POST` | `/panel-api/v1/gpu/install-hami` | 安装 HAMI |
-| `POST` | `/panel-api/v1/gpu/install-gpu-operator` | 安装 GPU Operator |
-| `GET` | `/panel-api/v1/gpu/config` | GPU 配置 |
-| `GET` | `/panel-api/v1/gpu/hami/metrics/real` | HAMI 实时指标 |
-| `GET` | `/panel-api/v1/gpu/summary` | GPU 汇总 |
-| `GET` | `/panel-api/v1/gpu/node/devices` | 节点 GPU 设备 |
-| `POST` | `/panel-api/v1/gpu/gpustack/worker` | 创建 GPUStack worker |
-
-这些接口所在 group 注册了 `middleware.Auth`，均需要 token。多数接口可选传 `namespace` query/form，用于初始化 GPU manager。
 
 ### POST `/panel-api/v1/gpu/enabled-gpu`
 

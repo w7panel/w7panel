@@ -188,8 +188,8 @@ rg "offline|k8soffline" .
 新增或修改接口时，优先维护对应业务专题文档；仅当接口无法归入现有专题或模块仍需按 Controller 反查时，才维护模块文档：
 
 ```text
-docs/development/api/{topic}.md
-docs/development/api/{module}.md
+docs/docs/src/development/api/{topic}.md
+docs/docs/src/development/api/{module}.md
 ```
 
 接口文档至少包含：
@@ -201,7 +201,7 @@ docs/development/api/{module}.md
 - 响应参数说明
 - 必要的响应示例、边界限制或特殊逻辑说明
 
-新增模块或新增专题时，需要同时更新 [README.md](./README.md) 的文档目录表格。若模块接口已被专题完整覆盖，不要额外创建模块文档。
+新增模块或新增专题时，需要同时更新 [index.md](./) 的文档目录表格。若模块接口已被专题完整覆盖，不要额外创建模块文档。
 
 ## 测试和验证
 

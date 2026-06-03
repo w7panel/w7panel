@@ -32,9 +32,9 @@
 - 静态下载是异步行为，前端应轮询状态接口。
 - 修改微应用字段时需要同步检查 Wujie 事件和前端 props 使用。
 
-## 通用约定
+## 通用说明
 
-### 认证
+### 鉴权
 
 本文档中的接口都需要用户 token：
 
@@ -48,7 +48,7 @@ Authorization: Bearer <user-token>
 |------------|------|------|
 | `k8s_token` | string | 当前用户的 K8s token，微应用查询、代理和静态下载都依赖该字段 |
 
-### 成功响应形态
+### 响应格式
 
 | 类型 | 响应形态 | 说明 |
 |------|----------|------|
@@ -56,8 +56,6 @@ Authorization: Bearer <user-token>
 | 静态状态 | 直接返回对象 | 包含 `status`、`proxyUrl`、`zpkUrl`、`ticket` |
 | 代理接口 | 透传 | 透传微应用后端或远程静态资源响应 |
 | 静态下载 | 当前无显式响应体 | 调用后用状态接口轮询 |
-
-### 错误响应
 
 缺少 token 或 token 无效时返回 401：
 
@@ -77,6 +75,10 @@ Authorization: Bearer <user-token>
 }
 ```
 
+### 参数位置
+
+微应用名称、静态资源标识、namespace、name、zpkUrl、version 和静态文件路径主要位于 path。微应用后端代理和静态回源代理会透传 query、Header 和 body；列表、详情、状态接口通常无 body；触发下载接口通过 path 指定 AppGroup。
+
 ## 能力概览
 
 | 能力 | 接口 | 说明 |
@@ -94,7 +96,7 @@ Authorization: Bearer <user-token>
 
 功能：获取当前用户角色可见的顶部微应用列表。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：无。
 
@@ -209,7 +211,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/top' \
 
 功能：获取单个微应用详情。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -330,7 +332,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo-root/info' \
 
 功能：代理请求微应用后端服务。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -393,7 +395,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo/proxy/api/health?debug=1'
 
 功能：查询指定应用前端静态资源下载状态，并在传入 `releaseName` 时尝试生成远程回源信息。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -451,7 +453,7 @@ curl 'http://localhost:8080/panel-api/v1/static/demo/status?version=1.0.0&releas
 
 功能：触发指定 AppGroup 的前端静态资源下载与解压。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 
@@ -497,7 +499,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/static/default/download/demo' \
 
 功能：当前端静态资源本地不存在或尚未下载完成时，从远程 ZPK 制品库回源代理静态文件。
 
-认证：`Authorization: Bearer <user-token>`
+认证：`Authorization: Bearer &lt;user-token&gt;`
 
 请求参数：
 

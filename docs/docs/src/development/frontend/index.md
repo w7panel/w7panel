@@ -1,6 +1,6 @@
 # 前端开发文档
 
-`docs/development/frontend/` 是 `w7panel-ui` 前端开发资料入口。文档按“通用约定 + 专题明细”组织；新增或修改前端公开能力时，先更新对应专题文档，再按需补充通用约定。
+`docs/docs/src/development/frontend/` 是 `w7panel-ui` 前端开发资料入口。文档按“通用约定 + 专题明细”组织；新增或修改前端公开能力时，先更新对应专题文档，再按需补充通用约定。
 
 源码目录：`w7panel-ui/src`
 
@@ -21,7 +21,7 @@
 3. 新增或修改微应用容器、props 或接入流程，更新 [microapps.md](./microapps.md)。
 4. 新增或修改公共组件，先从 [components.md](./components.md) 确认类型，再更新对应组件专题。
 5. 新增或修改微应用事件参数或回调，更新 [wujie-events.md](./wujie-events.md)。
-6. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/README.md](../api/README.md) 和前端调用封装。
+6. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/](../api/) 和前端调用封装。
 
 ## 维护规则
 
