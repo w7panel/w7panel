@@ -20,6 +20,7 @@ env:
   CHART_DIR: charts
   CHART_PACKAGE_DIR: charts
   DOCS_DIR: docs/docs
+  DOCS_PAGES_ARTIFACT: w7panel-docs-pages-${{ github.run_attempt }}
   ZPK_HOST: zpk.w7.cc
   ZPK_ARTIFACT: w7panel-offline
   IMAGE_PUSH_REGISTRY: ${{ vars.IMAGE_PUSH_REGISTRY || 'ghcr.io' }}
@@ -77,6 +78,7 @@ jobs:
       - name: Upload docs to GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
+          name: ${{ env.DOCS_PAGES_ARTIFACT }}
           path: ${{ env.DOCS_DIR }}/.vitepress/dist
 
       - name: Copy frontend assets
@@ -168,3 +170,5 @@ jobs:
       - name: Deploy docs to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ env.DOCS_PAGES_ARTIFACT }}
