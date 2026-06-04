@@ -111,7 +111,7 @@ Provider 未启用时返回：
 
 ### 参数位置
 
-`/authorize` 使用 query 参数；`/authorize/login` 可使用 query/form；`/token` 使用 form；`/userinfo` 通过 Header 携带 `Authorization: Bearer &lt;oidc-token&gt;`；`/register` 使用 JSON body 或 path 中的 client id；面板内 `/js-code`、`/redirect-uri` 使用 JSON/form，具体以接口表为准。
+`/authorize` 使用 query 参数；`/authorize/login` 可使用 query/form；`/token` 使用 form；`/userinfo` 通过 Header 携带 `Authorization: Bearer {oidc-token}`；`/register` 使用 JSON body 或 path 中的 client id；面板内 `/js-code`、`/redirect-uri` 使用 JSON/form，具体以接口表为准。
 
 ## 能力概览
 
@@ -438,10 +438,10 @@ Authorization: Bearer <OIDC_REGISTRATION_ACCESS_TOKEN>
 
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `redirect_uris` | 条件必填 | array&lt;string&gt; | 允许的回调地址；`allow_any_redirect_uri=false` 时必填 |
+| `redirect_uris` | 条件必填 | array[string] | 允许的回调地址；`allow_any_redirect_uri=false` 时必填 |
 | `allow_any_redirect_uri` | 否 | bool | 是否允许任意回调地址 |
 | `token_endpoint_auth_method` | 否 | string | `client_secret_basic`、`client_secret_post`、`none`；为空时按 secret 规则默认 |
-| `grant_types` | 否 | array&lt;string&gt; | 仅支持 `["authorization_code"]` 或 `["authorization_code","refresh_token"]` |
+| `grant_types` | 否 | array[string] | 仅支持 `["authorization_code"]` 或 `["authorization_code","refresh_token"]` |
 | `scope` | 否 | string | 空格分隔；只保留 `openid`、`profile`、`offline_access` |
 | `client_name` | 否 | string | Client 名称 |
 
@@ -470,10 +470,10 @@ curl -X POST 'http://localhost:8080/panel-api/v1/oidc/register' \
 | `client_secret` | string | `token_endpoint_auth_method != none` 时返回 |
 | `client_id_issued_at` | int64 | Client 创建时间，Unix 秒 |
 | `client_secret_expires_at` | int64 | 当前固定为 `0`，表示不过期 |
-| `redirect_uris` | array&lt;string&gt; | 回调地址 |
+| `redirect_uris` | array[string] | 回调地址 |
 | `allow_any_redirect_uri` | bool | 是否允许任意回调 |
 | `token_endpoint_auth_method` | string | token 端点认证方式 |
-| `grant_types` | array&lt;string&gt; | 当前响应固定为 `["authorization_code","refresh_token"]` |
+| `grant_types` | array[string] | 当前响应固定为 `["authorization_code","refresh_token"]` |
 | `scope` | string | 实际保存的 scope |
 | `client_name` | string | Client 名称 |
 
@@ -571,9 +571,9 @@ CRD 字段使用 camelCase：
 | `spec.clientId` | string | Client ID |
 | `spec.clientName` | string | Client 名称 |
 | `spec.clientSecret` | string | Client Secret |
-| `spec.redirectUris` | array&lt;string&gt; | 回调地址 |
+| `spec.redirectUris` | array[string] | 回调地址 |
 | `spec.allowAnyRedirectUri` | bool | 是否允许任意回调地址 |
-| `spec.scopes` | array&lt;string&gt; | scopes，常见 `openid`、`profile`、`offline_access` |
+| `spec.scopes` | array[string] | scopes，常见 `openid`、`profile`、`offline_access` |
 | `spec.tokenEndpointAuthMethod` | string | 前端当前创建时固定为 `client_secret_post` |
 
 示例：
@@ -606,7 +606,7 @@ CRD 字段使用 camelCase：
 
 功能：已登录面板用户直接获取 OIDC 一次性 code，常用于 Wujie 微应用事件 `getOidcCode`。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求类型：支持 JSON 或 form。
 
@@ -663,7 +663,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/oidc/js-code' \
 
 功能：根据 `authRequestID` 完成授权请求并构造回调 URL。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求类型：支持 JSON 或 form。
 

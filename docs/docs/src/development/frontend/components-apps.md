@@ -133,7 +133,7 @@ Ref 方法：
 | 方法 | 返回值 | 说明 |
 |------|--------|------|
 | `validate()` | Promise | 校验表单 |
-| `exportFormData()` | Promise&lt;object&gt; | 导出 K8s workload 对象，不提交 |
+| `exportFormData()` | Promise[object] | 导出 K8s workload 对象，不提交 |
 | `submit(hideMessage)` | Promise | 创建或更新 K8s workload |
 
 使用示例：

@@ -96,7 +96,7 @@ Authorization: Bearer <user-token>
 
 功能：获取当前用户角色可见的顶部微应用列表。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 
@@ -211,7 +211,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/top' \
 
 功能：获取单个微应用详情。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -332,7 +332,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo-root/info' \
 
 功能：代理请求微应用后端服务。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -395,7 +395,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo/proxy/api/health?debug=1'
 
 功能：查询指定应用前端静态资源下载状态，并在传入 `releaseName` 时尝试生成远程回源信息。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -453,7 +453,7 @@ curl 'http://localhost:8080/panel-api/v1/static/demo/status?version=1.0.0&releas
 
 功能：触发指定 AppGroup 的前端静态资源下载与解压。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -499,7 +499,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/static/default/download/demo' \
 
 功能：当前端静态资源本地不存在或尚未下载完成时，从远程 ZPK 制品库回源代理静态文件。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：
 

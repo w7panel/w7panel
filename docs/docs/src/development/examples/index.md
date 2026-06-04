@@ -736,7 +736,7 @@ helm package charts --destination charts
 
 | 检查项 | 方法 |
 |--------|------|
-| Pod 是否启动 | `kubectl get pods -n default -l app.kubernetes.io/instance=&lt;release&gt;` |
+| Pod 是否启动 | `kubectl get pods -n default -l app.kubernetes.io/instance={release}` |
 | Service 是否正常 | `kubectl get svc -n default` |
 | 后端健康检查 | 请求应用 `/health` |
 | 应用 API 鉴权 | 请求 `/api/project/list`，检查 `OAUTH_TOKEN` |

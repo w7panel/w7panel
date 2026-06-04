@@ -83,7 +83,7 @@ Authorization: Bearer <user-token>
 
 功能：获取当前 token 对应的 K3k 用户、集群、角色和功能权限信息。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 
@@ -118,7 +118,7 @@ Authorization: Bearer <user-token>
 
 功能：兼容入口，行为同 `/panel-api/v1/k3k/info`。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 
@@ -128,7 +128,7 @@ Authorization: Bearer <user-token>
 
 功能：初始化当前 K3k 用户对应的集群。当前 Controller 返回成功，实际初始化逻辑保留在代码注释中，调用前需要结合实现确认预期效果。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 
@@ -142,7 +142,7 @@ Authorization: Bearer <user-token>
 
 功能：创始人或 `w7panel` 用户切换登录到指定 K3k 用户，返回该用户 token。
 
-鉴权：`Authorization: Bearer &lt;founder-or-w7panel-token&gt;`。路由经过 `middleware.Auth`，Controller 内要求当前用户为 Founder 或用户名为 `w7panel`。
+鉴权：`Authorization: Bearer {founder-or-w7panel-token}`。路由经过 `middleware.Auth`，Controller 内要求当前用户为 Founder 或用户名为 `w7panel`。
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -195,7 +195,7 @@ Authorization: Bearer <user-token>
 
 功能：获取 CKM 列表。Founder 可通过 `namespace` 查询指定命名空间；非 Founder 强制使用当前 token 所属命名空间。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -209,7 +209,7 @@ Authorization: Bearer <user-token>
 
 功能：旧版 CVM 列表入口，行为同 `/panel-api/v1/k3k/ckm`。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：同 `/panel-api/v1/k3k/ckm`。
 
@@ -219,7 +219,7 @@ Authorization: Bearer <user-token>
 
 功能：获取指定 CKM 详情。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -234,7 +234,7 @@ Authorization: Bearer <user-token>
 
 功能：旧版 CVM 详情入口，行为同 `/panel-api/v1/k3k/ckm/v1/:namespace/info/:name`。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：同 CKM 详情接口。
 
@@ -244,7 +244,7 @@ Authorization: Bearer <user-token>
 
 功能：登录指定 CVM/CKM，返回对应 K3k 用户 token。K3k 子集群用户不能再次登录 CVM。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：
 
@@ -268,7 +268,7 @@ Authorization: Bearer <user-token>
 
 功能：返回当前用户权限信息，数据来源同 `K3kUser.ToArray()`。
 
-鉴权：`Authorization: Bearer &lt;user-token&gt;`
+鉴权：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 

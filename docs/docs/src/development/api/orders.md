@@ -92,7 +92,7 @@
 
 功能：创建面板授权购买订单。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求类型：`application/x-www-form-urlencoded`
 
@@ -110,7 +110,7 @@
 
 功能：获取资源超卖配置。读取失败时返回默认配置。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 
@@ -128,7 +128,7 @@
 
 功能：获取按超卖配置计算后的当前可用资源。读取失败时返回全 0。
 
-认证：`Authorization: Bearer &lt;user-token&gt;`
+认证：`Authorization: Bearer {user-token}`
 
 请求参数：无。
 

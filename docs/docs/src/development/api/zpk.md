@@ -353,7 +353,7 @@ Authorization: Bearer <user-token>
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `identifie` | string | 应用标识 |
-| `zpkUrl` | string | 内存态 ZPK 地址，格式为 `memory://&lt;identifie&gt;` |
+| `zpkUrl` | string | 内存态 ZPK 地址，格式为 `memory://{identifie}` |
 
 ## Chart 元信息
 

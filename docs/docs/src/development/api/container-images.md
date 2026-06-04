@@ -184,7 +184,7 @@ Registry v2 兼容入口按 Docker Distribution 协议使用 path、query、Head
 | `target.mediaType` | string | manifest/config media type |
 | `target.digest` | string | digest |
 | `target.size` | int64 | descriptor size |
-| `labels` | object&lt;string,string&gt; | 镜像 labels |
+| `labels` | object[string,string] | 镜像 labels |
 | `createdAt` | string | 创建时间 |
 | `updatedAt` | string | 更新时间 |
 
@@ -244,7 +244,7 @@ source=registry.local.w7.cc/default/app:v1&target=registry.local.w7.cc/default/a
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
 | `name` | 是 | string | 镜像引用 |
-| `labels` | 是 | object&lt;string,string&gt; | label 键值 |
+| `labels` | 是 | object[string,string] | label 键值 |
 | `replace` | 是 | bool | 是否替换全部 labels；`true` 时 field path 为 `labels`，否则只更新传入 key |
 
 请求示例：
@@ -367,7 +367,7 @@ push image status: complete: 1024, total: 2048, err: <nil>
 | `hostNetwork` | 否 | bool | 是否使用 hostNetwork；也影响 `--insecure --insecure-pull` |
 | `hostAliases` | 否 | array | Kubernetes `corev1.HostAlias` 列表 |
 | `title` | 否 | string | Job annotation 标题 |
-| `labels` | 否 | object&lt;string,string&gt; | 写入 Job labels |
+| `labels` | 否 | object[string,string] | 写入 Job labels |
 | `buildJobName` | 否 | string | Job 名称；为空时由底层生成 |
 | `schedule` | 否 | string | 仅 CronJob 使用 |
 | `dockerRegistrySecretName` | 否 | string | Docker config Secret 名称；会从 `default` namespace 读取 `.dockerconfigjson` 填充账号 |

@@ -93,8 +93,8 @@ Authorization: Bearer <token>
 | `success` | query | 否 | string | - | `true`/`false` 按布尔条件查询，其它值按字符串精确匹配 | 成功状态 |
 | `method` | query | 否 | string | - | 按字符串精确匹配，建议传大写 HTTP 方法 | HTTP 方法过滤，主要用于操作日志 |
 | `path` | query | 否 | string | - | 按字符串精确匹配 | 请求路径过滤，主要用于操作日志 |
-| `startTime` | query | 否 | string | - | 拼接为 `time:>="&lt;startTime&gt;"`，不做格式转换 | 开始时间 |
-| `endTime` | query | 否 | string | - | 拼接为 `time:&lt;="<endTime&gt;"`，不做格式转换 | 结束时间 |
+| `startTime` | query | 否 | string | - | 拼接为 time 大于等于 `{startTime}`，不做格式转换 | 开始时间 |
+| `endTime` | query | 否 | string | - | 拼接为 time 小于等于 `{endTime}`，不做格式转换 | 结束时间 |
 
 时间建议使用 RFC3339 格式，例如 `2026-06-03T00:00:00Z`。接口当前不会校验时间格式，格式是否可用由 VictoriaLogs LogSQL 决定。
 
@@ -121,7 +121,7 @@ Authorization: Bearer <token>
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `list` | array&lt;object&gt; | 日志列表。每个元素为 VictoriaLogs 查询结果解码后的字段 map |
+| `list` | array[object] | 日志列表。每个元素为 VictoriaLogs 查询结果解码后的字段 map |
 | `total` | int | 满足过滤条件的总数，由 `stats count() as total` 查询得到 |
 | `page` | int | 归一化后的当前页码 |
 | `pageSize` | int | 归一化后的每页条数 |

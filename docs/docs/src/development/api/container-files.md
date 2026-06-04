@@ -10,7 +10,7 @@
 
 1. 使用用户 token 调用 `/panel-api/v1/pid`，传入 namespace、节点 IP、Pod/容器信息。
 2. 后端返回 `pid`、`subPid`、`webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
-3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer &lt;webdavToken&gt;`。
+3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer {webdavToken}`。
 4. Codeblitz 编辑器通过 query 参数接收 `api-url`、`api-base-path` 和 `api-token`。
 5. 挂载文件、分片上传、下载复制等场景按各自接口处理，不要手动拼生产代理路径。
 
@@ -185,7 +185,7 @@ Authorization: Bearer <webdavToken>
 
 | Header | 必填 | 说明 |
 |--------|------|------|
-| `Authorization: Bearer &lt;webdavToken&gt;` | 是 | 文件访问 token |
+| `Authorization: Bearer {webdavToken}` | 是 | 文件访问 token |
 | `Depth` | `PROPFIND` 时常用 | `0` 或 `1` |
 | `Destination` | `MOVE`/`COPY` 时必填 | 目标 URL 或目标路径；代理层会改写 WebDAV Destination 路径 |
 | `Overwrite` | `MOVE`/`COPY` 时可选 | 是否覆盖目标 |
@@ -245,7 +245,7 @@ hello
 
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `sources` | 是 | array&lt;string&gt; | 要压缩的容器内路径列表 |
+| `sources` | 是 | array[string] | 要压缩的容器内路径列表 |
 | `output` | 是 | string | 输出压缩包容器内路径 |
 
 格式由 `output` 扩展名决定：
@@ -385,7 +385,7 @@ Content-Type: application/json
 | Header | 说明 |
 |--------|------|
 | `Content-Type` | `application/octet-stream` |
-| `Content-Disposition` | `attachment; filename=&lt;服务端文件完整路径&gt;` |
+| `Content-Disposition` | `attachment; filename={服务端文件完整路径}` |
 
 错误：文件不存在返回 `404`。
 
@@ -547,7 +547,7 @@ Content-Type: application/json
 | 场景 | 状态码 | 说明 |
 |------|--------|------|
 | 分片目录不存在 | `400` | `chunk directory not found` |
-| 缺少指定分片 | `400` | `missing chunk &lt;index&gt;` |
+| 缺少指定分片 | `400` | `missing chunk {index}` |
 | 创建目录/文件失败 | `500` | 返回底层错误 |
 
 ## 挂载文件接口
@@ -576,7 +576,7 @@ Content-Type: application/json
 | `apiVersion` | string | 工作负载 apiVersion |
 | `kind` | string | 工作负载 kind |
 | `name` | string | 工作负载名称 |
-| `mounts` | array&lt;object&gt; | 挂载说明列表 |
+| `mounts` | array[object] | 挂载说明列表 |
 
 `mounts[]` 字段：
 
@@ -590,7 +590,7 @@ Content-Type: application/json
 | `readOnly` | bool | 是否只读 |
 | `sourceType` | string | 来源类型：`configMap`、`secret`、`serviceAccountToken` |
 | `sourceName` | string | ConfigMap/Secret 名称 |
-| `files` | array&lt;object&gt; | 文件列表 |
+| `files` | array[object] | 文件列表 |
 
 `mounts[].files[]` 字段：
 
@@ -732,7 +732,7 @@ Content-Type: application/json
 | `path` | query/form/body | 是 | string | 已挂载文件的容器内绝对路径 |
 | `mode` | query/form/body | 是 | string | 文件权限，例如 `0644` |
 
-成功响应：JSON 字符串 `"success"`。若路径没有挂载，返回错误：`path &lt;path&gt; 没有挂载`。
+成功响应：JSON 字符串 `"success"`。若路径没有挂载，返回错误：`path {path} 没有挂载`。
 
 ## 开发检查
 

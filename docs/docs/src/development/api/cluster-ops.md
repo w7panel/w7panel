@@ -118,7 +118,7 @@ GET /k8s-proxy/api/v1/namespaces/default/services/nginx:80/proxy/health
 | 读取原生资源 | `GET /k8s-proxy/api/v1/namespaces/default/pods` |
 | 修改原生资源 | `PATCH /k8s-proxy/apis/apps/v1/namespaces/default/deployments/nginx` |
 | K8s Service proxy | `GET /k8s-proxy/api/v1/namespaces/default/services/nginx:80/proxy/` |
-| CRD 管理 | `GET /k8s-proxy/apis/&lt;group&gt;/&lt;version&gt;/...` |
+| CRD 管理 | `GET /k8s-proxy/apis/{group}/{version}/...` |
 
 使用边界：
 
@@ -356,7 +356,7 @@ services:
 | `namespace` | query/form/body | 是 | string | Pod 命名空间 |
 | `podName` | query/form/body | 是 | string | Pod 名称 |
 | `containerName` | query/form/body | 是 | string | 容器名称 |
-| `command` | query/form/body | 是 | array&lt;string&gt; | 命令数组，例如 `["/bin/sh","-c","ls -la"]` |
+| `command` | query/form/body | 是 | array[string] | 命令数组，例如 `["/bin/sh","-c","ls -la"]` |
 | `tty` | query/form/body | 否 | bool | 是否以 TTY 模式执行 |
 
 普通 HTTP 响应：命令输出文本。
@@ -388,10 +388,10 @@ Content-Type: application/json
 | 参数 | 位置 | 必填 | 类型 | 说明 |
 |------|------|------|------|------|
 | `namespace` | query/form/body | 是 | string | 命名空间 |
-| `podNames` | query/form/body | 否 | array&lt;string&gt; | Pod 名称数组 |
+| `podNames` | query/form/body | 否 | array[string] | Pod 名称数组 |
 | `podName` | query/form/body | 否 | string | 单个 Pod 名称；当 `podNames` 为空时会转为单元素数组 |
 | `containerName` | query/form/body | 是 | string | 容器名称 |
-| `command` | query/form/body | 是 | array&lt;string&gt; | 命令数组 |
+| `command` | query/form/body | 是 | array[string] | 命令数组 |
 | `tty` | query/form/body | 否 | bool | 是否 TTY |
 
 约束：不支持 WebSocket；`podNames` 和 `podName` 至少传一个。
@@ -558,8 +558,8 @@ Authorization: Bearer <token>
 
 | 形式 | 解析结果 |
 |------|----------|
-| `pod-name` | `http://&lt;podIP&gt;:80` |
-| `pod-name:8080` | `http://&lt;podIP&gt;:8080` |
+| `pod-name` | `http://{podIP}:80` |
+| `pod-name:8080` | `http://{podIP}:8080` |
 
 处理逻辑：
 
@@ -687,11 +687,11 @@ Authorization: Bearer <token>
 | `POST` | `/panel-api/v1/pinyin` | `words` query/form，必填 | 拼音转换结果数组 |
 | `GET` | `/panel-api/v1/dnsip` | `domain` query/form，必填 | IP 地址数组；解析失败返回 `[]` |
 | `GET` | `/panel-api/v1/dns-cname` | `domain` query/form，必填 | CNAME 数组；解析失败返回 `[]` |
-| `GET` | `/panel-api/v1/myip` | 无 | `{ "ip": "&lt;出口IP&gt;" }`，失败时可能为空 |
+| `GET` | `/panel-api/v1/myip` | 无 | `{ "ip": "{出口IP}" }`，失败时可能为空 |
 | `POST` | `/panel-api/v1/db-conn-test` | `dsn` query/form，必填 | `{ "canConnect": true/false, "msg": "错误信息" }` |
 | `POST` | `/panel-api/v1/ping-etcd` | `url` query/form，必填 | `{ "canConnect": true/false, "msg": "错误信息" }` |
 
-`ping-etcd` 会自动补齐尾部 `/`，并请求 `&lt;url&gt;/health`，HTTP 状态码 `200` 视为可连接。
+`ping-etcd` 会自动补齐尾部 `/`，并请求 `{url}/health`，HTTP 状态码 `200` 视为可连接。
 
 ### DNS Zone
 
@@ -792,7 +792,7 @@ Content-Type: application/json
 | `enabled` | bool | 是否启用 |
 | `serviceName` | string | Service 名称 |
 | `serviceType` | string | Service 类型，可能为空 |
-| `externalIPs` | array&lt;string&gt; | 外部 IP 列表 |
+| `externalIPs` | array[string] | 外部 IP 列表 |
 
 ## GPU
 

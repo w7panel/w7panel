@@ -154,7 +154,7 @@ refresh token 只用于刷新登录态，不用于普通业务 API。当前前�
 | 普通面板请求 | 默认 axios 拦截器 | 自动读取 `getToken()` |
 | 刷新登录态 | refresh token | 拦截器统一处理 401 |
 | 代用户或临时授权请求 | axios `customToken` | 覆盖默认 Authorization |
-| 文件/WebDAV 请求 | `webdavToken` | 手动设置 `Authorization: Bearer &lt;webdavToken&gt;` |
+| 文件/WebDAV 请求 | `webdavToken` | 手动设置 `Authorization: Bearer {webdavToken}` |
 | Console/第三方接口 | 第三方持续交付 token | 作为 `customToken` 或专用 Header |
 | 用户信息和权限 | `src/utils/auth.ts` | 统一读写本地缓存 |
 | 全局业务状态 | Pinia store | 不把同一后端对象长期存多份 |

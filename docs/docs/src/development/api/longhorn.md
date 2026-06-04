@@ -175,10 +175,10 @@ curl 'http://localhost:8080/panel-api/v1/longhorn/volumes/status' \
 | 1 | 使用 root SDK 创建 Longhorn client |
 | 2 | 读取 Volume、Snapshot、Engine、VolumeAttachment 列表 |
 | 3 | 跳过未绑定 PVC 的 Volume |
-| 4 | 使用 key `&lt;pvcName&gt;:&lt;namespace&gt;` 聚合状态 |
+| 4 | 使用 key `{pvcName}:{namespace}` 聚合状态 |
 | 5 | 计算快照大小、是否扩容中、是否存在 `longhorn-ui` lock、当前挂载节点 |
 
-响应参数：对象 map，key 为 `&lt;pvcName&gt;:&lt;namespace&gt;`，value 为卷状态对象。
+响应参数：对象 map，key 为 `{pvcName}:{namespace}`，value 为卷状态对象。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
