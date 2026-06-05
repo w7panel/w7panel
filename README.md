@@ -184,7 +184,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 - 如果忘记密码，可在 master 服务器执行以下命令重置管理员账号密码：
   
   ```bash
-  kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- ko-app/k8s-offline auth:register --username=admin --password=123456
+  kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- ko-app/w7panel auth:register --username=admin --password=123456
   ```
 
 - 如果公网 IP 和内网 IP 使用 IPv6，可能导致网络组件安装错误。建议关闭 IPv6，或在安装时显式指定 `PUBLIC_IP` 与 `INTERNAL_IP`：
