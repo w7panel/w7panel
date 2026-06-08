@@ -20,7 +20,6 @@ env:
   DOCS_DIR: docs/docs
   DOCS_BASE_PATH: /
   DOCS_DIST_DIR: docs/docs/.vitepress/dist
-  DOCS_IMAGE_REPOSITORY: zpk.w7.cc/w7panel/w7panel-docs
   ZPK_HOST: zpk.w7.cc
   ZPK_ARTIFACT: w7panel-offline
   IMAGE_PUSH_REGISTRY: ${{ vars.IMAGE_PUSH_REGISTRY || 'ghcr.io' }}
@@ -69,12 +68,12 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to docs image registry
+      - name: Login to image registry
         uses: docker/login-action@v3
         with:
-          registry: zpk.w7.cc
-          username: ${{ secrets.ZPK_DOCKER_USERNAME }}
-          password: ${{ secrets.ZPK_DOCKER_PASSWORD }}
+          registry: ${{ env.IMAGE_PUSH_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push docs image
         shell: bash
@@ -82,6 +81,8 @@ jobs:
           set -euo pipefail
 
           RELEASE_TAG="${{ steps.tag.outputs.value }}"
+          IMAGE_NAME="${GITHUB_REPOSITORY,,}"
+          DOCS_IMAGE_REPOSITORY="${IMAGE_PUSH_REGISTRY}/${IMAGE_NAME}-docs"
 
           docker buildx build \
             --push \
@@ -102,13 +103,6 @@ jobs:
       - name: Copy frontend assets
         run: |
           cp -R w7panel-ui/dist/. w7panel-server/kodata/
-
-      - name: Login to image registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.IMAGE_PUSH_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
