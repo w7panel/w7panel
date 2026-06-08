@@ -45,7 +45,7 @@ cannot get resource "serviceaccounts" in API group "" in the namespace "default"
 
 ## GitHub Actions 发布流程
 
-仓库支持通过 Git tag 或手动触发 Release workflow，自动构建前端、文档、镜像和 Helm Chart，并发布文档到 GitHub Pages。
+仓库支持通过 Git tag 或手动触发 Release workflow，自动构建文档镜像、前端、主服务镜像和 Helm Chart。
 
 工作流文件：
 
@@ -60,24 +60,35 @@ git push origin v1.0.0
 
 也可以在 GitHub Actions 页面手动运行 `Release` workflow，并填写 `tag`。
 
-主要流程：
+功能分类：
 
-- 构建 `w7panel-ui`，并同步产物到 `w7panel-server/kodata/`
-- 构建 `docs/docs` VitePress 文档项目
-- 打包并推送镜像、Helm Chart 和 ZPK 附件
-- 将 `docs/docs/.vitepress/dist` 发布到 GitHub Pages
+- 文档服务：按根路径 `/` 构建 `docs/docs` VitePress 文档项目，并将 `docs/docs/.vitepress/dist` 打包到 nginx 默认静态目录 `/usr/share/nginx/html/`
+- 前端资源：构建 `w7panel-ui`，并同步产物到 `w7panel-server/kodata/`
+- 主服务发布：构建并推送 w7panel 主服务镜像，打包 Helm Chart
+- Release 资产：将 Helm Chart 上传到 GitHub Release assets
+- ZPK 分发：将 Helm Chart 作为 ZPK 附件推送到 `ZPK_ARTIFACT`
+
+执行流程：
+
+1. 解析发布 tag：tag push 使用 `GITHUB_REF_NAME`，手动触发使用输入的 `tag`
+2. 构建文档：执行 `docs/docs` 的 pnpm 构建，固定 `DOCS_BASE_PATH=/`
+3. 推送文档镜像：登录 `IMAGE_PUSH_REGISTRY`，将静态文件复制到 nginx 默认目录，并推送 `${IMAGE_PUSH_REGISTRY}/${owner/repo}-docs:${tag}`
+4. 构建前端：执行 `w7panel-ui` 的 npm 构建
+5. 同步前端资源：复制 `w7panel-ui/dist` 到 `w7panel-server/kodata/`
+6. 推送主服务镜像并打包 Chart：登录 `IMAGE_PUSH_REGISTRY`，执行 `make publish`
+7. 发布 Helm 包：上传 `charts/*.tgz` 到 GitHub Release assets
+8. 推送 ZPK：登录 `ZPK_HOST`，将 Helm 包附加到 `ZPK_ARTIFACT` 后推送
 
 前置配置：
 
-- GitHub Pages Source 需要设置为 GitHub Actions
 - 配置 GitHub Secrets `ZPK_DOCKER_USERNAME`
 - 配置 GitHub Secrets `ZPK_DOCKER_PASSWORD`
 - 如使用非默认镜像仓库，可配置仓库变量 `IMAGE_PUSH_REGISTRY`
 - 如使用非默认 Helm 包镜像仓库，可配置仓库变量 `HELM_PACKAGE_IMAGE_REGISTRY`
-- 如 GitHub Pages 发布到域名根路径或自定义路径，可配置仓库变量 `DOCS_BASE_PATH`
 
 默认构建参数：
 
 - `IMAGE_PUSH_REGISTRY=ghcr.io`
 - `HELM_PACKAGE_IMAGE_REGISTRY=ghcr.registry.cdn.w7.cc`
-- `DOCS_BASE_PATH=/${仓库名}/`
+- `DOCS_BASE_PATH=/`
+- 文档镜像：`${IMAGE_PUSH_REGISTRY}/${owner/repo}-docs:${tag}`，默认是 `ghcr.io/w7panel/w7panel-docs:${tag}`
