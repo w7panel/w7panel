@@ -47,6 +47,9 @@
 | 文档 | 说明 |
 |------|------|
 | [examples/index.md](./examples/) | 面板内应用开发示例，覆盖独立应用仓库、后端服务、前端微应用、镜像发布和可选 Helm Chart |
+| [performance/index.md](./performance/) | 性能开发规范入口，覆盖后端 API、WebDAV、K8s 调用、前端请求、列表渲染和资源加载 |
+| [performance/backend.md](./performance/backend.md) | 后端性能规范，覆盖文件处理、认证 token、K8s 客户端、缓存、并发和日志 |
+| [performance/frontend.md](./performance/frontend.md) | 前端性能规范，覆盖 API 请求、轮询清理、状态缓存、列表渲染和资源加载 |
 | [CHANNELLOCAL_PERFORMANCE_ANALYSIS.md](./CHANNELLOCAL_PERFORMANCE_ANALYSIS.md) | ChannelLocal 性能分析专题 |
 
 ## 仓库结构

@@ -7,6 +7,15 @@ exports = module.exports = [
     ]
   },
   {
+    text: '开发规范',
+    collapsible: true,
+    items: [
+      { text: '性能规范总览', link: '/development/performance/' },
+      { text: '后端性能规范', link: '/development/performance/backend' },
+      { text: '前端性能规范', link: '/development/performance/frontend' },
+    ]
+  },
+  {
     text: '后端',
     collapsible: true,
     items: [
