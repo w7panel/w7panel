@@ -2,6 +2,10 @@
 
 本文档说明如何开发一个可以在 W7Panel 面板中安装和使用的独立应用。这里的“应用”不是给 `w7panel-server` 新增一个业务模块，也不是直接改 `w7panel-ui` 页面，而是类似 [w7panel-sitemanager](https://github.com/w7panel/w7panel-sitemanager) 的独立应用包：应用有自己的后端、前端和镜像，并发布到官方制品库后在面板内运行。复杂应用可以额外提供 Helm Chart；简单应用可以只提供镜像。
 
+## 相关示例
+
+- [制品库操作示例](/development/examples/zpk-product-workflow)：说明从添加制品、配置代码包到提交发布的操作流程。
+
 ## 应用形态
 
 面板内应用通常包含以下部分：
@@ -613,7 +617,9 @@ dev:
 
 ## 发布到官方制品库
 
-简单应用可以只构建镜像并发布到官方制品库，不需要维护 `charts/`。
+本节说明发布前需要准备哪些构建产物。简单应用可以只构建镜像并发布到官方制品库，不需要维护 `charts/`。
+
+制品库页面填写和截图操作见 [制品库操作示例](/development/examples/zpk-product-workflow)，包括添加制品、配置后端包管理、配置前端包和提交发布。
 
 基本流程：
 
@@ -704,7 +710,7 @@ containers:
         value: {{ .Values.env.OAUTH_TOKEN | quote }}
 ```
 
-Chart 检查：
+Chart 检查仅适用于熟悉 Helm 的开发者，用于在提交 Helm 包前提前发现模板或 values 问题：
 
 ```bash
 helm lint charts
@@ -732,26 +738,27 @@ helm package charts --destination charts
 
 ## 面板内联调
 
-应用安装到面板后，按以下路径排查：
+应用安装到面板后，优先通过面板页面和浏览器开发者工具排查，不要求开发者直接执行 Kubernetes 命令。
 
 | 检查项 | 方法 |
 |--------|------|
-| Pod 是否启动 | `kubectl get pods -n default -l app.kubernetes.io/instance={release}` |
-| Service 是否正常 | `kubectl get svc -n default` |
-| 后端健康检查 | 请求应用 `/health` |
+| 应用运行状态 | 在面板应用详情或资源详情中查看实例状态、重启次数和事件 |
+| 后端服务状态 | 在面板中查看应用暴露端口、网关转发配置和健康检查结果 |
+| 后端健康检查 | 通过面板提供的访问入口或调试入口请求应用 `/health` |
 | 应用 API 鉴权 | 请求 `/api/project/list`，检查 `OAUTH_TOKEN` |
 | 前端是否加载 | 面板中打开应用页面，检查 Network |
 | 面板 token 是否传入 | 浏览器 console 检查 `window.$wujie.props.paneltoken` 是否存在 |
 | K8s 代理是否正确 | Network 请求应走 `/k8s-proxy/api/v1/*` 或 `/k8s-proxy/apis/*` |
 
-常用命令：
+常用排查入口：
 
-```bash
-kubectl logs -n default deploy/<release-name>
-kubectl describe pod -n default <pod-name>
-helm get values <release-name> -n default       # Helm 应用使用
-helm get manifest <release-name> -n default    # Helm 应用使用
-```
+| 入口 | 适用场景 |
+|------|----------|
+| 面板日志 | 查看应用启动日志、运行错误和接口异常 |
+| 面板事件 | 查看镜像拉取失败、配置错误、健康检查失败等运行事件 |
+| 面板资源详情 | 查看实例、端口、环境变量、挂载和网关域名转发设置是否符合制品配置 |
+| 浏览器 Network | 查看前端资源是否加载、接口地址是否正确、请求头是否携带 token |
+| 浏览器 Console | 查看前端运行错误和 `window.$wujie.props` 注入内容 |
 
 ## 安全规范
 
@@ -769,7 +776,7 @@ helm get manifest <release-name> -n default    # Helm 应用使用
 | 面板打开空白 | 前端包路径不对或 `frontend.zip` 内容层级错误 | 确认 zip 根目录包含 `index.html` 和静态资源 |
 | 应用 API 401 | `OAUTH_TOKEN` 未传入或前后端值不一致 | 检查应用环境变量、`window.$wujie.props.OAUTH_TOKEN` 和请求头 |
 | K8s API 401/403 | `paneltoken` 缺失或权限不足 | 检查 Wujie props、用户权限、目标资源 RBAC |
-| Pod 启动失败 | 镜像 tag 不存在、配置缺失、端口不一致 | 查看 `kubectl describe pod` 和容器日志 |
+| 应用实例启动失败 | 镜像 tag 不存在、配置缺失、端口不一致 | 在面板资源详情中查看事件和日志 |
 | Helm 安装失败 | Chart 模板错误或 values 缺字段 | 执行 `helm lint` 和 `helm template` |
 | 发布后版本没变 | 制品版本、镜像 tag 或 Chart 版本未同步 | 检查 Makefile、release workflow 和 ZPK 附件 |
 

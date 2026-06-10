@@ -82,6 +82,7 @@ exports = module.exports = [
     collapsible: true,
     items: [
       { text: '应用开发示例', link: '/development/examples/' },
+      { text: '制品库操作示例', link: '/development/examples/zpk-product-workflow' },
     ]
   }
 ]
