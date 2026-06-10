@@ -9,6 +9,7 @@
 | 文档 | 说明 |
 |------|------|
 | [credentials.md](./credentials.md) | API 调用凭据、用户 token、webdavToken、微应用 props、OIDC token 和 LOCAL_MOCK 行为 |
+| [hawk.md](./hawk.md) | Hawk 服务端签名认证、ApiClient 凭据、客户端签名示例和接入注意事项 |
 | [cluster-ops.md](./cluster-ops.md) | 集群资源、Helm、YAML、终端、集群侧代理、DNS、GPU 和诊断类接口 |
 | [longhorn.md](./longhorn.md) | Longhorn 安装、卷状态、副本筛选、attach/detach、快照和文件系统操作 |
 | [container-files.md](./container-files.md) | 容器文件管理、WebDAV、压缩解压、权限修改、分片上传和文件编辑器调用流程 |

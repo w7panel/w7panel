@@ -26,6 +26,7 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 | 后端服务访问 Kubernetes | ServiceAccount token | Pod 内自动挂载 | 后端内部使用，不暴露给前端 |
 | `LOCAL_MOCK=true` 开发测试 | kubeconfig token | `KUBECONFIG` 或默认 kubeconfig 路径 | 中间件注入 `k8s_token` |
 | Console 签名登录 | ConsoleSignature | Console 请求签名 | 签名请求头/参数 |
+| 服务端 Hawk 签名调用 | Hawk ApiClient | Kubernetes `ApiClient` 资源 | `Authorization: Hawk ...` |
 | Console OAuth 登录/绑定 | Console OAuth code | `/auth/console/oauth` 跳转后回调 | query/form `code` |
 | 微应用自身后端 | 微应用 Basic 认证 | MicroApp/ZPK 配置 | `Authorization: Basic ...` |
 | OIDC 第三方 Client | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer {oidc-token}` |
@@ -107,6 +108,7 @@ TokenReview 失败时 `msg` 后会拼接具体错误信息。
 | kubeconfig token | `KUBECONFIG` 指向的 kubeconfig | `LOCAL_MOCK` 中间件注入 `k8s_token` | `LOCAL_MOCK=true` 开发测试 | 用于本地模式模拟 K8s token |
 | webdavToken | `/panel-api/v1/pid` 返回 | `Authorization: Bearer {webdavToken}` | WebDAV、压缩、权限修改、文件编辑器 | 用于目标容器文件系统访问，字段来源见 [container-files.md](container-files.md) |
 | ConsoleSignature | Console 签名中间件 | 签名请求头/参数 | `/panel-api/v1/auth/login` | 用于控制台签名登录 |
+| Hawk ApiClient | Kubernetes `ApiClient` 资源 | `Authorization: Hawk id="...", mac="...", nonce="...", ts="..."` | 显式接入 `middleware.Hawk` 的服务端接口 | 详见 [hawk.md](hawk.md) |
 | Console 第三方 CD token | `/panel-api/v1/auth/console/info` | 微应用 props `w7PanelToken` | 微应用、制品库、第三方持续交付 | 不等同于面板用户 token |
 | 微应用 Basic 认证 | MicroApp/ZPK 配置中的 `username/password` | `Authorization: Basic ...` | 微应用自身后端 | 不用于面板 API |
 | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer {oidc-token}` | OIDC `/userinfo` | 只能按 OIDC 协议获取用户信息 |

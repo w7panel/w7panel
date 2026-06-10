@@ -14,6 +14,7 @@ exports = module.exports = [
       { text: '开发约定', link: '/development/api/conventions' },
       { text: '调用凭据', link: '/development/api/credentials' },
       { text: 'OAuth/OIDC', link: '/development/api/oauth-oidc' },
+      { text: 'Hawk 签名认证', link: '/development/api/hawk' },
       {
         text: '集群',
         collapsible: true,
