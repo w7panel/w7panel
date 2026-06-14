@@ -137,10 +137,6 @@ export default {
       text: '帮助我们改善此页面！'
     },
 
-    license: {
-      text: 'Apache-2.0 License',
-      link: 'https://opensource.org/licenses/MIT'
-    },
     copyright: `Copyright © 2013-${new Date().getFullYear()} 微擎<br><span style="display:inline-flex;flex-wrap:wrap;justify-content:center;gap:15px;margin-top:10px;color:#999;font-size:12px;"><a href="https://beian.miit.gov.cn/" style="color:#999;" target="_blank" rel="noopener noreferrer">ICP备案：皖ICP备19002904号</a><a href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34130202000406" style="color:#999;" target="_blank" rel="noopener noreferrer">皖公网安备34130202000406号</a></span>`
   },
 
