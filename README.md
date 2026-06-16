@@ -1,5 +1,5 @@
 <h1 align="center">
-    <img src="./docs/images/logo.png" alt="w7panel" height="72">
+    <img src="./docs/src/public/user-guide/logo.png" alt="w7panel" height="72">
     <br>
 </h1>
 
@@ -121,29 +121,29 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
   
   基于 K8S 的集群能力，W7Panel 可管理多节点环境，在流量增长时更容易完成扩容和负载分摊。
   
-  ![](./docs/images/index.png)
+  ![](./docs/src/public/user-guide/index.png)
   
-  ![](./docs/images/node.png)
+  ![](./docs/src/public/user-guide/node.png)
 
 - **支持多种应用类型**
   
   支持镜像、Compose、YAML、Helm、应用商店等多种交付方式。
   
-  ![](./docs/images/apps.png)
+  ![](./docs/src/public/user-guide/apps.png)
 
 - **支持分布式存储**
   
   提供更贴近日常运维习惯的存储管理能力。
 
-  ![](./docs/images/storage.png)
+  ![](./docs/src/public/user-guide/storage.png)
   
-  ![](./docs/images/volume.png)
+  ![](./docs/src/public/user-guide/volume.png)
 
 - **免费 HTTPS 证书**
   
   支持自动签发和续期，减少证书维护成本。
 
-  ![](./docs/images/freessl.png)
+  ![](./docs/src/public/user-guide/freessl.png)
 
 ## 文档导航
 
@@ -160,11 +160,11 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 ### 开发与部署文档
 
 - [API 文档](./docs/api/README.md)
-- [部署文档](./docs/deployment/README.md)
-- [部署排障](./docs/deployment/troubleshooting.md)
+- [部署文档](./docs/src/user-guide/deployment.md)
+- [部署排障](./docs/src/user-guide/deployment-troubleshooting.md)
 - [开发指南](./docs/development/README.md)
 - [测试文档](./docs/testing/README.md)
-- [版本日志](./docs/changelog/1.0.0.md)
+- [版本日志](./docs/src/user-guide/overview/changelog/1.0.0.md)
 
 ### 子项目说明
 
@@ -201,10 +201,10 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 - 如果安装时长期卡在等待步骤，尤其在非大陆地区服务器上，可能是镜像拉取较慢。可先中断等待，调整 `/etc/rancher/k3s/registries.yaml`，然后重启 `k3s.service` 后继续观察 Pod 启动情况。
 
-更完整的安装、运维与故障处理说明，请查看 [部署排障文档](./docs/deployment/troubleshooting.md) 与 [docs/](./docs/README.md) 下各专题文档。
+更完整的安装、运维与故障处理说明，请查看 [部署排障文档](./docs/src/user-guide/deployment-troubleshooting.md) 与 [docs/](./docs/README.md) 下各专题文档。
 
 ## 社区
 
 **微信群**
 
-<img src="./docs/images/wechat_group.png" height="300">
+<img src="./docs/src/public/user-guide/wechat_group.png" height="300">

@@ -17,9 +17,9 @@ permissions:
 env:
   CHART_DIR: charts
   CHART_PACKAGE_DIR: charts
-  DOCS_DIR: docs/docs
+  DOCS_DIR: docs
   DOCS_BASE_PATH: /
-  DOCS_DIST_DIR: docs/docs/.vitepress/dist
+  DOCS_DIST_DIR: docs/.vitepress/dist
   ZPK_HOST: zpk.w7.cc
   ZPK_ARTIFACT: w7panel-offline
   IMAGE_PUSH_REGISTRY: ${{ vars.IMAGE_PUSH_REGISTRY || 'ghcr.io' }}

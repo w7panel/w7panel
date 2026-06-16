@@ -57,23 +57,14 @@ ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel-ui/.gitconfig
 ```
 docs/
 ├── README.md           # 项目概述
-├── changelog/          # 更新日志（每版本独立文件）
-│   ├── 1.0.0.md        # 当前版本（最新文件名即为当前版本号）
-│   └── ...             # 历史版本
-├── user-guide/         # 用户操作手册
-│   ├── README.md       # 快速入门
-│   ├── app-management.md
-│   ├── file-management.md
-│   ├── storage-management.md
-│   ├── domain-management.md
-│   └── faq.md
-├── api/                # API接口文档
-├── deployment/         # 部署文档
-├── development/        # 开发指南
-│   ├── api/            # w7panel-server/app API 接口说明
-│   ├── frontend/       # w7panel-ui 组件、API 方法和 Wujie 微前端事件说明
-│   └── examples/       # 应用开发示例
-└── testing/            # 测试文档
+├── src/
+│   ├── user-guide/     # 用户操作手册、部署运维
+│   │   └── overview/
+│   │       └── changelog/ # 更新日志（每版本独立文件）
+│   └── development/    # 开发指南、API、前端规范
+├── .vitepress/         # VitePress 配置和主题
+├── package.json
+└── pnpm-lock.yaml
 ```
 
 **以下情况必须立即更新文档：**
@@ -81,14 +72,14 @@ docs/
 | 触发条件 | 更新 AGENTS.md | 更新 /docs |
 |---------|---------------|-----------|
 | 新增/删除目录 | 目录结构、编译部署 | development/README.md |
-| 修改构建命令 | 编译部署 | deployment/README.md |
+| 修改构建命令 | 编译部署 | docs/src/user-guide/deployment.md |
 | 新增/修改/删除 API | API 接口 | api/README.md |
-| 修改环境变量 | 环境变量 | deployment/README.md |
+| 修改环境变量 | 环境变量 | docs/src/user-guide/deployment.md |
 | 新增/修改测试 | 测试流程 | testing/README.md |
 | 新增功能模块 | - | user-guide/, development/ |
 | 修改用户操作流程 | - | user-guide/ |
 | 新增/修改UI组件 | UI设计规范（第10节） | - |
-| 完成开发 | 版本管理规范 | changelog/{版本号}.md |
+| 完成开发 | 版本管理规范 | docs/src/user-guide/overview/changelog/{版本号}.md |
 | 新增后端功能 | 后端 README | w7panel/README.md |
 | 新增前端功能 | 前端 README | w7panel-ui/README.md |
 | 新增编辑器功能 | 编辑器 README | codeblitz/README.md |
@@ -96,12 +87,11 @@ docs/
 **更新检查清单：**
 ```
 □ AGENTS.md 是否需要更新？（包括UI设计规范）
-□ docs/changelog/{版本号}.md 是否需要更新？（版本日志）
-□ docs/user-guide/ 是否需要更新？（用户操作）
-□ docs/api/ 是否需要更新？
-□ docs/deployment/ 是否需要更新？
-□ docs/development/ 是否需要更新？
-□ docs/testing/ 是否需要更新？
+□ docs/src/user-guide/overview/changelog/{版本号}.md 是否需要更新？（版本日志）
+□ docs/src/user-guide/ 是否需要更新？（用户操作）
+□ docs/src/development/api/ 是否需要更新？
+□ docs/src/user-guide/deployment*.md 是否需要更新？
+□ docs/src/development/ 是否需要更新？
 □ w7panel/README.md 是否需要更新？（后端）
 □ w7panel-ui/README.md 是否需要更新？（前端）
 □ codeblitz/README.md 是否需要更新？（编辑器）
