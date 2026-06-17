@@ -16,7 +16,7 @@
 - **每次开发前先拉取最新代码**，防止代码冲突：
   ```bash
   # 后端
-  cd $BASE_DIR/w7panel && git fetch origin dev-v1 && git pull origin dev-v1
+  cd $BASE_DIR/w7panel-server && git fetch origin dev-v1 && git pull origin dev-v1
   
   # 前端
   cd $BASE_DIR/w7panel-ui && git fetch origin dev-v1 && git pull origin dev-v1
@@ -44,7 +44,7 @@
 **使用方法**:
 ```bash
 # 创建软链接
-ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel/.gitconfig
+ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel-server/.gitconfig
 ln -sf $BASE_DIR/gitconfig.yaml $BASE_DIR/w7panel-ui/.gitconfig
 ```
 
@@ -71,18 +71,18 @@ docs/
 
 | 触发条件 | 更新 AGENTS.md | 更新 /docs |
 |---------|---------------|-----------|
-| 新增/删除目录 | 目录结构、编译部署 | development/README.md |
-| 修改构建命令 | 编译部署 | docs/src/user-guide/deployment.md |
-| 新增/修改/删除 API | API 接口 | api/README.md |
-| 修改环境变量 | 环境变量 | docs/src/user-guide/deployment.md |
-| 新增/修改测试 | 测试流程 | testing/README.md |
-| 新增功能模块 | - | user-guide/, development/ |
-| 修改用户操作流程 | - | user-guide/ |
+| 新增/删除目录 | 目录结构、编译部署 | docs/src/development/index.md |
+| 修改构建命令 | 编译部署 | docs/src/user-guide/quick-start.md 或新增部署专题文档 |
+| 新增/修改/删除 API | API 接口 | docs/src/development/api/index.md 及对应专题 |
+| 修改环境变量 | 环境变量 | docs/src/user-guide/quick-start.md 或新增部署专题文档 |
+| 新增/修改测试 | 测试流程 | tests/README.md |
+| 新增功能模块 | - | docs/src/user-guide/, docs/src/development/ |
+| 修改用户操作流程 | - | docs/src/user-guide/ |
 | 新增/修改UI组件 | UI设计规范（第10节） | - |
 | 完成开发 | 版本管理规范 | docs/src/user-guide/overview/changelog/{版本号}.md |
-| 新增后端功能 | 后端 README | w7panel/README.md |
+| 新增后端功能 | 后端 README | w7panel-server/README.md |
 | 新增前端功能 | 前端 README | w7panel-ui/README.md |
-| 新增编辑器功能 | 编辑器 README | codeblitz/README.md |
+| 新增编辑器功能 | Web IDE 静态包说明 | w7panel-server/README.md |
 
 **更新检查清单：**
 ```
@@ -90,11 +90,11 @@ docs/
 □ docs/src/user-guide/overview/changelog/{版本号}.md 是否需要更新？（版本日志）
 □ docs/src/user-guide/ 是否需要更新？（用户操作）
 □ docs/src/development/api/ 是否需要更新？
-□ docs/src/user-guide/deployment*.md 是否需要更新？
+□ docs/src/user-guide/quick-start.md 或部署专题文档是否需要更新？
 □ docs/src/development/ 是否需要更新？
-□ w7panel/README.md 是否需要更新？（后端）
+□ w7panel-server/README.md 是否需要更新？（后端）
 □ w7panel-ui/README.md 是否需要更新？（前端）
-□ codeblitz/README.md 是否需要更新？（编辑器）
+□ w7panel-server/kodata/plugin/codeblitz.zip 相关说明是否需要更新？（编辑器）
 □ tests/README.md 是否需要更新？（测试脚本）
 ```
 
@@ -128,7 +128,7 @@ grep -r "permission-agent\|permissionUrl\|compressUrl\|webdavUrl" w7panel-ui/src
 **涉及文件：**
 - 后端：Controller、Service、路由
 - 前端：API 接口、页面组件、类型定义
-- 编辑器：`codeblitz/src/index.tsx`、`codeblitz/editor.html`
+- 编辑器：`w7panel-server/kodata/plugin/codeblitz.zip` 静态包及相关说明
 - 文档：更新 AGENTS.md
 
 **未遵守规则的后果：**
@@ -311,13 +311,13 @@ mv node-v20.x.x-linux-x64 /home/env/node
 # 或使用阿里云镜像
 wget https://npmmirror.com/mirrors/node/v20.20.0/node-v20.20.0-linux-x64.tar.xz
 
-# 3. 安装 Go（以 1.24 为例）- 使用国内源
+# 3. 安装 Go（以 1.26 为例）- 使用国内源
 cd /tmp
 # 阿里云镜像
-wget https://npmmirror.com/mirrors/golang/go1.24.linux-amd64.tar.gz
+wget https://npmmirror.com/mirrors/golang/go1.26.linux-amd64.tar.gz
 # 谷歌中国镜像
-wget https://golang.google.cn/dl/go1.24.linux-amd64.tar.gz
-tar -C /home/env -xzf go1.24.linux-amd64.tar.gz
+wget https://golang.google.cn/dl/go1.26.linux-amd64.tar.gz
+tar -C /home/env -xzf go1.26.linux-amd64.tar.gz
 
 # 4. 配置环境变量
 export PATH="/home/env/node/bin:/home/env/go/bin:$PATH"
@@ -366,11 +366,11 @@ go version
 
 | 项目 | 技术栈 | 目录 |
 |------|--------|------|
-| 后端 | Go 1.24 + Gin + w7-rangine-go | `$BASE_DIR/w7panel` |
-| 前端 | Vue 3.5 + TypeScript + Arco Design | `$BASE_DIR/w7panel-ui` |
-| Web IDE | React + TypeScript + Codeblitz | `$BASE_DIR/codeblitz` |
+| 后端 | Go 1.26 + Gin + w7-rangine-go | `$BASE_DIR/w7panel-server` |
+| 前端 | Vue 3 + TypeScript + Arco Design | `$BASE_DIR/w7panel-ui` |
+| Web IDE | Codeblitz 静态包 | `$BASE_DIR/w7panel-server/kodata/plugin/codeblitz.zip` |
 | 部署 | 编译输出 | `$BASE_DIR/dist` |
-| Helm Charts | K8s 部署包 | `$BASE_DIR/w7panel/install/charts` |
+| Helm Charts | K8s 部署包 | `$BASE_DIR/charts/w7panel` |
 
 ---
 
@@ -378,14 +378,17 @@ go version
 
 ```
 $BASE_DIR/
-├── w7panel/                        # 后端源码
-│   ├── app/application/http/controller/  # 控制器
+├── w7panel-server/                 # 后端源码
+│   ├── app/                        # 后端应用模块
+│   │   ├── application/            # 面板核心业务 API
+│   │   ├── auth/                   # 认证 API
+│   │   ├── k3k/                    # K3k API
+│   │   ├── k3s-registry/           # K3s 镜像仓库 API
+│   │   ├── metrics/                # 指标 API
+│   │   └── zpk/                    # ZPK 应用 API
 │   ├── common/service/             # 业务服务
 │   ├── common/middleware/          # 中间件
-│   ├── install/                    # 安装相关
-│   │   └── charts/                 # Helm Charts
-│   │       └── w7panel/            # Chart 目录
-│   ├── scripts/                    # 开发脚本
+│   ├── dev-tools/scripts/          # 开发脚本
 │   ├── kodata/                     # 静态资源
 │   └── config.yaml
 ├── w7panel-ui/                     # 前端源码
@@ -393,12 +396,8 @@ $BASE_DIR/
 │   ├── src/views/                  # 页面
 │   ├── src/components/             # 组件
 │   └── scripts/                    # 开发脚本
-├── codeblitz/                      # Web IDE 源码 (基于 Codeblitz/OpenSumi)
-│   ├── src/                        # 源码
-│   ├── scripts/                    # 开发脚本
-│   ├── package.json
-│   ├── webpack.config.js           # Webpack 配置
-│   └── node_modules/@codeblitzjs/ide-core/bundle/  # WASM 文件位置
+├── charts/                         # Helm Charts
+│   └── w7panel/                    # 当前维护的面板 Chart
 ├── kubeconfig.yaml               # K8S 集群配置
 ├── dist/                           # 编译输出目录
 │   ├── w7panel                    # 可执行文件
@@ -408,7 +407,7 @@ $BASE_DIR/
 │   │   └── logs/                   # 日志目录
 │   └── w7panel.db                 # SQLite 数据库
 ├── docs/                           # 项目文档
-│   └── development/examples/        # 应用开发示例
+│   └── src/development/examples/    # 应用开发示例
 └── tests/                          # 测试脚本
 
 /home/                              # 持久化存储目录（重启不丢失）
@@ -443,7 +442,7 @@ $BASE_DIR/
 
 ```bash
 # 完整构建（自动清理旧产物）
-cd $BASE_DIR/w7panel/scripts
+cd $BASE_DIR/w7panel-server/dev-tools/scripts
 ./build.sh
 ```
 
@@ -810,9 +809,9 @@ LOCAL_MOCK 模式正常工作需要以下条件：
 ### 认证
 
 ```
-POST /api/auth/login
-POST /api/auth/refresh
-GET  /api/auth/user
+POST /panel-api/v1/login
+POST /panel-api/v1/auth/refresh-token2
+GET  /panel-api/v1/auth/userinfo
 ```
 
 ### TOKEN 获取方式
@@ -823,7 +822,7 @@ GET  /api/auth/user
 |------|---------|----------|
 | K8S ServiceAccount | 在 K8S 容器内运行 | `cat /var/run/secrets/kubernetes.io/serviceaccount/token` |
 | 浏览器 localStorage | 前端登录后 | 打开浏览器控制台: `localStorage.getItem('webdavToken')` |
-| /k8s/pid 接口 | API 测试 | 从接口返回的 `webdavToken` 字段获取 |
+| /panel-api/v1/pid 接口 | API 测试 | 从接口返回的 `webdavToken` 字段获取 |
 | Kubeconfig | 本地开发 | 从 kubeconfig.yaml 的 token 字段提取 |
 
 **推荐方式（在 K8S 容器内）：**
@@ -831,8 +830,8 @@ GET  /api/auth/user
 # 方式1: 直接使用 K8S token（最常用）
 export TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 
-# 方式2: 从 /k8s/pid 接口获取（包含 webdavToken）
-RESPONSE=$(curl -s -G "http://localhost:8080/k8s/pid" \
+# 方式2: 从 /panel-api/v1/pid 接口获取（包含 webdavToken）
+RESPONSE=$(curl -s -G "http://localhost:8080/panel-api/v1/pid" \
   --data-urlencode "namespace=default" \
   --data-urlencode "HostIp=10.0.0.206" \
   --data-urlencode "containerName=w7-python" \
@@ -865,11 +864,11 @@ console.log({
 slog.Info("操作成功", "user", userID, "action", "create")
 ```
 
-- **目录**: 控制器 `app/{module}/http/controller/`，服务 `common/service/`
+- **目录**: 控制器 `w7panel-server/app/{module}/http/controller/`，服务 `w7panel-server/common/service/`
 
 ### 前端规范
 
-- **目录**: API `src/api/`，页面 `src/views/`，组件 `src/components/`，Hooks `src/hooks/`
+- **目录**: API `w7panel-ui/src/api/`，页面 `w7panel-ui/src/views/`，组件 `w7panel-ui/src/components/`，Hooks `w7panel-ui/src/hooks/`
 - **Hooks 规范**: 见下方「前端性能规范」第5节 Hooks 使用规范
 
 ### 性能规范
@@ -982,7 +981,7 @@ const { startPolling, stopPolling, restartPolling } = usePolling(async () => {
 **API 请求示例**:
 ```typescript
 // src/api/cluster.ts
-// compressUrl 从 /k8s/pid 接口返回，格式: /panel-api/v1/files/compress-agent/{pid}
+// compressUrl 从 /panel-api/v1/pid 接口返回，格式: /panel-api/v1/files/compress-agent/{pid}
 export function compressFiles(compressUrl: string, sources: string[], output: string) {
     return axios.post(`${compressUrl}/compress`, { sources, output });
 }
@@ -997,10 +996,9 @@ export function compressFiles(compressUrl: string, sources: string[], output: st
 | slog 格式错误 | 必须使用键值对: `slog.Info("msg", "key", value)` |
 | kodata 丢失 | 运行时依赖 `kodata/` 目录，需正确复制 |
 | K8S 连接失败 | 检查 kubeconfig.yaml 路径和内容 |
-| 编辑器 WASM 401 错误 | 复制 WASM 文件到 `kodata/plugin/codeblitz/` |
+| 编辑器 WASM 401 错误 | 检查 `w7panel-server/kodata/plugin/codeblitz.zip` 是否已随 `kodata` 正确复制和解压 |
 | 编辑器 PROPFIND 400 错误 | Content-Type 必须是 `text/xml; charset=utf-8` |
 | 编辑器资源管理器空白 | 检查 WebDAV API 是否正常，查看浏览器控制台日志 |
-| editor.html JS 加载失败 | 检查 main.*.js 文件名是否与 editor.html 中引用一致 |
 | 编辑器写入失败 ENOTSUP | 使用 OverlayFS + 事件回调同步到 WebDAV |
 | WebDAV 401 认证失败 | 需要有效的 K8S Token，从 kubeconfig 或 ServiceAccount 获取 |
 | agent-browser 找不到元素 | 使用 `snapshot -i` 查看交互元素，用 ref (@e1) 定位 |
@@ -1072,7 +1070,7 @@ CAPTCHA_ENABLED=false LOCAL_MOCK=true KO_DATA_PATH=$BASE_DIR/dist/kodata KUBECON
 3. 更新 Helm Charts 镜像地址
 4. 部署测试
 
-**Helm Charts 项目**: `$BASE_DIR/w7panel/install/charts/`
+**Helm Charts 项目**: `$BASE_DIR/charts/`
 
 ---
 
@@ -1081,7 +1079,7 @@ CAPTCHA_ENABLED=false LOCAL_MOCK=true KO_DATA_PATH=$BASE_DIR/dist/kodata KUBECON
 ### 项目结构
 
 ```
-$BASE_DIR/w7panel/install/charts/w7panel/
+$BASE_DIR/charts/w7panel/
 ├── Chart.yaml          # Chart 元数据
 ├── values.yaml         # 默认配置值
 └── templates/          # K8s 资源模板
@@ -1111,7 +1109,7 @@ docker build -t ccr.ccs.tencentyun.com/afan/w7panel:1.0.20 .
 docker push ccr.ccs.tencentyun.com/afan/w7panel:1.0.20
 
 # 3. 部署（通过 helm --set 指定镜像版本）
-helm upgrade --install w7panel ./w7panel/install/charts/w7panel -n default \
+helm upgrade --install w7panel ./charts/w7panel -n default \
   --set image.tag=1.0.20
 ```
 
