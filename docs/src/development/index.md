@@ -56,7 +56,7 @@
 
 ```text
 $BASE_DIR/
-├── w7panel-server/                  # 后端源码，Go + Gin + w7-rangine-go
+├── w7panel-server/                  # 后端源码，Go 1.26 + Gin + w7-rangine-go
 │   ├── app/                         # 后端应用模块
 │   │   ├── application/             # 面板核心业务 API
 │   │   ├── auth/                    # 认证 API
@@ -75,7 +75,7 @@ $BASE_DIR/
 │   ├── src/hooks/                   # 复用逻辑
 │   ├── src/router/                  # 路由配置
 │   └── src/views/                   # 页面模块
-├── codeblitz/                       # Web IDE 源码占位目录；当前静态包在 w7panel-server/kodata/plugin/codeblitz.zip
+├── w7panel-server/kodata/plugin/    # Web IDE 静态包；当前为 codeblitz.zip
 ├── charts/                          # w7panel Helm Chart
 ├── installer/                       # 安装脚本、离线清单和系统配置
 ├── docs/                            # 项目文档
@@ -180,12 +180,12 @@ rg "localStorage\\.|sessionStorage\\." w7panel-ui/src
 
 | 变更类型 | 需要更新 |
 |----------|----------|
-| 新增、修改、删除 API | `docs/src/development/api/{module}.md`，必要时同步 `docs/api/README.md` |
+| 新增、修改、删除 API | `docs/src/development/api/{module}.md`，必要时同步 `docs/src/development/api/index.md` |
 | 新增前端公共组件 | `docs/src/development/frontend/components.md` |
 | 新增 Wujie 事件 | `docs/src/development/frontend/wujie-events.md` |
-| 修改构建、部署、环境变量 | `docs/src/user-guide/deployment.md` |
-| 新增或修改测试 | `docs/testing/README.md` 或 `tests/README.md` |
-| 新增功能模块或用户流程变化 | `docs/user-guide/` |
+| 修改构建、部署、环境变量 | `docs/src/user-guide/quick-start.md`、`docs/src/user-guide/overview/faq.md` 或新增部署专题文档 |
+| 新增或修改测试 | `tests/README.md` |
+| 新增功能模块或用户流程变化 | `docs/src/user-guide/` |
 | 完成开发 | `docs/src/user-guide/overview/changelog/{version}.md` |
 
 新增接口文档至少包含：

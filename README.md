@@ -22,9 +22,9 @@ W7Panel 提供统一的集群、应用、文件、域名、存储与用户管理
 
 | 组件 | 技术栈 | 说明 |
 |------|--------|------|
-| 后端 | Go 1.24 + Gin + w7-rangine-go | RESTful API、WebDAV 代理、K8S 交互 |
-| 前端 | Vue 3.5 + TypeScript + Arco Design | 响应式管理界面 |
-| Web IDE | React + Codeblitz (OpenSumi) | 在线代码编辑器 |
+| 后端 | Go 1.26 + Gin + w7-rangine-go | RESTful API、WebDAV 代理、K8S 交互 |
+| 前端 | Vue 3 + TypeScript + Arco Design | 响应式管理界面 |
+| Web IDE | Codeblitz 静态包 | 在线代码编辑器，随 `w7panel-server/kodata/plugin/codeblitz.zip` 分发 |
 | 容器运行时 | containerd / Docker | 兼容主流容器运行时 |
 | 存储 | Longhorn / NFS / Local | 多种存储后端支持 |
 
@@ -149,28 +149,26 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 ### 用户文档
 
-- [快速入门](./docs/user-guide/README.md)
-- [集群管理](./docs/user-guide/cluster-management.md)
-- [应用管理](./docs/user-guide/app-management.md)
-- [文件管理](./docs/user-guide/file-management.md)
-- [存储管理](./docs/user-guide/storage-management.md)
-- [域名管理](./docs/user-guide/domain-management.md)
-- [常见问题](./docs/user-guide/faq.md)
+- [快速入门](./docs/src/user-guide/quick-start.md)
+- [集群管理](./docs/src/user-guide/cluster-management.md)
+- [应用管理](./docs/src/user-guide/app-management.md)
+- [文件管理](./docs/src/user-guide/file-management.md)
+- [存储管理](./docs/src/user-guide/storage-management.md)
+- [域名管理](./docs/src/user-guide/domain-management.md)
+- [常见问题](./docs/src/user-guide/overview/faq.md)
 
 ### 开发与部署文档
 
-- [API 文档](./docs/api/README.md)
-- [部署文档](./docs/src/user-guide/deployment.md)
-- [部署排障](./docs/src/user-guide/deployment-troubleshooting.md)
-- [开发指南](./docs/development/README.md)
-- [测试文档](./docs/testing/README.md)
+- [API 文档](./docs/src/development/api/index.md)
+- [开发指南](./docs/src/development/index.md)
+- [测试文档](./tests/README.md)
 - [版本日志](./docs/src/user-guide/overview/changelog/1.0.0.md)
 
 ### 子项目说明
 
-- `w7panel/`：后端源码
+- `w7panel-server/`：后端源码
 - `w7panel-ui/`：前端源码
-- `codeblitz/`：Web IDE 源码
+- `w7panel-server/kodata/plugin/codeblitz.zip`：Web IDE 静态包
 - `tests/`：测试脚本与测试资料
 
 ## 常见问题
@@ -184,7 +182,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 - 如果忘记密码，可在 master 服务器执行以下命令重置管理员账号密码：
   
   ```bash
-  kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- ko-app/k8s-offline auth:register --username=admin --password=123456
+  kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- k8s-offline auth:register --username=admin --password=123456
   ```
 
 - 如果公网 IP 和内网 IP 使用 IPv6，可能导致网络组件安装错误。建议关闭 IPv6，或在安装时显式指定 `PUBLIC_IP` 与 `INTERNAL_IP`：
@@ -201,7 +199,7 @@ export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 
 - 如果安装时长期卡在等待步骤，尤其在非大陆地区服务器上，可能是镜像拉取较慢。可先中断等待，调整 `/etc/rancher/k3s/registries.yaml`，然后重启 `k3s.service` 后继续观察 Pod 启动情况。
 
-更完整的安装、运维与故障处理说明，请查看 [部署排障文档](./docs/src/user-guide/deployment-troubleshooting.md) 与 [docs/](./docs/README.md) 下各专题文档。
+更完整的安装、运维与故障处理说明，请查看 [FAQ](./docs/src/user-guide/overview/faq.md) 与 [docs/](./docs/README.md) 下各专题文档。
 
 ## 社区
 

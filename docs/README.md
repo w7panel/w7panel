@@ -64,8 +64,7 @@ docs/
 - [域名管理](./src/user-guide/domain-management.md)
 - [镜像管理](./src/user-guide/image-management.md)
 - [计划任务](./src/user-guide/scheduled-tasks.md)
-- [部署文档](./src/user-guide/deployment.md)
-- [部署排障](./src/user-guide/deployment-troubleshooting.md)
+- [快速开始](./src/user-guide/quick-start.md)
 - [常见问题](./src/user-guide/overview/faq.md)
 
 ### 开发文档
@@ -95,14 +94,14 @@ docs/
 - 新增用户操作流程时，优先更新 `docs/src/user-guide/`。
 - 新增或调整 API 时，优先更新 `docs/src/development/api/`。
 - 新增前端组件、接口调用或微前端事件时，优先更新 `docs/src/development/frontend/`。
-- 修改部署方式、环境变量或故障处理步骤时，同步更新 `docs/src/user-guide/deployment*.md`。
+- 修改部署方式、环境变量或故障处理步骤时，同步更新 `docs/src/user-guide/quick-start.md`、`docs/src/user-guide/overview/faq.md` 或新增相应部署专题文档。
 - 完成面向用户或开发者的变更后，同步更新 `docs/src/user-guide/overview/changelog/1.0.0.md`。
 
 ### 子项目说明
 
 - `../w7panel-server/`：后端服务源码
 - `../w7panel-ui/`：Vue 管理端源码
-- `../codeblitz/`：Web IDE 源码
+- Web IDE：当前以 `../w7panel-server/kodata/plugin/codeblitz.zip` 静态包随服务分发；如恢复独立源码目录，再补充对应入口。
 - `../tests/`：测试脚本与测试资料
 
 ## 说明

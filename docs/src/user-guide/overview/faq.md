@@ -99,7 +99,7 @@ PUBLIC_IP=123.123.123.123 INTERNAL_IP=123.123.123.123 sh install.sh
 常见做法是执行类似下面的命令：
 
 ```bash
-kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- ko-app/k8s-offline auth:register --username=admin --password=123456
+kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- k8s-offline auth:register --username=admin --password=123456
 ```
 
 ## 三、使用与排查
