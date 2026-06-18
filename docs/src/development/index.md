@@ -216,6 +216,15 @@ npm run dev
 npm run build
 ```
 
+### Helm Chart
+
+当前维护的 Helm Chart 位于 `charts/w7panel/`，打包产物输出到 `charts/`：
+
+```bash
+cd $BASE_DIR
+make package-chart IMAGE_TAG=v1.2.3 HELM_CHART_VERSION=1.2.3 HELM_APP_VERSION=v1.2.3
+```
+
 ### 启动服务
 
 推荐通过启动脚本启动：

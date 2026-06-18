@@ -1,6 +1,6 @@
 
-CHART_DIR ?= charts
-CHART_PACKAGE_DIR ?= $(CHART_DIR)
+CHART_DIR ?= charts/w7panel
+CHART_PACKAGE_DIR ?= charts
 CHART_NAME ?= $(shell awk '/^name:/ {print $$2; exit}' $(CHART_DIR)/Chart.yaml)
 CHART_IMAGE_REPOSITORY ?= $(shell awk '/^[[:space:]]*repository:/ {print $$2; exit}' $(CHART_DIR)/values.yaml)
 CHART_IMAGE_TAG ?= $(shell awk '/^[[:space:]]*tag:/ {gsub(/"/, "", $$2); print $$2; exit}' $(CHART_DIR)/values.yaml)
