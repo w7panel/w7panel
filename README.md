@@ -76,69 +76,6 @@ http://{ip}:9090
 
 更多安装前检查、首次进入后台和无法访问后台的排查步骤，请查看 [快速开始](./docs/src/user-guide/quick-start.md)。
 
-## 开发快速开始
-
-每次开发前先同步 `dev-v1`：
-
-```bash
-git fetch origin dev-v1
-git pull origin dev-v1
-```
-
-无特别要求时，部署测试使用测试模式：
-
-```bash
-export LOCAL_MOCK=true
-export CAPTCHA_ENABLED=false
-export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
-```
-
-后端构建与测试：
-
-```bash
-cd $BASE_DIR/w7panel-server
-mkdir -p $BASE_DIR/dist
-go build -o $BASE_DIR/dist/w7panel .
-go test ./...
-```
-
-前端开发与构建：
-
-```bash
-cd $BASE_DIR/w7panel-ui
-npm run dev
-npm run build
-```
-
-启动服务优先使用启动脚本：
-
-```bash
-cd $BASE_DIR/dist
-export LOCAL_MOCK=true
-export CAPTCHA_ENABLED=false
-export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
-./w7panel-ctl.sh start
-```
-
-如果当前 `dist/` 只有手动编译出的二进制、还没有复制启动脚本，可以直接启动：
-
-```bash
-cd $BASE_DIR/dist
-export LOCAL_MOCK=true
-export CAPTCHA_ENABLED=false
-export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
-export KO_DATA_PATH=$BASE_DIR/w7panel-server/kodata
-./w7panel server:start
-```
-
-停止服务优先使用：
-
-```bash
-./w7panel-ctl.sh stop
-```
-
-不要直接使用 `pkill -9` 或 `kill -9` 停止服务，避免子进程无法优雅退出。完整开发规范请查看 [开发指南](./docs/src/development/index.md)。
-
 ## 仓库结构
 
 ```text
@@ -214,61 +151,6 @@ export KO_DATA_PATH=$BASE_DIR/w7panel-server/kodata
 支持自动签发和续期，减少证书维护成本。
 
 ![](./docs/src/public/user-guide/freessl.png)
-
-## 常见问题速查
-
-### W7Panel 一定要配合 Kubernetes 使用吗？
-
-是的。W7Panel 的核心定位就是 Kubernetes 场景下的云原生应用管理平台。如果完全不使用 Kubernetes，它并不是为这类环境设计的。
-
-### 不会 `kubectl` 还能使用吗？
-
-可以。W7Panel 的目标之一就是降低 Kubernetes 的使用门槛。你可以通过界面完成应用部署、运行状态查看、日志事件排查、域名证书配置、文件管理和存储查看等常见操作。
-
-### 自动识别的公网 IP 不正确怎么办？
-
-如果服务器通过 NAT 出网，安装时可以显式指定公网 IP：
-
-```bash
-PUBLIC_IP=123.123.123.123 sh install.sh
-```
-
-### IPv6 影响安装或访问怎么办？
-
-建议优先使用 IPv4 安装，必要时显式指定公网 IP 和内网 IP：
-
-```bash
-PUBLIC_IP=123.123.123.123 INTERNAL_IP=123.123.123.123 sh install.sh
-```
-
-### 忘记管理员密码怎么办？
-
-可以在 master 节点重新注册管理员账号密码：
-
-```bash
-kubectl exec -it $(kubectl get pods -n default -l app=w7panel-offline | awk 'NR>1{print $1}') -- k8s-offline auth:register --username=admin --password=123456
-```
-
-更多问题请查看 [FAQ](./docs/src/user-guide/overview/faq.md)。
-
-## 文档站
-
-`docs/` 是 VitePress 文档站源码目录，主入口位于 [docs/src/index.md](./docs/src/index.md)。
-
-本地预览：
-
-```bash
-cd docs
-pnpm install
-pnpm run dev
-```
-
-构建静态站点：
-
-```bash
-cd docs
-pnpm run build
-```
 
 ## 社区
 
