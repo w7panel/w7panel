@@ -82,7 +82,6 @@ docs/
 | 完成开发 | 版本管理规范 | docs/src/user-guide/overview/changelog/{版本号}.md |
 | 新增后端功能 | 后端 README | w7panel-server/README.md |
 | 新增前端功能 | 前端 README | w7panel-ui/README.md |
-| 新增编辑器功能 | Web IDE 静态包说明 | w7panel-server/README.md |
 
 **更新检查清单：**
 ```
@@ -94,7 +93,6 @@ docs/
 □ docs/src/development/ 是否需要更新？
 □ w7panel-server/README.md 是否需要更新？（后端）
 □ w7panel-ui/README.md 是否需要更新？（前端）
-□ w7panel-server/kodata/plugin/codeblitz.zip 相关说明是否需要更新？（编辑器）
 □ tests/README.md 是否需要更新？（测试脚本）
 ```
 
@@ -128,7 +126,6 @@ grep -r "permission-agent\|permissionUrl\|compressUrl\|webdavUrl" w7panel-ui/src
 **涉及文件：**
 - 后端：Controller、Service、路由
 - 前端：API 接口、页面组件、类型定义
-- 编辑器：`w7panel-server/kodata/plugin/codeblitz.zip` 静态包及相关说明
 - 文档：更新 AGENTS.md
 
 **未遵守规则的后果：**
@@ -368,7 +365,6 @@ go version
 |------|--------|------|
 | 后端 | Go 1.26 + Gin + w7-rangine-go | `$BASE_DIR/w7panel-server` |
 | 前端 | Vue 3 + TypeScript + Arco Design | `$BASE_DIR/w7panel-ui` |
-| Web IDE | Codeblitz 静态包 | `$BASE_DIR/w7panel-server/kodata/plugin/codeblitz.zip` |
 | 部署 | 编译输出 | `$BASE_DIR/dist` |
 | Helm Charts | K8s 部署包 | `$BASE_DIR/charts/w7panel` |
 
@@ -996,43 +992,10 @@ export function compressFiles(compressUrl: string, sources: string[], output: st
 | slog 格式错误 | 必须使用键值对: `slog.Info("msg", "key", value)` |
 | kodata 丢失 | 运行时依赖 `kodata/` 目录，需正确复制 |
 | K8S 连接失败 | 检查 kubeconfig.yaml 路径和内容 |
-| 编辑器 WASM 401 错误 | 检查 `w7panel-server/kodata/plugin/codeblitz.zip` 是否已随 `kodata` 正确复制和解压 |
-| 编辑器 PROPFIND 400 错误 | Content-Type 必须是 `text/xml; charset=utf-8` |
-| 编辑器资源管理器空白 | 检查 WebDAV API 是否正常，查看浏览器控制台日志 |
-| 编辑器写入失败 ENOTSUP | 使用 OverlayFS + 事件回调同步到 WebDAV |
+| WebDAV PROPFIND 400 错误 | Content-Type 必须是 `text/xml; charset=utf-8` |
+| 文件管理列表空白 | 检查 WebDAV API 是否正常，查看浏览器控制台日志 |
 | WebDAV 401 认证失败 | 需要有效的 K8S Token，从 kubeconfig 或 ServiceAccount 获取 |
 | agent-browser 找不到元素 | 使用 `snapshot -i` 查看交互元素，用 ref (@e1) 定位 |
-
----
-
-## Web IDE 编辑器
-
-### 架构说明
-
-编辑器基于 Codeblitz (OpenSumi) 构建，使用以下文件系统方案：
-
-| 组件 | 说明 |
-|------|------|
-| OverlayFS | 叠加文件系统，提供写入能力 |
-| InMemory | 可写层（内存），临时存储修改 |
-| DynamicRequest | 只读层，通过 WebDAV 读取远程文件 |
-
-### 写入同步机制
-
-编辑器通过事件回调将本地修改同步到 WebDAV：
-
-| 事件 | WebDAV 操作 | 说明 |
-|------|-------------|------|
-| `onDidSaveTextDocument` | PUT | 保存文件时同步到服务器 |
-| `onDidCreateFiles` | MKCOL | 创建文件/目录时同步 |
-| `onDidDeleteFiles` | DELETE | 删除文件时同步 |
-
-### LOCAL_MOCK 模式
-
-在 `LOCAL_MOCK=true` 环境下：
-- WebDAV 直接访问本地文件系统（通过 `/host/proc` 映射）
-- 测试时使用 `pid=1` 模拟特权 pod
-- **注意**: 认证仍需要有效的 K8S Token
 
 ---
 

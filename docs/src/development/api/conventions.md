@@ -173,7 +173,7 @@ slog.Warn("get pod failed", "namespace", namespace, "pod", podName, "error", err
 | 修改响应字段 | 搜索字段使用处、类型定义和 UI 展示 |
 | 修改字段含义 | 检查按钮状态、权限判断、读写逻辑是否一致 |
 | 修改鉴权方式 | 检查 token 获取、刷新、错误拦截 |
-| 修改文件/WebDAV 字段 | 检查文件管理、Codeblitz、Wujie 微应用调用 |
+| 修改文件/WebDAV 字段 | 检查文件管理和 Wujie 微应用调用 |
 
 常用检查：
 

@@ -111,7 +111,7 @@ controller.abort();
 | `setInterval`、`setTimeout` | timer id |
 | 轮询请求 | polling handle、AbortController |
 | WebSocket、终端 | socket、xterm 实例 |
-| 编辑器 | CodeMirror、Monaco 或 Codeblitz 实例 |
+| 编辑器 | CodeMirror 或 Monaco 实例 |
 | 图表 | ECharts instance |
 | Wujie 事件 | bus listener |
 
