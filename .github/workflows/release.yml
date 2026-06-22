@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "1.1.*"
   workflow_dispatch:
     inputs:
       tag:
@@ -15,7 +15,7 @@ permissions:
   packages: write
 
 env:
-  CHART_DIR: charts
+  CHART_DIR: charts/w7panel
   CHART_PACKAGE_DIR: charts
   DOCS_DIR: docs
   DOCS_BASE_PATH: /

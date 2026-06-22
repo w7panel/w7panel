@@ -101,7 +101,6 @@ docs/
 
 - `../w7panel-server/`：后端服务源码
 - `../w7panel-ui/`：Vue 管理端源码
-- Web IDE：当前以 `../w7panel-server/kodata/plugin/codeblitz.zip` 静态包随服务分发；如恢复独立源码目录，再补充对应入口。
 - `../tests/`：测试脚本与测试资料
 
 ## 说明

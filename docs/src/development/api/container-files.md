@@ -1,6 +1,6 @@
 # 容器文件管理 API
 
-本文档说明容器文件管理相关 API 的职责、调用凭据、访问模式和请求/响应参数。文件管理能力主要服务于应用详情文件页、Codeblitz 编辑器、微应用文件弹窗、压缩解压、权限修改、挂载文件编辑和分片上传。
+本文档说明容器文件管理相关 API 的职责、调用凭据、访问模式和请求/响应参数。文件管理能力主要服务于应用详情文件页、微应用文件弹窗、压缩解压、权限修改、挂载文件编辑和分片上传。
 
 ## 整体使用方式
 
@@ -11,8 +11,7 @@
 1. 使用用户 token 调用 `/panel-api/v1/pid`，传入 namespace、节点 IP、Pod/容器信息。
 2. 后端返回 `pid`、`subPid`、`webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
 3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer {webdavToken}`。
-4. Codeblitz 编辑器通过 query 参数接收 `api-url`、`api-base-path` 和 `api-token`。
-5. 挂载文件、分片上传、下载复制等场景按各自接口处理，不要手动拼生产代理路径。
+4. 挂载文件、分片上传、下载复制等场景按各自接口处理，不要手动拼生产代理路径。
 
 ### 场景选择
 
@@ -43,7 +42,7 @@
 Authorization: Bearer <token>
 ```
 
-`/panel-api/v1/pid` 返回的 `webdavToken` 当前就是用户 token。前端和 Codeblitz 访问 WebDAV、压缩、权限接口时，应使用：
+`/panel-api/v1/pid` 返回的 `webdavToken` 当前就是用户 token。前端访问 WebDAV、压缩、权限接口时，应使用：
 
 ```http
 Authorization: Bearer <webdavToken>
@@ -77,7 +76,7 @@ Authorization: Bearer <webdavToken>
 
 1. 前端使用用户 token 调用 `/panel-api/v1/pid`，传入 `namespace`、`HostIp`、`podName`、`containerName` 或 `containerId`。
 2. 后端返回 `webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
-3. 前端或 Codeblitz 使用 `webdavToken` 访问 WebDAV、压缩和权限接口。
+3. 前端使用 `webdavToken` 访问 WebDAV、压缩和权限接口。
 4. 需要生产 Agent 代理时，前端使用后端返回的 URL，不自行拼接生产代理路径。
 
 ## LOCAL_MOCK 路径差异
@@ -737,7 +736,7 @@ Content-Type: application/json
 ## 开发检查
 
 - WebDAV 必须保持标准协议响应，尤其 `PROPFIND` 必须返回 XML。
-- 后端修改 `webdavUrl`、`compressUrl`、`permissionUrl`、`webdavBasePath` 时，必须同步检查前端和 Codeblitz。
+- 后端修改 `webdavUrl`、`compressUrl`、`permissionUrl`、`webdavBasePath` 时，必须同步检查前端文件管理和微应用文件弹窗。
 - `LOCAL_MOCK=true` 只影响 `/host/proc` 路径选择，不跳过 Auth。
 - 文件路径要避免让用户自行拼接生产 Agent 代理路径，优先使用 `/pid` 返回值。
 - 新增压缩格式、WebDAV 属性、分片字段或挂载文件字段时，需要同步本文档、前端类型和相关测试。

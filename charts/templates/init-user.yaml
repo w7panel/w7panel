@@ -1,8 +1,0 @@
-{{- if .Values.register.needInitUser -}}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-    name: {{ .Release.Name }}-init-user
-data:
-    a: b
-{{- end }}    

@@ -1,6 +1,6 @@
 # 开发指南
 
-本文档是 W7Panel 开发资料入口，面向后端、前端、Web IDE 静态资源、应用示例、联调测试和文档维护。
+本文档是 W7Panel 开发资料入口，面向后端、前端、应用示例、联调测试和文档维护。
 
 ## 快速入口
 
@@ -65,7 +65,7 @@ $BASE_DIR/
 │   │   ├── metrics/                 # 指标 API
 │   │   └── zpk/                     # ZPK 应用 API
 │   ├── common/                      # 公共服务、中间件和工具
-│   ├── kodata/                      # 后端静态资源、CRD、内置 Chart、Web IDE 插件包
+│   ├── kodata/                      # 后端静态资源、CRD 和内置 Chart
 │   └── install/                     # 安装相关资源
 ├── w7panel-ui/                      # 前端源码，Vue 3 + TypeScript + Arco Design
 │   ├── config/                      # Vite 和构建配置
@@ -75,7 +75,6 @@ $BASE_DIR/
 │   ├── src/hooks/                   # 复用逻辑
 │   ├── src/router/                  # 路由配置
 │   └── src/views/                   # 页面模块
-├── w7panel-server/kodata/plugin/    # Web IDE 静态包；当前为 codeblitz.zip
 ├── charts/                          # w7panel Helm Chart
 ├── installer/                       # 安装脚本、离线清单和系统配置
 ├── docs/                            # 项目文档
@@ -214,6 +213,15 @@ go test ./...
 cd $BASE_DIR/w7panel-ui
 npm run dev
 npm run build
+```
+
+### Helm Chart
+
+当前维护的 Helm Chart 位于 `charts/w7panel/`，打包产物输出到 `charts/`：
+
+```bash
+cd $BASE_DIR
+make package-chart IMAGE_TAG=v1.2.3 HELM_CHART_VERSION=1.2.3 HELM_APP_VERSION=v1.2.3
 ```
 
 ### 启动服务
