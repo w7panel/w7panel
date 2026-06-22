@@ -31,10 +31,9 @@
 | 容器 | 源码位置 | 说明 |
 |------|----------|------|
 | 通用应用组微应用 | `w7panel-ui/src/views/topapp/micro-container.vue` | 启动 `appmicro`，同时挂载 `WujieModals` |
-| 应用详情微应用 | `w7panel-ui/src/views/app/apps/detail.vue`、`w7panel-ui/src/views/app/apps/micro.vue` | 应用详情内嵌微应用 |
+| 应用详情微应用 | `w7panel-ui/src/views/app/apps/detail.vue` | 应用详情内嵌微应用 |
 | 应用商店 ZPK 页面 | `w7panel-ui/src/views/app/store/store-zpk.vue` | 应用商店页面内嵌微应用 |
 | GPUStack | `w7panel-ui/src/views/app/gpustack/index.vue` | GPUStack 专用微应用和 worker 管理事件 |
-| 文件/镜像缓存策略 | `w7panel-ui/src/components/domain-strategy-filecache.vue`、`domain-strategy-imagecache.vue` | 域名策略内嵌缓存微应用 |
 
 ## 常见 props
 

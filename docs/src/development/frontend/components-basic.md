@@ -70,11 +70,8 @@ Props：
 | 组件 | 源文件 | 说明 |
 |------|--------|------|
 | `DefaultLayout` | `src/components/default-layout.vue` | 默认布局 |
-| `Footer` | `src/components/footer/index.vue` | 页脚 |
 | `Menu` | `src/components/menu/index.vue` | 侧边菜单 |
 | `Navbar` | `src/components/navbar/index.vue` | 顶部导航 |
-| `TabBar` | `src/components/tab-bar/index.vue` | 标签栏 |
-| `TabItem` | `src/components/tab-bar/tab-item.vue` | 标签栏条目 |
 | `ContactUs` | `src/components/contact-us.vue` | 联系入口，读取公开站点联系配置 |
 
 ## 维护要求

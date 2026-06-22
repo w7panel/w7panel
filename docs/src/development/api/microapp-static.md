@@ -580,7 +580,6 @@ curl 'http://localhost:8080/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS
 |------|------|
 | `w7panel-ui/src/views/topapp/micro-container.vue` | 通用应用组微应用容器 |
 | `w7panel-ui/src/views/app/apps/detail.vue` | 应用详情微应用容器 |
-| `w7panel-ui/src/views/app/apps/micro.vue` | 应用详情内嵌微应用 |
 | `w7panel-ui/src/views/app/store/store-zpk.vue` | 应用商店 ZPK 微应用 |
 | `w7panel-ui/src/components/wujie-modals.vue` | 微应用调用面板能力的事件桥 |
 

@@ -919,64 +919,13 @@ slog.Info("操作成功", "user", userID, "action", "create")
 4. **API 请求优化**
    - 避免串行请求，使用 `Promise.all` 批量请求
    - 避免重复请求，添加请求缓存
-   - useRequest Hook 添加取消机制
+   - 封装请求逻辑时必须提供取消机制
 
 5. **Hooks 使用规范**
 
-**useRequest Hook** (`src/hooks/request.ts`):
-```typescript
-import useRequest from '@/hooks/request';
-
-// 基础用法
-const { loading, response, run, cancel, refresh } = useRequest(api);
-
-// 完整配置
-const { loading, response, run, cancel, refresh, clearCache } = useRequest(api, {
-    defaultValue: [],           // 默认值
-    isLoading: true,            // 初始加载状态
-    cache: true,               // 启用缓存
-    cacheTime: 5 * 60 * 1000,  // 缓存时间 (5分钟)
-    retry: 3,                   // 重试次数
-    retryDelay: 1000,          // 重试延迟 (1秒)
-    timeout: 30000,            // 请求超时 (30秒)
-    onSuccess: (data) => {},   // 成功回调
-    onError: (err) => {},      // 错误回调
-});
-
-// 手动运行请求
-run();
-
-// 取消请求
-cancel();
-
-// 刷新 (清除缓存后重新请求)
-refresh();
-```
-
-**定时器管理** (`src/hooks/timer.ts`):
-```typescript
-import { useTimer, usePolling } from '@/hooks/timer';
-
-// 定时器管理
-const { setTimeout, setInterval, clearTimer, clearAllTimers } = useTimer();
-
-// 设置定时器
-const timerId = setTimeout('my-timer', () => {
-    console.log('执行一次');
-}, 3000);
-
-const intervalId = setInterval('my-interval', () => {
-    console.log('每3秒执行');
-}, 3000);
-
-// 清理定时器
-clearTimer('my-timer');
-
-// 轮询 (自动处理激活/停用状态)
-const { startPolling, stopPolling, restartPolling } = usePolling(async () => {
-    await fetchData();
-}, 5000);
-```
+- 复用现有 hooks 前先确认文件仍存在，避免引用历史遗留路径。
+- 定时器、轮询、WebSocket、xterm、CodeMirror、ECharts 实例必须在组件卸载或抽屉关闭时清理。
+- keep-alive 页面需要在 `onDeactivated` 中停止轮询，在 `onActivated` 中按需恢复。
 
 **API 请求示例**:
 ```typescript

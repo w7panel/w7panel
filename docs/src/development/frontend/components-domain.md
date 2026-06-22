@@ -126,13 +126,6 @@ Events：
 />
 ```
 
-## 缓存策略组件
-
-| 组件 | 源文件 | Props | Events | 说明 |
-|------|--------|-------|--------|------|
-| `DomainStrategyFilecache` | `src/components/domain-strategy-filecache.vue` | `data`, `activeName` | `submit`, `cancel` | 文件缓存策略配置，提交 operations |
-| `DomainStrategyImagecache` | `src/components/domain-strategy-imagecache.vue` | `data`, `activeName` | `submit`, `cancel` | 图片缓存策略配置 |
-
 ## 维护要求
 
 - 修改组件 Props、Events、Ref 方法或对外行为时，同步更新本文。

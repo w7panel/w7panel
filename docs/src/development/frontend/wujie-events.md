@@ -570,83 +570,6 @@ window.$wujie.bus.$emit('changeLogin', {
 });
 ```
 
-## 域名缓存微应用事件
-
-注册位置：
-
-- `w7panel-ui/src/components/domain-strategy-filecache.vue`
-- `w7panel-ui/src/components/domain-strategy-imagecache.vue`
-
-这些事件由缓存策略内嵌微应用触发。注意事件名是通用的 `submit`、`close`，因此只能在对应缓存组件生命周期内使用。
-
-### 文件缓存 `submit`
-
-功能：开启或关闭文件缓存，并向父组件提交 JSON Patch operations。
-
-参数：
-
-| 形式 | 类型 | 说明 |
-|------|------|------|
-| `true/false` | boolean | 直接设置文件缓存开关 |
-| `{ from, open }` | object | `from` 为 `file-cache` 时处理，`open` 表示开关 |
-
-响应：
-
-| 父组件事件 | 参数 | 说明 |
-|------------|------|------|
-| `submit` | `operations` | JSON Patch operations，用于更新 Ingress |
-
-示例：
-
-```ts
-window.$wujie.bus.$emit('submit', {
-  from: 'file-cache',
-  open: true,
-});
-```
-
-### 文件缓存 `close`
-
-功能：关闭文件缓存组件。
-
-参数：无。
-
-响应：父组件触发 `cancel`。
-
-```ts
-window.$wujie.bus.$emit('close');
-```
-
-### 图片缓存 `submit`
-
-功能：通知父组件提交图片缓存配置。
-
-参数：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `from` | string | 是 | 必须为 `image-cache` |
-
-响应：父组件触发 `submit`，无额外参数。
-
-```ts
-window.$wujie.bus.$emit('submit', {
-  from: 'image-cache',
-});
-```
-
-### 图片缓存 `close`
-
-功能：关闭图片缓存组件。
-
-参数：无。
-
-响应：父组件触发 `cancel`。
-
-```ts
-window.$wujie.bus.$emit('close');
-```
-
 ## GPUStack 专用事件
 
 注册位置：`w7panel-ui/src/views/app/gpustack/index.vue`
@@ -795,7 +718,7 @@ window.$wujie.bus.$emit('changeReplicas', {
 
 | 事件 | 触发位置 | 参数 | 说明 |
 |------|----------|------|------|
-| `routeChange` | `topapp/micro-container.vue`、`app/apps/detail.vue`、`app/apps/micro.vue`、`gpustack/index.vue` | string | 面板菜单或路由变化 |
+| `routeChange` | `topapp/micro-container.vue`、`app/apps/detail.vue`、`gpustack/index.vue` | string | 面板菜单或路由变化 |
 | `podList` | `gpustack/index.vue` | array | GPUStack worker Pod 列表 |
 
 监听示例：

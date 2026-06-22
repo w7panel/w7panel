@@ -34,16 +34,16 @@
 
 | 类型 | 文档 | 组件 |
 |------|------|------|
-| 基础展示与导航 | [components-basic.md](./components-basic.md) | `Chart`、`Breadcrumb`、`RouteBreadcrumb`、`DefaultLayout`、`Footer`、`Menu`、`Navbar`、`TabBar`、`TabItem`、`ContactUs` |
+| 基础展示与导航 | [components-basic.md](./components-basic.md) | `Chart`、`Breadcrumb`、`RouteBreadcrumb`、`DefaultLayout`、`Menu`、`Navbar`、`ContactUs` |
 | 表单控件 | [components-forms.md](./components-forms.md) | `CustomCheckbox`、`CronJob`、`HealthProbe`、`DcformDrawer` |
 | YAML 编辑 | [components-yaml.md](./components-yaml.md) | `YamlInput`、`YamlEditor`、`YamlDrawer`、`YamlView`、`K8sYamlDrawer` |
 | 日志、终端和文本对比 | [components-terminal.md](./components-terminal.md) | `PodLog`、`JobLog`、`WebShell`、`WebshellTty`、`DiffTxt` |
 | 应用、镜像和代码包 | [components-apps.md](./components-apps.md) | `StoreInstall`、`StoreInstallDrawer`、`AddappDrawer`、`AppForm`、`AppFormContainer`、`AppFormVolumes`、`MicroAppForm`、`BuildImageDrawer`、`CodepackDrawer` |
 | 域名、灰度和缓存策略 | [components-domain.md](./components-domain.md) | `DomainStrategy`、`DomainMicroEdit`、`DomainParseAlert`、`DomainGrayRelease`、`DomainStrategyPlugin`、缓存策略插件 |
-| 集群、节点和容器选择 | [components-cluster.md](./components-cluster.md) | `NodeSelect`、`NodeBind`、`DdcNode`、`NbPage`、`NdSet`、`SelectContainer` |
-| 资源、账号和权限 | [components-resource.md](./components-resource.md) | `ContainerPlugin`、`QuotaConfig`、`QuotaEdit`、`CostEdit`、`PermissionEdit`、`TestResource` |
+| 集群、节点和容器选择 | [components-cluster.md](./components-cluster.md) | `NodeSelect`、`NbPage`、`NdSet`、`SelectContainer` |
+| 资源、账号和权限 | [components-resource.md](./components-resource.md) | `ContainerPlugin`、`QuotaConfig`、`QuotaEdit`、`PermissionEdit` |
 | 业务卡片和入口 | [components-business.md](./components-business.md) | `PodsCharts`、`HelmItem`、`RespoItem`、`TopappMenu`、`SlideCapt` |
-| 微前端桥接 | [components-microfrontend.md](./components-microfrontend.md) | `WujieModals`、`SubaccountPanel`、策略微应用容器 |
+| 微前端桥接 | [components-microfrontend.md](./components-microfrontend.md) | `WujieModals` |
 
 ## 维护建议
 

@@ -102,7 +102,7 @@ controller.abort();
 - keep-alive 页面需要在 `onDeactivated` 中停止轮询，在 `onActivated` 中按需恢复。
 - 弹窗、抽屉内的重组件关闭时必须释放连接和实例；必要时使用 `unmountOnClose`。
 - 轮询间隔按业务实时性设置，避免多个组件同时轮询同一接口。
-- 使用 `src/hooks/timer.ts`、`src/hooks/request.ts` 等已有 hooks 时，优先复用其取消、缓存和清理能力。
+- 封装轮询或请求复用逻辑时，必须提供取消、缓存失效和组件卸载清理能力。
 
 检查项：
 

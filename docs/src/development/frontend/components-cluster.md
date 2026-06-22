@@ -24,30 +24,10 @@ Events：
 <NodeSelect :ns="form.affinity" @select="affinity => form.affinity = affinity" />
 ```
 
-## `NodeBind`
-
-源文件：`w7panel-ui/src/components/node/node-bind.vue`
-
-功能：节点绑定抽屉。
-
-Props：
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `show` | boolean | `false` | 是否显示 |
-| `list` | array | `[]` | 节点或绑定列表 |
-
-Events：
-
-| 事件 | 参数 | 说明 |
-|------|------|------|
-| `close` | boolean | 关闭 |
-
 ## 节点展示片段
 
 | 组件 | 源文件 | Props | 说明 |
 |------|--------|-------|------|
-| `DdcNode` | `src/components/node/ddc-node.vue` | `list` | 节点展示 |
 | `NbPage` | `src/components/node/nb-page.vue` | `list` | 节点页面片段 |
 | `NdSet` | `src/components/node/nd-set.vue` | - | 节点设置 |
 
