@@ -74,7 +74,7 @@ Authorization: Bearer <token>
 | YAML 和 Compose | 应用 YAML、回滚、Docker Compose 转换 |
 | 终端与执行 | Pod TTY、Node TTY、Exec、ExecAll |
 | 代理 | K8s API proxy、Service/Pod/Common proxy、proxy-no、proxy-url、kubeconfig |
-| DNS 和网络诊断 | DNS 解析、DNS zone/record、数据库连接测试、etcd ping |
+| DNS 和网络诊断 | DNS 解析、PrivateDNS CRD、数据库连接测试、etcd ping |
 | GPU | GPU 开关、HAMI/GPU Operator、GPU summary、设备和 GPUStack worker |
 
 ## K8s 原生代理
@@ -693,50 +693,56 @@ Authorization: Bearer <token>
 
 `ping-etcd` 会自动补齐尾部 `/`，并请求 `{url}/health`，HTTP 状态码 `200` 视为可连接。
 
-### DNS Zone
+### 私有 DNS CRD
+
+私有 DNS 前端管理操作直接通过 K8s 代理操作集群级 CRD `privatedns.w7panel.w7.com`，不再通过 `/panel-api/v1/dns/*` 面板业务接口做 zone 和 record 的增删改查。
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| `GET` | `/panel-api/v1/dns/zones` | DNS zone 列表 |
-| `POST` | `/panel-api/v1/dns/zones` | 创建 zone |
-| `DELETE` | `/panel-api/v1/dns/zones/:domain` | 删除 zone |
+| `GET` | `/k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns` | 查询私有 DNS zone 列表 |
+| `POST` | `/k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns` | 创建私有 DNS zone |
+| `GET` | `/k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns/:name` | 查询指定 zone 及记录 |
+| `PUT` | `/k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns/:name` | 更新指定 zone 的完整记录集合 |
+| `DELETE` | `/k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns/:name` | 删除指定 zone |
 
-创建 zone 请求体：
+`PrivateDNS` 资源字段：
 
 | 字段 | 必填 | 类型 | 说明 |
 |------|------|------|------|
-| `domain` | 是 | string | 域名，会转小写、去掉末尾 `.`，至少两段 label |
+| `apiVersion` | 是 | string | 固定为 `w7panel.w7.com/v1alpha1` |
+| `kind` | 是 | string | 固定为 `PrivateDNS` |
+| `metadata.name` | 是 | string | 建议使用规范化后的域名 |
+| `spec.domain` | 是 | string | 域名，会转小写、去掉末尾 `.`，至少两段 label |
+| `spec.records` | 否 | array | 当前 zone 的完整期望记录集合 |
+| `status.phase` | 否 | string | 控制器同步状态：`Pending`、`Ready` 或 `Failed` |
+| `status.recordCount` | 否 | int | 已同步记录数量 |
+| `status.message` | 否 | string | 控制器同步消息 |
 
-Zone 响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `domain` | string | 域名 |
-| `recordNum` | int | 记录数量 |
-| `updateTime` | string | 更新时间，可能为空 |
-
-请求示例：
+创建 zone 示例：
 
 ```http
-POST /panel-api/v1/dns/zones
+POST /k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "domain": "example.com"
+  "apiVersion": "w7panel.w7.com/v1alpha1",
+  "kind": "PrivateDNS",
+  "metadata": {
+    "name": "example.com"
+  },
+  "spec": {
+    "domain": "example.com",
+    "records": []
+  }
 }
 ```
 
-### DNS Record
+### 私有 DNS Record
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/dns/zones/:domain/records` | 记录列表 |
-| `POST` | `/panel-api/v1/dns/zones/:domain/records` | 创建记录 |
-| `PUT` | `/panel-api/v1/dns/zones/:domain/records/:id` | 更新记录 |
-| `DELETE` | `/panel-api/v1/dns/zones/:domain/records/:id` | 删除记录 |
+记录不是独立子资源。新增、修改和删除记录时，前端先读取 `PrivateDNS` 对象，再通过 `PUT` 更新 `spec.records` 的完整列表，由后端控制器把期望状态同步到 CoreDNS。
 
-Record 请求/响应字段：
+Record 字段：
 
 | 字段 | 必填 | 类型 | 默认值 | 说明 |
 |------|------|------|--------|------|
@@ -760,39 +766,31 @@ Record 请求/响应字段：
 请求示例：
 
 ```http
-POST /panel-api/v1/dns/zones/example.com/records
+PUT /k8s-proxy/apis/w7panel.w7.com/v1alpha1/privatedns/example.com
 Authorization: Bearer <token>
 Content-Type: application/json
 
 {
-  "name": "www",
-  "type": "A",
-  "value": "1.2.3.4",
-  "ttl": 60
+  "apiVersion": "w7panel.w7.com/v1alpha1",
+  "kind": "PrivateDNS",
+  "metadata": {
+    "name": "example.com",
+    "resourceVersion": "12345"
+  },
+  "spec": {
+    "domain": "example.com",
+    "records": [
+      {
+        "id": "82de55c85af5",
+        "name": "www",
+        "type": "A",
+        "value": "1.2.3.4",
+        "ttl": 60
+      }
+    ]
+  }
 }
 ```
-
-### DNS Server
-
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| `GET` | `/panel-api/v1/dns/server` | DNS 服务配置 |
-| `PUT` | `/panel-api/v1/dns/server` | 开启/关闭 DNS 服务 |
-
-更新请求体：
-
-| 字段 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `enabled` | 是 | bool | 是否启用 |
-
-响应字段：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `enabled` | bool | 是否启用 |
-| `serviceName` | string | Service 名称 |
-| `serviceType` | string | Service 类型，可能为空 |
-| `externalIPs` | array[string] | 外部 IP 列表 |
 
 ## GPU
 
