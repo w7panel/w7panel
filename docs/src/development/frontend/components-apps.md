@@ -167,6 +167,7 @@ Props：
 | `volumeClaimTemplates` | array | `[]` | StatefulSet 动态 PVC 模板 |
 | `mirror` | array | `[]` | 镜像仓库列表 |
 | `isPlugin` | boolean | `false` | 插件模式 |
+| `isTemplate` | boolean | `false` | 模板模式，隐藏复用已有应用、代码包构建等依赖集群资源的功能 |
 | `pluginData` | object | - | 插件数据 |
 | `layout` | string | - | 布局模式 |
 

@@ -95,6 +95,15 @@ echo "执行测试..."
 
 ## 测试工具
 
+### Go 权限单元测试
+
+网关插件菜单权限由后端权限服务维护，可运行定向测试确认创始人默认权限完整：
+
+```bash
+cd $BASE_DIR/w7panel-server
+go test ./common/service/k8s/permission -run TestFounderFallbackIncludesGatewayPluginPermissions -count=1
+```
+
 ### agent-browser
 
 用于UI测试的浏览器自动化工具：

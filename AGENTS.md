@@ -867,6 +867,20 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - **目录**: API `w7panel-ui/src/api/`，页面 `w7panel-ui/src/views/`，组件 `w7panel-ui/src/components/`，Hooks `w7panel-ui/src/hooks/`
 - **Hooks 规范**: 见下方「前端性能规范」第5节 Hooks 使用规范
 
+#### 网关插件 UI 规范
+
+- 网关插件列表以 `higress-system` 命名空间的 Higress `WasmPlugin` 为唯一数据源。
+- 网关插件列表不单独展示前端包；关联的 MicroApp 仅用于决定配置时加载插件页面还是回退 YAML。
+- 网关插件列表的“插件”列固定为 360px，避免在宽屏下过度拉伸。
+- 网关插件列表顶部的添加按钮与搜索框至少保留 12px 间距。
+- 网关插件列表右侧操作的确认浮层向左展开并限制内容宽度，避免浮层打开时触发页面横向滚动。
+- 插件能力和启停状态写入 `metadata.annotations`，不要向 Higress `spec` 添加非标准字段；制品安装的 WasmPlugin 与 MicroApp 通过共同的 `metadata.labels["w7.cc/group-name"]` 关联，旧资源可兼容 `w7.cc/plugin-microapp` annotation。
+- 全局配置的前端包菜单竖排，支持创始人端和普通用户端，并固定创始人端在普通用户端上方；规则配置只读取普通用户端菜单并横排展示。
+- MicroApp 当前作用域的 `bindings.menu` 有菜单项时才视为配置了前端包，并按照统一的静态资源与 Wujie/iframe 流程加载；无菜单或加载失败时回退 YAML。
+- 插件停用只影响全局配置和规则的运行状态；插件列表仍允许进入、修改并保存全局配置，修改内容在重新启用后生效。
+- 域名管理“更多”只显示已启用且支持规则配置的插件，不能在域名页面安装或卸载插件。
+- 域名管理“更多”的提示框与插件表格之间保留 12px 间距。
+
 ### 性能规范
 
 **后端性能规范:**

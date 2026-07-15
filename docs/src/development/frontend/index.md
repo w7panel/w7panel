@@ -13,15 +13,17 @@
 | [components.md](./components.md) | 组件文档入口，按类型跳转到各组件专题 |
 | [wujie-events.md](./wujie-events.md) | Wujie 微前端事件参数、回调响应和调用示例 |
 | [microapps.md](./microapps.md) | 微应用容器、Wujie props、token 边界、后端代理和接入流程 |
+| [gateway-plugins.md](./gateway-plugins.md) | Higress WasmPlugin 管理、作用域、MicroApp 配置界面和 YAML 回退 |
 
 ## 使用顺序
 
 1. 新开发页面或改页面流程，先看 [conventions.md](./conventions.md)。
 2. 修改 token、权限、本地缓存或刷新逻辑，更新 [auth-state.md](./auth-state.md)。
 3. 新增或修改微应用容器、props 或接入流程，更新 [microapps.md](./microapps.md)。
-4. 新增或修改公共组件，先从 [components.md](./components.md) 确认类型，再更新对应组件专题。
-5. 新增或修改微应用事件参数或回调，更新 [wujie-events.md](./wujie-events.md)。
-6. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/](../api/) 和前端调用封装。
+4. 修改网关插件、配置作用域或插件 MicroApp 接入时，更新 [gateway-plugins.md](./gateway-plugins.md)。
+5. 新增或修改公共组件，先从 [components.md](./components.md) 确认类型，再更新对应组件专题。
+6. 新增或修改微应用事件参数或回调，更新 [wujie-events.md](./wujie-events.md)。
+7. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/](../api/) 和前端调用封装。
 
 ## 维护规则
 
