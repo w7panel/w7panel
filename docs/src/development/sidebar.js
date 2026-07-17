@@ -41,6 +41,15 @@ exports = module.exports = [
             ]
           },
           { text: '集群指标', link: '/development/api/metrics' },
+          {
+            text: '网关',
+            collapsible: true,
+            items: [
+              { text: '反向代理', link: '/development/frontend/gateway-proxy' },
+              { text: 'AI 代理', link: '/development/frontend/ai-proxy' },
+              { text: '网关插件', link: '/development/frontend/gateway-plugins' },
+            ]
+          },
         ]
       },
       { text: '微应用', link: '/development/api/microapp-static' },

@@ -104,6 +104,15 @@ cd $BASE_DIR/w7panel-server
 go test ./common/service/k8s/permission -run TestFounderFallbackIncludesGatewayPluginPermissions -count=1
 ```
 
+### Higress 插件迁移兼容测试
+
+验证域名白名单读取时优先选择制品资源，并继续兼容旧固定资源名：
+
+```bash
+cd $BASE_DIR/w7panel-server
+go test ./common/service/k8s/higress -run TestPreferredWasmPlugin -count=1
+```
+
 ### agent-browser
 
 用于UI测试的浏览器自动化工具：

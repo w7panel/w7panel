@@ -40,6 +40,8 @@
 | [frontend/auth-state.md](./frontend/auth-state.md) | 前端 token 注入、刷新、本地缓存和权限状态 |
 | [frontend/microapps.md](./frontend/microapps.md) | 微应用容器、Wujie props、token 边界、后端代理和接入流程 |
 | [frontend/gateway-plugins.md](./frontend/gateway-plugins.md) | 网关插件、WasmPlugin 作用域和 MicroApp 配置界面 |
+| [frontend/gateway-proxy.md](./frontend/gateway-proxy.md) | 网关反向代理的 McpBridge、Ingress 和上游同步流程 |
+| [frontend/ai-proxy.md](./frontend/ai-proxy.md) | AI 代理域名、提供者隔离、Key Auth、模型白名单和清理流程 |
 | [frontend/components.md](./frontend/components.md) | 前端组件文档入口，组件明细按类型拆分 |
 | [frontend/wujie-events.md](./frontend/wujie-events.md) | Wujie 微前端事件、参数、回调响应和调用示例 |
 
@@ -52,6 +54,7 @@
 | [performance/backend.md](./performance/backend.md) | 后端性能规范，覆盖文件处理、认证 token、K8s 客户端、缓存、并发和日志 |
 | [performance/frontend.md](./performance/frontend.md) | 前端性能规范，覆盖 API 请求、轮询清理、状态缓存、列表渲染和资源加载 |
 | [CHANNELLOCAL_PERFORMANCE_ANALYSIS.md](./CHANNELLOCAL_PERFORMANCE_ANALYSIS.md) | ChannelLocal 性能分析专题 |
+| [bootstrap-profile-artifact-installation.md](./bootstrap-profile-artifact-installation.md) | BootstrapProfile 与 ArtifactInstallation 预装制品架构、资源定义和运行策略 |
 
 ## 仓库结构
 
@@ -66,6 +69,8 @@ $BASE_DIR/
 │   │   ├── metrics/                 # 指标 API
 │   │   └── zpk/                     # ZPK 应用 API
 │   ├── common/                      # 公共服务、中间件和工具
+│   │   └── service/k8s/bootstrap/   # 预装 Profile 与单制品协调 Controller
+│   ├── k8s/pkg/apis/bootstrap/      # 预装 CRD API 类型
 │   ├── kodata/                      # 后端静态资源、CRD 和内置 Chart
 │   └── install/                     # 安装相关资源
 ├── w7panel-ui/                      # 前端源码，Vue 3 + TypeScript + Arco Design

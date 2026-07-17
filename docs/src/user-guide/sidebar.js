@@ -42,6 +42,7 @@ exports = module.exports = [
             items: [
               { text: '域名管理', link: '/user-guide/domain-management' },
               { text: '反向代理', link: '/user-guide/reverse-proxy' },
+              { text: 'AI 代理', link: '/user-guide/ai-proxy' },
               { text: '网关插件', link: '/user-guide/gateway-plugins' },
               { text: '私有 DNS 解析', link: '/user-guide/private-dns' },
             ]

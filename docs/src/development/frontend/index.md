@@ -14,6 +14,8 @@
 | [wujie-events.md](./wujie-events.md) | Wujie 微前端事件参数、回调响应和调用示例 |
 | [microapps.md](./microapps.md) | 微应用容器、Wujie props、token 边界、后端代理和接入流程 |
 | [gateway-plugins.md](./gateway-plugins.md) | Higress WasmPlugin 管理、作用域、MicroApp 配置界面和 YAML 回退 |
+| [gateway-proxy.md](./gateway-proxy.md) | 网关反向代理的 McpBridge、Ingress、上游和删除一致性 |
+| [ai-proxy.md](./ai-proxy.md) | AI 代理域名、提供者隔离、权重、Key Auth 和模型白名单资源关系 |
 
 ## 使用顺序
 
@@ -21,9 +23,11 @@
 2. 修改 token、权限、本地缓存或刷新逻辑，更新 [auth-state.md](./auth-state.md)。
 3. 新增或修改微应用容器、props 或接入流程，更新 [microapps.md](./microapps.md)。
 4. 修改网关插件、配置作用域或插件 MicroApp 接入时，更新 [gateway-plugins.md](./gateway-plugins.md)。
-5. 新增或修改公共组件，先从 [components.md](./components.md) 确认类型，再更新对应组件专题。
-6. 新增或修改微应用事件参数或回调，更新 [wujie-events.md](./wujie-events.md)。
-7. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/](../api/) 和前端调用封装。
+5. 修改网关反向代理的 McpBridge、Ingress 或域名管理流程时，更新 [gateway-proxy.md](./gateway-proxy.md)。
+6. 修改 AI 代理资源、域名配置或 Higress 插件协议时，更新 [ai-proxy.md](./ai-proxy.md)。
+7. 新增或修改公共组件，先从 [components.md](./components.md) 确认类型，再更新对应组件专题。
+8. 新增或修改微应用事件参数或回调，更新 [wujie-events.md](./wujie-events.md)。
+9. 涉及后端 API 字段、路径或鉴权方式变化时，同步检查 [../api/](../api/) 和前端调用封装。
 
 ## 维护规则
 
