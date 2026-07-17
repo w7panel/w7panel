@@ -27,7 +27,7 @@
 set -e
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 TOKEN="${TOKEN:-$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null || echo "")}"
 WEBDAV_PATH="/k8s/webdav-agent/1/agent"
 CONCURRENT="${CONCURRENT:-10}"

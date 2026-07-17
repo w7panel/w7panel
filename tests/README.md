@@ -46,10 +46,10 @@ bash test-cases/api/webdav-list.sh
 
 ```bash
 # 配置服务地址和Token
-BASE_URL=http://localhost:8080 TOKEN=xxx bash run.sh
+BASE_URL=http://localhost:8000 TOKEN=xxx bash run.sh
 
 # 或直接运行单个测试
-BASE_URL=http://localhost:8080 TOKEN=xxx bash test-cases/api/webdav-list.sh
+BASE_URL=http://localhost:8000 TOKEN=xxx bash test-cases/api/webdav-list.sh
 ```
 
 ## 测试用例
@@ -84,7 +84,7 @@ BASE_URL=http://localhost:8080 TOKEN=xxx bash test-cases/api/webdav-list.sh
 set -e
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 TOKEN="${TOKEN:-xxx}"
 
 # 测试代码
@@ -94,6 +94,15 @@ echo "执行测试..."
 ```
 
 ## 测试工具
+
+### LOCAL_MOCK 鉴权单元测试
+
+验证测试模式只改变 Kubernetes 访问方式，不会绕过面板用户 Token 校验：
+
+```bash
+cd $BASE_DIR/w7panel-server
+go test ./common/middleware -run TestAuthRequiresTokenInLocalMockMode -count=1
+```
 
 ### Go 权限单元测试
 
@@ -118,7 +127,7 @@ go test ./common/service/k8s/higress -run TestPreferredWasmPlugin -count=1
 用于UI测试的浏览器自动化工具：
 
 ```bash
-agent-browser open "http://localhost:8080"
+agent-browser open "http://localhost:8000"
 agent-browser snapshot -i
 agent-browser click @e1
 agent-browser close

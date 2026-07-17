@@ -97,7 +97,7 @@ Authorization: Bearer <user-token>
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/longhorn/need-delete-replica?diskselector=disk-default&nodeid=node-1,node-2' \
+curl 'http://localhost:8000/panel-api/v1/longhorn/need-delete-replica?diskselector=disk-default&nodeid=node-1,node-2' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -164,7 +164,7 @@ curl 'http://localhost:8080/panel-api/v1/longhorn/need-delete-replica?diskselect
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/longhorn/volumes/status' \
+curl 'http://localhost:8000/panel-api/v1/longhorn/volumes/status' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -243,7 +243,7 @@ curl 'http://localhost:8080/panel-api/v1/longhorn/volumes/status' \
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/install?namespace=longhorn-system' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/install?namespace=longhorn-system' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -299,7 +299,7 @@ POST http://longhorn-backend.longhorn-system.svc:9500/v1/volumes/{volumeName}?ac
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/attach' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/attach' \
   -H 'Authorization: Bearer <user-token>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -345,7 +345,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/attach
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/detach' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/detach' \
   -H 'Authorization: Bearer <user-token>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -383,7 +383,7 @@ null
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/cancel-expansion' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/cancel-expansion' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -414,7 +414,7 @@ null
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/trim-filesystem' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/trim-filesystem' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -448,7 +448,7 @@ null
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/snapshot-delete' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/snapshot-delete' \
   -H 'Authorization: Bearer <user-token>' \
   -H 'Content-Type: application/json' \
   -d '{"name":"snapshot-001"}'
@@ -481,7 +481,7 @@ null
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/longhorn/volumes/pvc-xxx/snapshot-purge' \
+curl -X POST 'http://localhost:8000/panel-api/v1/longhorn/volumes/pvc-xxx/snapshot-purge' \
   -H 'Authorization: Bearer <user-token>'
 ```
 

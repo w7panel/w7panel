@@ -8,7 +8,7 @@
 #    禁止直接开始测试，必须先规划测试路径！
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 USERNAME="${USERNAME:-admin}"
 PASSWORD="${PASSWORD:-123456}"
 TOKEN=""

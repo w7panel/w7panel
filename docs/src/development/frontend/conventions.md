@@ -159,7 +159,6 @@ window.$wujie.bus.$on('eventName', handler);
 | 位置 | 说明 |
 |------|------|
 | `src/components/wujie-modals.vue` | 微应用通用弹窗、文件、日志、构建、域名、OIDC、登录切换等事件 |
-| `src/views/app/gpustack/index.vue` | GPUStack 专用事件 |
 
 ## 状态和缓存
 

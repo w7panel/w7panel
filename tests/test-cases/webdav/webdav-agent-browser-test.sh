@@ -27,7 +27,7 @@ echo "=== 测试1: API 接口测试 ==="
 
 # 测试 WebDAV PROPFIND
 echo "1.1 PROPFIND /etc/"
-RESPONSE=$(curl -s -m 10 -X PROPFIND "http://localhost:8080/k8s/webdav-agent/1/agent/etc/" \
+RESPONSE=$(curl -s -m 10 -X PROPFIND "http://localhost:8000/k8s/webdav-agent/1/agent/etc/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Depth: 1" \
     -H "Content-Type: text/xml; charset=utf-8")
@@ -40,7 +40,7 @@ fi
 
 # 测试读取文件
 echo "1.2 GET /etc/passwd"
-RESPONSE=$(curl -s -m 10 "http://localhost:8080/k8s/webdav-agent/1/agent/etc/passwd" \
+RESPONSE=$(curl -s -m 10 "http://localhost:8000/k8s/webdav-agent/1/agent/etc/passwd" \
     -H "Authorization: Bearer $TOKEN")
 if echo "$RESPONSE" | grep -q "root:"; then
     echo "    ✅ 成功读取"
@@ -51,7 +51,7 @@ fi
 # 测试特殊目录
 echo "1.3 PROPFIND /proc/ (特殊目录)"
 START=$(date +%s%3N)
-RESPONSE=$(curl -s -m 10 -X PROPFIND "http://localhost:8080/k8s/webdav-agent/1/agent/proc/" \
+RESPONSE=$(curl -s -m 10 -X PROPFIND "http://localhost:8000/k8s/webdav-agent/1/agent/proc/" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Depth: 1" \
     -H "Content-Type: text/xml; charset=utf-8")
@@ -69,7 +69,7 @@ fi
 
 # 测试读取特殊文件
 echo "1.4 GET /proc/version (特殊文件)"
-RESPONSE=$(curl -s -m 10 "http://localhost:8080/k8s/webdav-agent/1/agent/proc/version" \
+RESPONSE=$(curl -s -m 10 "http://localhost:8000/k8s/webdav-agent/1/agent/proc/version" \
     -H "Authorization: Bearer $TOKEN")
 if echo "$RESPONSE" | grep -q "Linux"; then
     echo "    ✅ 成功: ${RESPONSE:0:50}..."
@@ -79,7 +79,7 @@ fi
 
 # 测试符号链接
 echo "1.5 GET /etc/mtab (符号链接)"
-RESPONSE=$(curl -s -m 10 "http://localhost:8080/k8s/webdav-agent/1/agent/etc/mtab" \
+RESPONSE=$(curl -s -m 10 "http://localhost:8000/k8s/webdav-agent/1/agent/etc/mtab" \
     -H "Authorization: Bearer $TOKEN")
 if echo "$RESPONSE" | grep -q "overlay"; then
     echo "    ✅ 符号链接解析成功"
@@ -93,21 +93,21 @@ echo "=== 测试2: 文件操作测试 ==="
 
 # 创建测试目录
 echo "2.1 创建测试目录"
-curl -s -m 10 -X MKCOL "http://localhost:8080/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/" \
+curl -s -m 10 -X MKCOL "http://localhost:8000/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/" \
     -H "Authorization: Bearer $TOKEN" > /dev/null
 echo "    ✅ 目录已创建"
 
 # 写入文件
 echo "2.2 写入测试文件"
 TEST_CONTENT="Hello WebDAV UI Test - $(date)"
-curl -s -m 10 -X PUT "http://localhost:8080/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
+curl -s -m 10 -X PUT "http://localhost:8000/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
     -H "Authorization: Bearer $TOKEN" \
     -H "Content-Type: text/plain" \
     -d "$TEST_CONTENT" > /dev/null
 echo "    ✅ 文件已写入"
 
 # 读取验证
-RESPONSE=$(curl -s -m 10 "http://localhost:8080/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
+RESPONSE=$(curl -s -m 10 "http://localhost:8000/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
     -H "Authorization: Bearer $TOKEN")
 if [ "$RESPONSE" = "$TEST_CONTENT" ]; then
     echo "2.3 读取验证: ✅ 内容一致"
@@ -116,9 +116,9 @@ else
 fi
 
 # 清理
-curl -s -m 10 -X DELETE "http://localhost:8080/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
+curl -s -m 10 -X DELETE "http://localhost:8000/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/test.txt" \
     -H "Authorization: Bearer $TOKEN" > /dev/null
-curl -s -m 10 -X DELETE "http://localhost:8080/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/" \
+curl -s -m 10 -X DELETE "http://localhost:8000/k8s/webdav-agent/1/agent/tmp/webdav-ui-test/" \
     -H "Authorization: Bearer $TOKEN" > /dev/null
 echo "2.4 清理测试数据: ✅"
 
@@ -127,7 +127,7 @@ echo "=== 测试3: 边界测试 ==="
 
 echo "3.1 读取不存在的文件"
 HTTP_CODE=$(curl -s -m 10 -o /dev/null -w "%{http_code}" \
-    "http://localhost:8080/k8s/webdav-agent/1/agent/etc/nonexistent-file-12345" \
+    "http://localhost:8000/k8s/webdav-agent/1/agent/etc/nonexistent-file-12345" \
     -H "Authorization: Bearer $TOKEN")
 if [ "$HTTP_CODE" = "404" ]; then
     echo "    ✅ 正确返回 404"
@@ -140,7 +140,7 @@ echo "=== 测试4: 性能测试 ==="
 
 START=$(date +%s%3N)
 for i in {1..10}; do
-    curl -s -m 10 "http://localhost:8080/k8s/webdav-agent/1/agent/etc/passwd" \
+    curl -s -m 10 "http://localhost:8000/k8s/webdav-agent/1/agent/etc/passwd" \
         -H "Authorization: Bearer $TOKEN" > /dev/null
 done
 END=$(date +%s%3N)

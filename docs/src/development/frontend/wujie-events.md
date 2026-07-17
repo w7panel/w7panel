@@ -570,156 +570,13 @@ window.$wujie.bus.$emit('changeLogin', {
 });
 ```
 
-## GPUStack 专用事件
-
-注册位置：`w7panel-ui/src/views/app/gpustack/index.vue`
-
-这些事件仅在 GPUStack 页面内有效，用于微应用管理 GPU worker。
-
-### `createApp`
-
-功能：创建 GPUStack worker。
-
-参数：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `cpu` | string/number | 是 | CPU 数值 |
-| `cpuDw` | string | 否 | CPU 单位，例如 `m` 或空字符串 |
-| `memory` | string/number | 是 | 内存，单位固定拼接为 `Mi` |
-| `gpuCompute` | string/number | 否 | GPU 算力 |
-| `gpuNumber` | string/number | 否 | GPU 数量 |
-| `gpuVm` | string/number | 否 | GPU 显存 |
-| `runtimeClassName` | string | 否 | RuntimeClass 名称 |
-
-响应：无直接回调；成功后面板提示“操作成功”并触发 `podList` 下行事件。
-
-```ts
-window.$wujie.bus.$emit('createApp', {
-  cpu: 2,
-  cpuDw: '',
-  memory: 4096,
-  gpuNumber: 1,
-  gpuCompute: 100,
-  gpuVm: 8192,
-});
-```
-
-### `editApp`
-
-功能：修改 GPUStack worker StatefulSet 的资源限制和请求。
-
-参数：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `name` | string | 是 | StatefulSet 名称 |
-| `cpu` | string/number | 是 | CPU 数值 |
-| `cpuDw` | string | 否 | CPU 单位 |
-| `memory` | string/number | 是 | 内存 Mi |
-| `gpuCompute` | string/number | 否 | GPU 算力 |
-| `gpuNumber` | string/number | 否 | GPU 数量 |
-| `gpuVm` | string/number | 否 | GPU 显存 |
-
-响应：无直接回调；成功后触发 `podList` 下行事件。
-
-```ts
-window.$wujie.bus.$emit('editApp', {
-  name: 'gpustack-worker-a',
-  cpu: 4,
-  memory: 8192,
-  gpuNumber: 1,
-});
-```
-
-### `deleteApp`
-
-功能：删除 GPUStack worker StatefulSet。
-
-参数：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `name` | string | 是 | StatefulSet 名称 |
-
-响应：无直接回调；成功后触发 `podList` 下行事件。
-
-```ts
-window.$wujie.bus.$emit('deleteApp', { name: 'gpustack-worker-a' });
-```
-
-### `getPodList`
-
-功能：请求面板重新查询并下发 GPUStack worker Pod 列表。
-
-参数：无。
-
-响应：通过下行事件 `podList` 返回。
-
-```ts
-window.$wujie.bus.$emit('getPodList');
-
-window.$wujie.bus.$on('podList', (list) => {
-  // list 为 worker pod 列表
-});
-```
-
-`podList` 元素主要字段：
-
-| 字段 | 说明 |
-|------|------|
-| `name` | Pod 名称 |
-| `hostIp` | 节点 IP |
-| `statusTxt` | Pod phase |
-| `ip` | Pod IP 列表字符串 |
-| `workerName` | worker StatefulSet 名称 |
-| `replicas` | 副本数 |
-| `form` | CPU、内存、GPU 等资源表单数据 |
-
-### `changeMenu`
-
-功能：同步 GPUStack 当前菜单。
-
-参数：
-
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `v` | string | 菜单 key 或路径 |
-
-响应：无。
-
-```ts
-window.$wujie.bus.$emit('changeMenu', '/workers');
-```
-
-### `changeReplicas`
-
-功能：修改 GPUStack worker StatefulSet 副本数。
-
-参数：
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `name` | string | 是 | StatefulSet 名称 |
-| `replicas` | number | 是 | 目标副本数 |
-
-响应：无直接回调；成功后面板提示“操作成功”。
-
-```ts
-window.$wujie.bus.$emit('changeReplicas', {
-  name: 'gpustack-worker-a',
-  replicas: 2,
-});
-```
-
 ## 面板下发给微应用的事件
 
 这些事件不是通过 `registerWujieEvent()` 注册，而是面板通过 Wujie bus 主动下发给微应用。微应用侧使用 `window.$wujie.bus.$on()` 监听。
 
 | 事件 | 触发位置 | 参数 | 说明 |
 |------|----------|------|------|
-| `routeChange` | `topapp/micro-container.vue`、`app/apps/detail.vue`、`gpustack/index.vue` | string | 面板菜单或路由变化 |
-| `podList` | `gpustack/index.vue` | array | GPUStack worker Pod 列表 |
+| `routeChange` | `topapp/micro-container.vue`、`app/apps/detail.vue` | string | 面板菜单或路由变化 |
 
 监听示例：
 
@@ -728,9 +585,6 @@ window.$wujie.bus.$on('routeChange', (path: string) => {
   // 微应用内部切换路由
 });
 
-window.$wujie.bus.$on('podList', (list) => {
-  // 更新 GPUStack worker 列表
-});
 ```
 
 ## 新增事件规范

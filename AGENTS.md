@@ -250,7 +250,7 @@ export BASE_DIR=/home/wwwroot/w7panel-dev
 | 变量名 | 默认值 | 说明 |
 |--------|--------|------|
 | `BASE_DIR` | . | 项目根目录 |
-| `W7PANEL_HTTP_SERVER_PORT` | 8080 | HTTP端口 |
+| `W7PANEL_HTTP_SERVER_PORT` | 8000 | HTTP端口 |
 | `KO_DATA_PATH` | ./kodata | 静态资源路径（相对于可执行文件目录） |
 | `LOCAL_MOCK` | 自动检测 | 开发模式：true；生产模式：false |
 | `CAPTCHA_ENABLED` | false | 验证码开关，开发测试时设为 false 跳过滑块验证 |
@@ -653,10 +653,6 @@ Body: {"path": "/path/file", "mode": "755"}
 
 POST /panel-api/v1/files/permission-agent/{pid}/chown
 Body: {"path": "/path/file", "owner": "root"}
-
-# 子进程权限修改
-POST /panel-api/v1/files/permission-agent/{pid}/subagent/{subpid}/chmod
-POST /panel-api/v1/files/permission-agent/{pid}/subagent/{subpid}/chown
 ```
 
 ### WebDAV 性能限制
@@ -827,7 +823,7 @@ GET  /panel-api/v1/auth/userinfo
 export TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
 
 # 方式2: 从 /panel-api/v1/pid 接口获取（包含 webdavToken）
-RESPONSE=$(curl -s -G "http://localhost:8080/panel-api/v1/pid" \
+RESPONSE=$(curl -s -G "http://localhost:8000/panel-api/v1/pid" \
   --data-urlencode "namespace=default" \
   --data-urlencode "HostIp=10.0.0.206" \
   --data-urlencode "containerName=w7-python" \

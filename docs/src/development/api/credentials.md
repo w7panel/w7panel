@@ -4,7 +4,7 @@
 
 ## 整体使用方式
 
-W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默认规则是：前端或普通业务调用使用面板用户 token；容器文件操作使用 `webdavToken`；后端访问 Kubernetes 使用 ServiceAccount 或 `LOCAL_MOCK` 注入的 kubeconfig token；微应用和第三方系统按各自协议使用独立凭据。
+W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默认规则是：前端或普通业务调用使用面板用户 token；容器文件操作使用 `webdavToken`；后端建立 Kubernetes 客户端时使用 ServiceAccount 或本地 kubeconfig；微应用和第三方系统按各自协议使用独立凭据。
 
 ### 基本流程
 
@@ -24,9 +24,8 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 | K8s 代理和面板聚合接口 | 用户 token | 前端登录态或微应用 `paneltoken` | `Authorization: Bearer {user-token}` |
 | 容器文件、WebDAV、压缩、权限修改 | webdavToken | 容器 PID/文件入口相关接口返回 | `Authorization: Bearer {webdavToken}` |
 | 后端服务访问 Kubernetes | ServiceAccount token | Pod 内自动挂载 | 后端内部使用，不暴露给前端 |
-| `LOCAL_MOCK=true` 开发测试 | kubeconfig token | `KUBECONFIG` 或默认 kubeconfig 路径 | 中间件注入 `k8s_token` |
+| `LOCAL_MOCK=true` 开发测试 | 面板用户 token | 登录接口或 kubeconfig 中可用于认证的用户 token | `Authorization: Bearer {token}` |
 | Console 签名登录 | ConsoleSignature | Console 请求签名 | 签名请求头/参数 |
-| 服务端 Hawk 签名调用 | Hawk ApiClient | Kubernetes `ApiClient` 资源 | `Authorization: Hawk ...` |
 | Console OAuth 登录/绑定 | Console OAuth code | `/auth/console/oauth` 跳转后回调 | query/form `code` |
 | 微应用自身后端 | 微应用 Basic 认证 | MicroApp/ZPK 配置 | `Authorization: Basic ...` |
 | OIDC 第三方 Client | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer {oidc-token}` |
@@ -95,7 +94,7 @@ TokenReview 失败时 `msg` 后会拼接具体错误信息。
 | 用户初始化与注册 | 初始化用户、注册用户和初始化状态判断 |
 | 密码管理 | 重置密码和修改当前用户密码 |
 | Console 凭据 | Console OAuth、绑定、注册、证书、代理和第三方 CD token |
-| LOCAL_MOCK | 开发测试模式下 kubeconfig token 注入和安全边界 |
+| LOCAL_MOCK | 开发测试模式的 Kubernetes/Agent 访问差异和认证边界 |
 | 公开接口和微应用凭据 | 公开 noauth 接口说明、Wujie props 中各类 token 边界 |
 
 ## 凭据类型
@@ -105,10 +104,9 @@ TokenReview 失败时 `msg` 后会拼接具体错误信息。
 | 用户 token | `/panel-api/v1/login`、`/panel-api/v1/auth/refresh-token2`、浏览器 `w7panel-token` | `Authorization: Bearer {token}` | 面板业务 API、K8s 代理、文件管理、应用管理 | 多数接口的默认凭据 |
 | refresh token | 登录接口返回，浏览器保存为 `w7panel-refresh-token` | form `refreshToken` | 刷新用户 token | 只用于刷新登录态，不用于普通业务 API |
 | ServiceAccount token | Pod 内 `/var/run/secrets/kubernetes.io/serviceaccount/token` | 后端内部使用 | 生产环境服务访问 Kubernetes API | 不应暴露给前端 |
-| kubeconfig token | `KUBECONFIG` 指向的 kubeconfig | `LOCAL_MOCK` 中间件注入 `k8s_token` | `LOCAL_MOCK=true` 开发测试 | 用于本地模式模拟 K8s token |
+| kubeconfig | `KUBECONFIG` 指向的文件 | 后端本地读取 | `LOCAL_MOCK=true` 开发测试 | 用于建立本地 Kubernetes 客户端，不替代 API Bearer token |
 | webdavToken | `/panel-api/v1/pid` 返回 | `Authorization: Bearer {webdavToken}` | WebDAV、压缩、权限修改、文件编辑器 | 用于目标容器文件系统访问，字段来源见 [container-files.md](container-files.md) |
 | ConsoleSignature | Console 签名中间件 | 签名请求头/参数 | `/panel-api/v1/auth/login` | 用于控制台签名登录 |
-| Hawk ApiClient | Kubernetes `ApiClient` 资源 | `Authorization: Hawk id="...", mac="...", nonce="...", ts="..."` | 显式接入 `middleware.Hawk` 的服务端接口 | 详见 [hawk.md](hawk.md) |
 | Console 第三方 CD token | `/panel-api/v1/auth/console/info` | 微应用 props `w7PanelToken` | 微应用、制品库、第三方持续交付 | 不等同于面板用户 token |
 | 微应用 Basic 认证 | MicroApp/ZPK 配置中的 `username/password` | `Authorization: Basic ...` | 微应用自身后端 | 不用于面板 API |
 | OIDC access token | `/panel-api/v1/oidc/token` | `Authorization: Bearer {oidc-token}` | OIDC `/userinfo` | 只能按 OIDC 协议获取用户信息 |
@@ -160,7 +158,7 @@ Authorization: Bearer <getToken()>
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/login' \
+curl -X POST 'http://localhost:8000/panel-api/v1/login' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'username=admin' \
   --data-urlencode 'password=123456'
@@ -224,7 +222,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/login' \
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/auth/refresh-token2' \
+curl -X POST 'http://localhost:8000/panel-api/v1/auth/refresh-token2' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'refreshToken=refresh-token-value'
 ```
@@ -254,7 +252,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/auth/refresh-token2' \
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/auth/userinfo' \
+curl 'http://localhost:8000/panel-api/v1/auth/userinfo' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -430,7 +428,7 @@ JSON 响应示例：
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&policyName=default'
+curl 'http://localhost:8000/panel-api/v1/auth/console/login?code=<oauth-code>&policyName=default'
 ```
 
 ### GET `/panel-api/v1/auth/console/bind`
@@ -578,33 +576,13 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 "success"
 ```
 
-### POST `/panel-api/v1/auth/console/thirdparty-cd-token`
-
-功能：预留的第三方 CD token 接口。
-
-当前实现为空，controller 未写入响应体。前端或微应用不要依赖该接口获取 token，应优先使用 `/panel-api/v1/auth/console/info` 返回的 `thirdparty_cd_token`。
-
 ### ANY `/panel-api/v1/auth/console/proxy/*path`
 
 功能：代理到 Console SDK。
 
-认证：`middleware.NewAuth("founder")`，仅创始人/高权限场景使用。
+认证：需要用户 Bearer token。当前路由使用通用 `middleware.Auth`，没有额外的 Founder 限制。
 
 请求参数：透传原始 method、path、query、body 和 header。
-
-响应参数：透传 Console 返回。
-
-### GET `/panel-api/v1/auth/console/code/:code`
-
-功能：把优惠码请求代理到 Console 第三方 CD SDK。
-
-认证：`Authorization: Bearer {user-token}`
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `code` | path | 是 | string | 优惠码 |
 
 响应参数：透传 Console 返回。
 
@@ -632,31 +610,16 @@ curl 'http://localhost:8080/panel-api/v1/auth/console/login?code=<oauth-code>&po
 
 ## LOCAL_MOCK 行为
 
-`LOCAL_MOCK=true` 或 `LOCAL_MOCK=1` 时，`middleware.Auth` 会绕过 TokenReview，并把 kubeconfig token 注入到请求上下文：
-
-```go
-ctx.Set("k8s_token", token)
-```
-
-token 读取顺序：
-
-| 优先级 | 路径 |
-|--------|------|
-| 1 | `$KUBECONFIG` 环境变量指定文件 |
-| 2 | `./kubeconfig.yaml` |
-| 3 | `./config/kubeconfig.yaml` |
-| 4 | `./w7panel/kubeconfig.yaml` |
-| 5 | `filepath.Join(filepath.Dir(KO_DATA_PATH), "kubeconfig.yaml")` |
-| 6 | 固定回退值 `local-mock-token` |
+`LOCAL_MOCK=true` 或 `LOCAL_MOCK=1` 只改变本地 Kubernetes 客户端和 Agent/rootfs 访问方式。`middleware.Auth` 与生产模式一样读取并校验请求中的 Bearer token，校验成功后才把该 token 写入 `k8s_token` 请求上下文。
 
 注意事项：
 
 | 项 | 说明 |
 |----|------|
-| 用户身份 | `LOCAL_MOCK` 分支只设置 `k8s_token`，不设置 `username` |
+| 请求认证 | 所有受保护接口仍需 `Authorization: Bearer {token}` |
+| KUBECONFIG | 用于本地 Kubernetes 客户端连接，不会自动成为当前请求的用户身份 |
 | 使用范围 | 仅用于本地开发测试，默认部署测试使用 `LOCAL_MOCK=true` |
-| 安全边界 | 生产接口不要依赖 `LOCAL_MOCK` 绕过真实用户鉴权 |
-| 文件接口 | `LOCAL_MOCK` 只改变 Agent/文件访问路径，不改变前端应携带 token 的约定 |
+| 文件接口 | 只改变 Agent/文件访问路径，不改变前端携带 token 的约定 |
 
 ## 公开接口
 

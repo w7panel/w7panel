@@ -33,7 +33,6 @@
 | 通用应用组微应用 | `w7panel-ui/src/views/topapp/micro-container.vue` | 启动 `appmicro`，同时挂载 `WujieModals` |
 | 应用详情微应用 | `w7panel-ui/src/views/app/apps/detail.vue` | 应用详情内嵌微应用 |
 | 应用商店 ZPK 页面 | `w7panel-ui/src/views/app/store/store-zpk.vue` | 应用商店页面内嵌微应用 |
-| GPUStack | `w7panel-ui/src/views/app/gpustack/index.vue` | GPUStack 专用微应用和 worker 管理事件 |
 
 ## 常见 props
 

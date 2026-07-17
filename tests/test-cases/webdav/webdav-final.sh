@@ -15,7 +15,7 @@ LOCAL_MOCK=true KO_DATA_PATH=$BASE_DIR/w7panel/kodata ./w7panel-offline server:s
 sleep 4
 
 TOKEN="test"
-WEBDAV_URL="http://localhost:8080/k8s/webdav-agent/1/agent"
+WEBDAV_URL="http://localhost:8000/k8s/webdav-agent/1/agent"
 
 echo ""
 echo "=== 测试 1: PROPFIND /proc 返回标准 XML ==="

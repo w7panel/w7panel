@@ -20,7 +20,7 @@ LOCAL_MOCK=true KO_DATA_PATH=$BASE_DIR/w7panel/kodata ./w7panel-offline server:s
 sleep 3
 
 # 检查服务
-curl -s http://localhost:8080/ > /dev/null || {
+curl -s http://localhost:8000/ > /dev/null || {
     echo "❌ 服务启动失败"
     cat /tmp/w7panel.log | tail -20
     exit 1
@@ -28,7 +28,7 @@ curl -s http://localhost:8080/ > /dev/null || {
 echo "✅ 服务启动成功"
 
 TOKEN="test"
-WEBDAV_URL="http://localhost:8080/k8s/webdav-agent/1/agent"
+WEBDAV_URL="http://localhost:8000/k8s/webdav-agent/1/agent"
 
 echo ""
 echo "=== 测试 1: PROPFIND 普通目录（返回 XML）==="

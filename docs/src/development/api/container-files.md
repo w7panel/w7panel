@@ -36,7 +36,7 @@
 
 ### 鉴权
 
-除 `GET /panel-api/v1/files/webdav-test/*path` 外，本文接口均需要用户 token：
+本文接口均需要用户 token：
 
 ```http
 Authorization: Bearer <token>
@@ -147,17 +147,7 @@ Authorization: Bearer <webdavToken>
 }
 ```
 
-子进程响应中的 URL 会包含 `/subagent/{subPid}`：
-
-```json
-{
-  "pid": "12345",
-  "subPid": "67890",
-  "webdavUrl": "/panel-api/v1/10.0.0.10:8000/proxy/panel-api/v1/files/webdav-agent/12345/subagent/67890/agent",
-  "compressUrl": "/panel-api/v1/10.0.0.10:8000/proxy/panel-api/v1/files/compress-agent/12345/subagent/67890",
-  "permissionUrl": "/panel-api/v1/10.0.0.10:8000/proxy/panel-api/v1/files/permission-agent/12345/subagent/67890"
-}
-```
+当前 `/pid` 不生成 `/subagent/{subPid}` 形式的访问 URL，`subPid` 响应字段通常为空。
 
 ## WebDAV 接口
 
@@ -166,8 +156,6 @@ Authorization: Bearer <webdavToken>
 | 方法 | 路径 | 鉴权 | 说明 |
 |------|------|------|------|
 | 多方法 | `/panel-api/v1/files/webdav-agent/:pid/agent/*path` | 需要 token | 访问主进程 rootfs |
-| 多方法 | `/panel-api/v1/files/webdav-agent/:pid/subagent/:subpid/agent/*path` | 需要 token | 访问子进程 rootfs |
-| 多方法 | `/panel-api/v1/files/webdav-test/*path` | 无鉴权 | 测试入口，映射宿主 `/` |
 
 注册的多方法包括：`PROPFIND`、`PROPPATCH`、`MKCOL`、`COPY`、`MOVE`、`LOCK`、`UNLOCK`、`LINK`、`UNLINK`、`GET`、`PUT`、`DELETE`、`HEAD`、`OPTIONS`、`PATCH`、`POST`。
 
@@ -176,7 +164,6 @@ Authorization: Bearer <webdavToken>
 | 参数 | 位置 | 必填 | 类型 | 说明 |
 |------|------|------|------|------|
 | `pid` | path | 是 | string | 主进程 PID |
-| `subpid` | path | 子进程接口必填 | string | 子进程 PID |
 | `path` | path | 是 | string | 容器内路径；空路径按 `/` 处理 |
 | body | body | `PUT` 时必填 | bytes | 写入文件内容 |
 
@@ -418,21 +405,6 @@ Content-Type: application/json
 | `namespace` | query/form/body | 是 | string | Pod namespace |
 | `upload` | query/form/body | 是 | string | `1` 表示从 `s3.base_dir/from` 上传到 `podName:to`；其它值表示从 `podName:from` 下载到 `s3.base_dir/to` |
 | `podName` | query/form/body | 是 | string | Pod 名称 |
-
-成功响应：JSON 字符串 `"success"`。
-
-### POST `/panel-api/v1/files/mvtopod`
-
-功能：将系统临时目录中的文件移动到目标容器 rootfs。
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `pid` | query/form/body | 是 | string | 主进程 PID |
-| `subpid` | query/form/body | 否 | string | 子进程 PID；`0` 会被当作空值 |
-| `fromPath` | query/form/body | 是 | string | 相对 `os.TempDir()` 的源路径 |
-| `toPath` | query/form/body | 是 | string | 容器内目标路径 |
 
 成功响应：JSON 字符串 `"success"`。
 

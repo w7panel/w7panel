@@ -26,7 +26,7 @@ echo "=========================================="
 # 检查服务
 echo ""
 echo "[1] 服务状态..."
-if curl -s http://localhost:8080/ | head -1 | grep -q "DOCTYPE"; then
+if curl -s http://localhost:8000/ | head -1 | grep -q "DOCTYPE"; then
     echo "✓ 正常"; ((PASS++))
 else
     echo "✗ 未启动，请先启动服务"; ((FAIL++)); exit 1
@@ -35,7 +35,7 @@ fi
 # 获取 webdavUrl (从 /k8s/pid 接口返回)
 echo ""
 echo "[2] 获取 webdavUrl..."
-PID_RESP=$(curl -s -G "http://localhost:8080/k8s/pid" \
+PID_RESP=$(curl -s -G "http://localhost:8000/k8s/pid" \
   -d "namespace=default" \
   -d "HostIp=10.0.0.206" \
   -d "containerName=w7-python" \
@@ -62,7 +62,7 @@ TEST_FILE_RENAME="$TEST_DIR/renamed.txt"
 
 echo ""
 echo "[3] 创建测试目录 (MKCOL)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MKCOL "http://localhost:8080${WEBDAV_URL}${TEST_DIR}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MKCOL "http://localhost:8000${WEBDAV_URL}${TEST_DIR}" \
   -H "Authorization: Bearer $TOKEN")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "200" ]]; then
     echo "✓ 创建成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -72,7 +72,7 @@ fi
 
 echo ""
 echo "[4] 创建测试文件 (PUT)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://localhost:8080${WEBDAV_URL}${TEST_FILE}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "http://localhost:8000${WEBDAV_URL}${TEST_FILE}" \
   -H "Authorization: Bearer $TOKEN" \
   -d "Hello WebDAV Test")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "200" || "$HTTP_CODE" == "204" ]]; then
@@ -83,9 +83,9 @@ fi
 
 echo ""
 echo "[5] 重命名文件 (MOVE)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MOVE "http://localhost:8080${WEBDAV_URL}${TEST_FILE}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MOVE "http://localhost:8000${WEBDAV_URL}${TEST_FILE}" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Destination: http://localhost:8080${WEBDAV_URL}${TEST_FILE_RENAME}" \
+  -H "Destination: http://localhost:8000${WEBDAV_URL}${TEST_FILE_RENAME}" \
   -H "Overwrite: T")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "204" ]]; then
     echo "✓ 重命名成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -95,7 +95,7 @@ fi
 
 echo ""
 echo "[6] 创建子目录..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MKCOL "http://localhost:8080${WEBDAV_URL}${TEST_DIR}/subdir" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MKCOL "http://localhost:8000${WEBDAV_URL}${TEST_DIR}/subdir" \
   -H "Authorization: Bearer $TOKEN")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "200" ]]; then
     echo "✓ 创建成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -105,9 +105,9 @@ fi
 
 echo ""
 echo "[7] 重命名文件夹 (MOVE)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MOVE "http://localhost:8080${WEBDAV_URL}${TEST_DIR}/subdir" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MOVE "http://localhost:8000${WEBDAV_URL}${TEST_DIR}/subdir" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Destination: http://localhost:8080${WEBDAV_URL}${TEST_DIR_RENAME}" \
+  -H "Destination: http://localhost:8000${WEBDAV_URL}${TEST_DIR_RENAME}" \
   -H "Overwrite: T")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "204" ]]; then
     echo "✓ 重命名成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -119,9 +119,9 @@ fi
 
 echo ""
 echo "[8] 复制文件 (COPY)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X COPY "http://localhost:8080${WEBDAV_URL}${TEST_FILE_RENAME}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X COPY "http://localhost:8000${WEBDAV_URL}${TEST_FILE_RENAME}" \
   -H "Authorization: Bearer $TOKEN" \
-  -H "Destination: http://localhost:8080${WEBDAV_URL}${TEST_DIR}/copy.txt" \
+  -H "Destination: http://localhost:8000${WEBDAV_URL}${TEST_DIR}/copy.txt" \
   -H "Overwrite: T")
 if [[ "$HTTP_CODE" == "201" || "$HTTP_CODE" == "204" ]]; then
     echo "✓ 复制成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -131,7 +131,7 @@ fi
 
 echo ""
 echo "[9] 删除文件 (DELETE)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "http://localhost:8080${WEBDAV_URL}${TEST_FILE_RENAME}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "http://localhost:8000${WEBDAV_URL}${TEST_FILE_RENAME}" \
   -H "Authorization: Bearer $TOKEN")
 if [[ "$HTTP_CODE" == "204" || "$HTTP_CODE" == "200" ]]; then
     echo "✓ 删除成功 (HTTP $HTTP_CODE)"; ((PASS++))
@@ -141,7 +141,7 @@ fi
 
 echo ""
 echo "[10] 删除目录 (DELETE)..."
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "http://localhost:8080${WEBDAV_URL}${TEST_DIR}" \
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE "http://localhost:8000${WEBDAV_URL}${TEST_DIR}" \
   -H "Authorization: Bearer $TOKEN")
 if [[ "$HTTP_CODE" == "204" || "$HTTP_CODE" == "200" ]]; then
     echo "✓ 删除成功 (HTTP $HTTP_CODE)"; ((PASS++))

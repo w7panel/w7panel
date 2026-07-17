@@ -9,13 +9,12 @@
 | 文档 | 说明 |
 |------|------|
 | [credentials.md](./credentials.md) | API 调用凭据、用户 token、webdavToken、微应用 props、OIDC token 和 LOCAL_MOCK 行为 |
-| [hawk.md](./hawk.md) | Hawk 服务端签名认证、ApiClient 凭据、客户端签名示例和接入注意事项 |
 | [cluster-ops.md](./cluster-ops.md) | 集群资源、Helm、YAML、终端、集群侧代理、DNS、GPU 和诊断类接口 |
 | [longhorn.md](./longhorn.md) | Longhorn 安装、卷状态、副本筛选、attach/detach、快照和文件系统操作 |
 | [container-files.md](./container-files.md) | 容器文件管理、WebDAV、压缩解压、权限修改、分片上传和文件编辑器调用流程 |
 | [container-images.md](./container-images.md) | Registry v2、containerd 镜像操作、容器提交镜像 |
 | [microapp-static.md](./microapp-static.md) | 微应用信息、后端代理、前端静态资源状态、下载和回源代理 |
-| [oauth-oidc.md](./oauth-oidc.md) | OAuth、OIDC Provider、Client 管理、授权码、Console OAuth 和微应用获取 code |
+| [oauth-oidc.md](./oauth-oidc.md) | OAuth、OIDC Provider、OIDCClient CRD、Console OAuth 和微应用获取 code |
 | [metrics.md](./metrics.md) | CPU、内存、磁盘使用量和 metrics 组件安装状态 |
 | [k3k.md](./k3k.md) | 云主机用户、CKM/CVM、同步、菜单、套餐和订单入口 |
 | [zpk.md](./zpk.md) | ZPK 配置、列表、安装、升级、构建和应用管理 |

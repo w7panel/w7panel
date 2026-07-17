@@ -61,7 +61,7 @@ Authorization: Bearer <token>
 
 约定：
 
-- 当前 `Auth` 中间件在 `LOCAL_MOCK=true` 时会从 kubeconfig 或默认值填充 `k8s_token`，用于本地开发测试；新增生产接口不要依赖该行为绕过用户鉴权。
+- `LOCAL_MOCK=true` 只切换本地 Kubernetes 和 Agent 访问方式；`Auth` 中间件仍校验请求中的 Bearer token。
 - 公开接口必须使用 `/panel-api/v1/noauth/*` 前缀，并只返回业务允许公开的字段。
 - 需要调用 K8s API 的接口必须明确 token 来源：用户 token、ServiceAccount token、webdavToken 或自定义 token。
 - 不在日志、URL、响应或前端可见字段中输出完整 token、密码、密钥、OIDC code、registry password。
@@ -158,7 +158,7 @@ slog.Warn("get pod failed", "namespace", namespace, "pod", podName, "error", err
 约定：
 
 - `/proc`、`/sys`、`/dev`、device、fifo、socket 等特殊文件要单独处理。
-- `LOCAL_MOCK=true` 时使用本地 `/host/proc` 路径，并依赖开发模式下的 `k8s_token` 注入；生产模式必须校验真实用户 token 或 ServiceAccount。
+- `LOCAL_MOCK=true` 时文件 Agent 使用本地 `/host/proc` 路径，但接口仍必须校验真实用户 token。
 - WebDAV 标准方法保持协议兼容，不用 JSON 替代 XML。
 - 压缩和解压接口必须校验源路径、目标路径和格式。
 

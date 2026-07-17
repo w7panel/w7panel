@@ -350,13 +350,13 @@ Authorization: Bearer <token>
 ```bash
 TOKEN="<token>"
 
-curl -s "http://localhost:8080/panel-api/v1/audit/logs/status" \
+curl -s "http://localhost:8000/panel-api/v1/audit/logs/status" \
   -H "Authorization: Bearer ${TOKEN}"
 
-curl -s "http://localhost:8080/panel-api/v1/audit/login-logs?page=1&pageSize=20&success=false" \
+curl -s "http://localhost:8000/panel-api/v1/audit/login-logs?page=1&pageSize=20&success=false" \
   -H "Authorization: Bearer ${TOKEN}"
 
-curl -s "http://localhost:8080/panel-api/v1/audit/operation-logs?page=1&pageSize=20&method=POST" \
+curl -s "http://localhost:8000/panel-api/v1/audit/operation-logs?page=1&pageSize=20&method=POST" \
   -H "Authorization: Bearer ${TOKEN}"
 ```
 

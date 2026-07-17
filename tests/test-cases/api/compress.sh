@@ -19,7 +19,7 @@
 set -e
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 TOKEN="${TOKEN:-$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null || echo "")}"
 
 # 颜色

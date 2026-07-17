@@ -2,7 +2,7 @@
 
 BASE_DIR=/home/wwwroot/w7panel-dev
 TOKEN="test"
-WEBDAV_URL="http://localhost:8080/k8s/webdav-agent/1/agent"
+WEBDAV_URL="http://localhost:8000/k8s/webdav-agent/1/agent"
 
 echo "=========================================="
 echo "    WebDAV 文件管理 & 文本编辑器 UI 测试"

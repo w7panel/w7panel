@@ -103,7 +103,7 @@ Authorization: Bearer <user-token>
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/microapp/top' \
+curl 'http://localhost:8000/panel-api/v1/microapp/top' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -222,7 +222,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/top' \
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/microapp/demo-root/info' \
+curl 'http://localhost:8000/panel-api/v1/microapp/demo-root/info' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -346,7 +346,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo-root/info' \
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/microapp/demo/proxy/api/health?debug=1' \
+curl 'http://localhost:8000/panel-api/v1/microapp/demo/proxy/api/health?debug=1' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -408,7 +408,7 @@ curl 'http://localhost:8080/panel-api/v1/microapp/demo/proxy/api/health?debug=1'
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/static/demo/status?version=1.0.0&releaseName=demo' \
+curl 'http://localhost:8000/panel-api/v1/static/demo/status?version=1.0.0&releaseName=demo' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -465,7 +465,7 @@ curl 'http://localhost:8080/panel-api/v1/static/demo/status?version=1.0.0&releas
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/static/default/download/demo' \
+curl -X POST 'http://localhost:8000/panel-api/v1/static/default/download/demo' \
   -H 'Authorization: Bearer <user-token>'
 ```
 
@@ -514,7 +514,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/static/default/download/demo' \
 
 ```bash
 # zpkUrl=https://zpk.example.com 的 base64url 值为 aHR0cHM6Ly96cGsuZXhhbXBsZS5jb20
-curl 'http://localhost:8080/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS5jb20/demo/1.0.0/frontend/index.html' \
+curl 'http://localhost:8000/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS5jb20/demo/1.0.0/frontend/index.html' \
   -H 'Authorization: Bearer <user-token>'
 ```
 

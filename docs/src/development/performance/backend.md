@@ -87,7 +87,6 @@ if len(content) > MaxFileSize {
 - TokenReview、JWT 解析、K3k audience 解析等结果应按 token 或 token 指纹缓存。
 - 缓存必须有 TTL 或基于 token 过期时间的失效策略。
 - 缓存 key 不保存完整敏感 token；需要记录时使用哈希或短指纹。
-- `LOCAL_MOCK=true` 下读取 kubeconfig token 时，应避免每次请求读文件。
 - token、密码、密钥、OIDC code 不写入日志、URL、响应体或前端可见字段。
 
 缓存设计至少说明：
@@ -107,7 +106,6 @@ if len(content) > MaxFileSize {
 | TokenReview 成功结果 | 可以 | token 过期、TTL 到期、用户登出 |
 | JWT audience/claims 解析 | 可以 | token 变化 |
 | K3k config 解析 | 可以 | token 变化、配置版本变化 |
-| kubeconfig mock token | 可以 | 文件 mtime 变化或进程重启 |
 | 用户权限判断结果 | 谨慎 | 权限变更、用户组变更、TTL 到期 |
 
 实现建议：

@@ -15,7 +15,7 @@
 # - Token已配置
 #
 # ## 环境变量
-# BASE_URL - 服务地址 (默认: http://localhost:8080)
+# BASE_URL - 服务地址 (默认: http://localhost:8000)
 # TOKEN    - 认证Token
 #
 #========================================
@@ -23,7 +23,7 @@
 set -e
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 TOKEN="${TOKEN:-$(cat /var/run/secrets/kubernetes.io/serviceaccount/token 2>/dev/null || echo "")}"
 WEBDAV_PATH="/k8s/webdav-agent/1/agent"
 

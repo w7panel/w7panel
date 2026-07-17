@@ -111,20 +111,23 @@ Events：
 
 | 组件 | 源文件 | Props | Events | 说明 |
 |------|--------|-------|--------|------|
-| `DomainStrategyPluginRatelimit` | `src/components/domain-strategy-plugin-ratelimit.vue` | `show`, `config` | `submit`, `close` | 限流插件配置 |
-| `DomainStrategyPluginWhitelist` | `src/components/domain-strategy-plugin-whitelist.vue` | `show`, `data` | `submit`, `close` | 白名单插件配置 |
-| `DomainStrategyPluginFilecache` | `src/components/domain-strategy-plugin-filecache.vue` | `show`, `rules`, `keyrules`, `data` | `submit`, `close` | 文件缓存插件配置 |
+| `GatewayPluginConfig` | `src/components/gateway-plugin-config.vue` | `show`, `plugin`, `microapp`, `scope`, `ingress` | `close`, `saved` | 统一管理全局或域名规则配置，前端不可用时回退 YAML |
+| `GatewayPluginMicroapp` | `src/components/gateway-plugin-microapp.vue` | `microapp`, `route`, `instanceName`, `contextProps` | `error` | 加载插件配置前端并注入当前作用域上下文 |
 
 使用示例：
 
 ```vue
-<DomainStrategyPluginRatelimit
-  :show="rateLimitVisible"
-  :config="rateLimitConfig"
-  @submit="config => rateLimitConfig = config"
-  @close="rateLimitVisible = false"
+<GatewayPluginConfig
+  :show="configVisible"
+  :plugin="plugin"
+  :ingress="ingress"
+  scope="rule"
+  @saved="refreshPlugins"
+  @close="configVisible = false"
 />
 ```
+
+插件配置的数据映射、MicroApp props 和保存协议见 [网关插件前端接入](./gateway-plugins.md)。
 
 ## 维护要求
 

@@ -203,6 +203,6 @@ await props.savePluginConfig(nextConfig);        // enabled 省略时默认启�
 
 - 全局配置：创始人可见创始人端和普通用户端菜单，普通用户只见自身菜单，菜单竖排。
 - 规则配置：只读取 `normal` binding，菜单横排。
-- MicroApp 启动前会在浏览器控制台输出注入的配置 props，覆盖全局和规则作用域；认证 Token 和 Authorization 不写入日志。
+- MicroApp 启动前只在浏览器控制台输出作用域、插件、域名和启停状态等非敏感上下文；`pluginConfig`、认证 Token、Authorization 和保存函数不写入日志。
 - Wujie 实例名必须包含插件、作用域和 Ingress，避免多个配置抽屉相互覆盖。
 - MicroApp 不可用时必须回退 YAML，不阻断插件配置。

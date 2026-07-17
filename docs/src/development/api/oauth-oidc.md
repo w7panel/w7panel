@@ -1,6 +1,6 @@
 # OAuth 与 OIDC API
 
-本文档说明 W7Panel 内置 OIDC Provider、OIDC 动态 Client 管理、面板内获取授权码、标准授权码流程和 Console OAuth 相关接口。OIDC 标准端点的响应格式和错误对象应遵循 OAuth/OIDC 协议，不要强行套用普通业务 JSON。
+本文档说明 W7Panel 内置 OIDC Provider、OIDCClient CRD、面板内获取授权码和 Console OAuth 相关接口。OIDC 标准端点的响应格式和错误对象应遵循 OAuth/OIDC 协议，不要强行套用普通业务 JSON。
 
 ## 整体使用方式
 
@@ -9,9 +9,9 @@ OAuth/OIDC 接口分为三类：标准 OIDC Provider 端点、面板内已登录
 ### 基本流程
 
 1. 第三方 Client 先读取 Discovery，获取 authorize、token、userinfo、jwks 等端点。
-2. 标准授权码流程走 `/authorize`、`/authorize/login`、`/token`、`/userinfo`。
+2. 标准协议端点走 `/authorize`、`/token`、`/userinfo`；当前仓库没有注册交互式登录页，完整浏览器授权流程不能仅依赖这些路由完成。
 3. 面板内微应用已持有用户 token 时，可调用 `/js-code` 或兼容入口直接获取一次性 code。
-4. 动态 Client 管理走 `/register`，是否可用取决于 OIDC 注册配置。
+4. Client 配置通过 `OIDCClient` CRD 管理。
 5. Console OAuth 登录、绑定和信息查询走 `/panel-api/v1/auth/console/*`，详细凭据字段见 [credentials.md](./credentials.md)。
 
 ### 场景选择
@@ -19,11 +19,11 @@ OAuth/OIDC 接口分为三类：标准 OIDC Provider 端点、面板内已登录
 | 场景 | 使用接口 | 说明 |
 |------|----------|------|
 | 第三方发现 Provider | `/.well-known/openid-configuration` | 返回 Discovery 元数据 |
-| 标准登录授权 | `/authorize`、`/authorize/login` | OAuth/OIDC 授权码流程 |
+| 标准授权端点 | `/authorize` | 创建 OIDC 授权请求；当前缺少配套交互式登录页 |
 | 换 token | `/token` | 返回 access token、id token、refresh token |
 | 查询用户信息 | `/userinfo` | 使用 OIDC access token |
 | 面板内获取 code | `/js-code`、`/redirect-uri` | 已登录用户直接生成 code 或 callback URL |
-| 动态 Client 管理 | `/register` | 创建、查询、更新、删除 Client |
+| Client 管理 | K8s 代理访问 `OIDCClient` CRD | 创建、查询、更新、删除 Client |
 | Console OAuth | `/auth/console/*` | Console 登录、绑定、代理和授权信息 |
 
 ### 使用边界
@@ -37,7 +37,7 @@ OAuth/OIDC 接口分为三类：标准 OIDC Provider 端点、面板内已登录
 
 ### 鉴权
 
-Discovery、JWKS、authorize、token、userinfo 等标准 OIDC 端点按 OAuth/OIDC 协议处理鉴权和 client 认证；`/userinfo` 使用 OIDC `access_token`。动态注册接口是否需要 registration token 取决于 `OIDC_REGISTRATION_ACCESS_TOKEN`。面板内 `/js-code`、`/redirect-uri` 和兼容入口需要面板用户 token，Console OAuth 接口的凭据边界见 [credentials.md](./credentials.md)。
+Discovery、JWKS、authorize、token、userinfo 等标准 OIDC 端点按 OAuth/OIDC 协议处理鉴权和 client 认证；`/userinfo` 使用 OIDC `access_token`。面板内 `/js-code`、`/redirect-uri` 和兼容入口需要面板用户 token，Console OAuth 接口的凭据边界见 [credentials.md](./credentials.md)。
 
 ### 基础路径
 
@@ -65,8 +65,6 @@ OIDC 配置来自 `w7panel-server/config.yaml` 的 `oidc` 节点。
 | `OIDC_ACCESS_TOKEN_TTL` | `3600s` | access token 有效期 |
 | `OIDC_REFRESH_TOKEN_TTL` | `720h` | refresh token 有效期 |
 | `OIDC_CODE_TTL` | `300s` | 授权请求和 code 有效期 |
-| `OIDC_REGISTRATION_ENABLED` | `false` | 是否启用动态 Client 注册接口 |
-| `OIDC_REGISTRATION_ACCESS_TOKEN` | 空 | 动态注册接口访问 token；为空时开启注册后不校验固定值 |
 | `OIDC_INSECURE_ALLOW_ANY_REDIRECT_URI` | `true` | Provider 级任意 redirect_uri 配置 |
 | `OIDC_CLIENT_ID` | `default` | 默认静态 Client ID |
 | `OIDC_CLIENT_SECRET` | 空 | 默认静态 Client Secret |
@@ -101,17 +99,9 @@ Provider 未启用时返回：
 }
 ```
 
-动态注册未启用时返回：
-
-```json
-{
-  "error": "oidc registration disabled"
-}
-```
-
 ### 参数位置
 
-`/authorize` 使用 query 参数；`/authorize/login` 可使用 query/form；`/token` 使用 form；`/userinfo` 通过 Header 携带 `Authorization: Bearer {oidc-token}`；`/register` 使用 JSON body 或 path 中的 client id；面板内 `/js-code`、`/redirect-uri` 使用 JSON/form，具体以接口表为准。
+`/authorize` 使用 query 参数；`/token` 使用 form；`/userinfo` 通过 Header 携带 `Authorization: Bearer {oidc-token}`；面板内 `/js-code`、`/redirect-uri` 使用 JSON/form，具体以接口表为准。
 
 ## 能力概览
 
@@ -120,10 +110,8 @@ Provider 未启用时返回：
 | Discovery | `ANY /.well-known/openid-configuration` | 暴露 OpenID Provider 元数据 |
 | JWKS | `ANY /jwks` | 暴露 RS256 签名公钥 |
 | 授权端点 | `ANY /authorize` | 标准 OAuth/OIDC 授权端点 |
-| 内置登录页 | `GET/POST /authorize/login` | 授权码流程中的登录授权页 |
 | Token | `ANY /token` | 标准 token 端点 |
 | UserInfo | `ANY /userinfo` | 标准 userinfo 端点 |
-| 动态 Client 管理 | `/register` | 注册、查询、更新、删除动态 Client |
 | 面板内获取 code | `POST /js-code` | 已登录面板用户直接获取一次性 code |
 | 面板内 callback URL | `POST /redirect-uri` | 完成授权请求并生成回调 URL |
 | 旧版入口 | `/panel-api/v1/code`、`/panel-api/v1/callback-url` | 兼容入口 |
@@ -142,7 +130,7 @@ Provider 未启用时返回：
 请求示例：
 
 ```bash
-curl 'http://localhost:8080/panel-api/v1/oidc/.well-known/openid-configuration'
+curl 'http://localhost:8000/panel-api/v1/oidc/.well-known/openid-configuration'
 ```
 
 响应参数：OIDC Discovery JSON。常用字段如下：
@@ -163,11 +151,11 @@ curl 'http://localhost:8080/panel-api/v1/oidc/.well-known/openid-configuration'
 
 ```json
 {
-  "issuer": "http://localhost:8080/panel-api/v1/oidc",
-  "authorization_endpoint": "http://localhost:8080/panel-api/v1/oidc/authorize",
-  "token_endpoint": "http://localhost:8080/panel-api/v1/oidc/token",
-  "userinfo_endpoint": "http://localhost:8080/panel-api/v1/oidc/userinfo",
-  "jwks_uri": "http://localhost:8080/panel-api/v1/oidc/jwks",
+  "issuer": "http://localhost:8000/panel-api/v1/oidc",
+  "authorization_endpoint": "http://localhost:8000/panel-api/v1/oidc/authorize",
+  "token_endpoint": "http://localhost:8000/panel-api/v1/oidc/token",
+  "userinfo_endpoint": "http://localhost:8000/panel-api/v1/oidc/userinfo",
+  "jwks_uri": "http://localhost:8000/panel-api/v1/oidc/jwks",
   "scopes_supported": ["openid", "profile", "offline_access"]
 }
 ```
@@ -213,7 +201,7 @@ curl 'http://localhost:8080/panel-api/v1/oidc/.well-known/openid-configuration'
 
 功能：标准授权端点，创建授权请求并引导用户登录授权。
 
-认证：标准 OIDC 流程中无需面板 Bearer token；如果后续访问 `/authorize/login` 时已携带有效 Bearer token，可自动完成授权。
+认证：标准 OIDC 流程中无需面板 Bearer token。
 
 请求参数：
 
@@ -233,72 +221,18 @@ curl 'http://localhost:8080/panel-api/v1/oidc/.well-known/openid-configuration'
 请求示例：
 
 ```bash
-curl -i 'http://localhost:8080/panel-api/v1/oidc/authorize?client_id=default&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000%2Fcallback&response_type=code&scope=openid%20profile&state=abc'
+curl -i 'http://localhost:8000/panel-api/v1/oidc/authorize?client_id=default&redirect_uri=http%3A%2F%2F127.0.0.1%3A3000%2Fcallback&response_type=code&scope=openid%20profile&state=abc'
 ```
 
 响应：
 
 | 情况 | 响应 |
 |------|------|
-| 需要登录 | 302 到 `/login?authRequestID=...`，由 Provider 映射到内置登录流程 |
+| 需要登录 | 302 到 `/login?authRequestID=...`；当前仓库没有注册该登录页，部署侧必须额外提供登录入口 |
 | 请求非法 | OIDC 标准错误 |
 | 登录完成 | 302 到 `redirect_uri?code=...&state=...` |
 
-实现注意：Client 的 `LoginURL()` 返回 `/login?authRequestID=...`，项目实际注册的登录页是 `/panel-api/v1/oidc/authorize/login`。部署侧如没有额外 rewrite，需要重点验证完整授权码流程；面板内直接获取 code 可使用 `/js-code`。
-
-### GET `/panel-api/v1/oidc/authorize/login`
-
-功能：显示内置登录授权页，或在已携带 Bearer token 时自动完成授权并跳转回 callback。
-
-认证：可选。携带有效 token 时自动授权；未携带时展示 HTML 登录页。
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `authRequestID` | query | 是 | string | 授权请求 ID |
-
-响应：
-
-| 情况 | 响应 |
-|------|------|
-| 已携带有效 Bearer token | 302 到授权回调 URL |
-| 未携带 token | 返回 `text/html; charset=utf-8` 登录页 |
-| 缺少 `authRequestID` | `400 {"error":"missing authRequestID"}` |
-| `authRequestID` 无效 | `400 {"error":"invalid authRequestID","error_description":"..."}` |
-
-### POST `/panel-api/v1/oidc/authorize/login`
-
-功能：提交用户名密码完成授权请求。
-
-认证：无需 Bearer token。
-
-请求类型：`application/x-www-form-urlencoded`
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `authRequestID` | query | 是 | string | 授权请求 ID |
-| `username` | form | 是 | string | 用户名 |
-| `password` | form | 是 | string | 密码 |
-
-请求示例：
-
-```bash
-curl -i -X POST 'http://localhost:8080/panel-api/v1/oidc/authorize/login?authRequestID=<id>' \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode 'username=admin' \
-  --data-urlencode 'password=123456'
-```
-
-响应：
-
-| 情况 | 响应 |
-|------|------|
-| 登录成功 | 302 到授权回调 URL |
-| 登录失败 | 返回 HTML 登录页并显示错误 |
-| 参数缺失 | 返回 HTML 登录页并显示“用户名和密码不能为空” |
+实现注意：Client 的 `LoginURL()` 返回 `/login?authRequestID=...`。面板内已经持有用户 token 的场景应使用 `/js-code`；如需完整浏览器授权码流程，必须先实现并注册交互式登录页。
 
 ### ANY `/panel-api/v1/oidc/token`
 
@@ -326,7 +260,7 @@ curl -i -X POST 'http://localhost:8080/panel-api/v1/oidc/authorize/login?authReq
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/oidc/token' \
+curl -X POST 'http://localhost:8000/panel-api/v1/oidc/token' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode 'grant_type=authorization_code' \
   --data-urlencode 'client_id=default' \
@@ -404,157 +338,6 @@ Authorization: Bearer <access_token>
 }
 ```
 
-## 动态 OIDC Client 管理
-
-这些接口用于动态注册 Client，和前端系统设置页直接通过 K8s 代理管理 `OIDCClient` CRD 是两套入口。动态注册接口使用 snake_case JSON；CRD 使用 camelCase 字段。
-
-### 访问控制
-
-动态注册接口要求：
-
-| 条件 | 说明 |
-|------|------|
-| `OIDC_ENABLED=true` | OIDC Provider 启用 |
-| `OIDC_REGISTRATION_ENABLED=true` | 动态注册启用 |
-| `OIDC_REGISTRATION_ACCESS_TOKEN` | 非空时，请求 token 必须等于该值 |
-
-注册管理 token 可通过通用 token 解析逻辑传入，推荐使用：
-
-```http
-Authorization: Bearer <OIDC_REGISTRATION_ACCESS_TOKEN>
-```
-
-如果 `OIDC_REGISTRATION_ACCESS_TOKEN` 为空，只要启用动态注册，当前实现会允许访问。
-
-### POST `/panel-api/v1/oidc/register`
-
-功能：注册动态 OIDC Client。
-
-认证：registration access token。
-
-请求类型：`application/json`
-
-请求参数：
-
-| 字段 | 必填 | 类型 | 说明 |
-|------|------|------|------|
-| `redirect_uris` | 条件必填 | array[string] | 允许的回调地址；`allow_any_redirect_uri=false` 时必填 |
-| `allow_any_redirect_uri` | 否 | bool | 是否允许任意回调地址 |
-| `token_endpoint_auth_method` | 否 | string | `client_secret_basic`、`client_secret_post`、`none`；为空时按 secret 规则默认 |
-| `grant_types` | 否 | array[string] | 仅支持 `["authorization_code"]` 或 `["authorization_code","refresh_token"]` |
-| `scope` | 否 | string | 空格分隔；只保留 `openid`、`profile`、`offline_access` |
-| `client_name` | 否 | string | Client 名称 |
-
-请求示例：
-
-```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/oidc/register' \
-  -H 'Authorization: Bearer <registration-token>' \
-  -H 'Content-Type: application/json' \
-  -d '{
-    "redirect_uris": ["https://app.example.com/callback"],
-    "token_endpoint_auth_method": "client_secret_post",
-    "grant_types": ["authorization_code", "refresh_token"],
-    "scope": "openid profile offline_access",
-    "client_name": "demo"
-  }'
-```
-
-响应状态：`201 Created`
-
-响应参数：
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `client_id` | string | 自动生成，格式类似 `oidc_xxx`，会规范化为小写和短横线 |
-| `client_secret` | string | `token_endpoint_auth_method != none` 时返回 |
-| `client_id_issued_at` | int64 | Client 创建时间，Unix 秒 |
-| `client_secret_expires_at` | int64 | 当前固定为 `0`，表示不过期 |
-| `redirect_uris` | array[string] | 回调地址 |
-| `allow_any_redirect_uri` | bool | 是否允许任意回调 |
-| `token_endpoint_auth_method` | string | token 端点认证方式 |
-| `grant_types` | array[string] | 当前响应固定为 `["authorization_code","refresh_token"]` |
-| `scope` | string | 实际保存的 scope |
-| `client_name` | string | Client 名称 |
-
-响应示例：
-
-```json
-{
-  "client_id": "oidc-abcd1234efgh5678",
-  "client_secret": "secret-value",
-  "client_id_issued_at": 1710000000,
-  "client_secret_expires_at": 0,
-  "redirect_uris": ["https://app.example.com/callback"],
-  "allow_any_redirect_uri": false,
-  "token_endpoint_auth_method": "client_secret_post",
-  "grant_types": ["authorization_code", "refresh_token"],
-  "scope": "openid profile offline_access",
-  "client_name": "demo"
-}
-```
-
-### GET `/panel-api/v1/oidc/register/:clientId`
-
-功能：查询动态 Client。
-
-认证：registration access token。
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `clientId` | path | 是 | string | 动态 Client ID |
-
-响应状态：`200 OK`
-
-响应参数：同注册响应。
-
-错误：
-
-| 状态 | 响应 | 说明 |
-|------|------|------|
-| 404 | `{"error":"not_found","error_description":"client not found"}` | Client 不存在或不是动态 Client |
-
-### PUT `/panel-api/v1/oidc/register/:clientId`
-
-功能：更新动态 Client。
-
-认证：registration access token。
-
-请求类型：`application/json`
-
-请求参数：同注册请求。更新逻辑如下：
-
-| 字段 | 行为 |
-|------|------|
-| `redirect_uris` | 非空时覆盖 |
-| `scope` | 非空时覆盖 |
-| `client_name` | 非空时覆盖 |
-| `allow_any_redirect_uri` | 总是覆盖 |
-| `token_endpoint_auth_method` | 非空时覆盖 |
-| `grant_types` | 当前校验请求合法性，但不单独持久化 |
-
-响应状态：`200 OK`
-
-响应参数：同注册响应。
-
-### DELETE `/panel-api/v1/oidc/register/:clientId`
-
-功能：删除动态 Client。
-
-认证：registration access token。
-
-请求参数：
-
-| 参数 | 位置 | 必填 | 类型 | 说明 |
-|------|------|------|------|------|
-| `clientId` | path | 是 | string | 动态 Client ID |
-
-响应状态：`204 No Content`
-
-响应体：无。
-
 ## OIDCClient CRD 管理
 
 前端系统设置页 `OIDC密钥管理` 当前直接通过 K8s 代理管理 CRD：
@@ -598,8 +381,6 @@ CRD 字段使用 camelCase：
 }
 ```
 
-注意：动态注册 API 写入的后端 CRD 也是 `OIDCClient`，但 API 请求/响应字段为 snake_case；前端 K8s 代理操作 CRD 时必须使用 camelCase。
-
 ## 面板内获取授权信息
 
 ### POST `/panel-api/v1/oidc/js-code`
@@ -628,7 +409,7 @@ CRD 字段使用 camelCase：
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/oidc/js-code' \
+curl -X POST 'http://localhost:8000/panel-api/v1/oidc/js-code' \
   -H 'Authorization: Bearer <user-token>' \
   -H 'Content-Type: application/json' \
   -d '{
@@ -677,7 +458,7 @@ curl -X POST 'http://localhost:8080/panel-api/v1/oidc/js-code' \
 请求示例：
 
 ```bash
-curl -X POST 'http://localhost:8080/panel-api/v1/oidc/redirect-uri' \
+curl -X POST 'http://localhost:8000/panel-api/v1/oidc/redirect-uri' \
   -H 'Authorization: Bearer <user-token>' \
   -H 'Content-Type: application/json' \
   -d '{"authRequestID":"<id>"}'
@@ -716,8 +497,7 @@ Console OAuth 详细请求/响应字段见 [credentials.md](credentials.md)。�
 | `GET` | `/panel-api/v1/auth/console/login` | 无用户 token | 使用 Console OAuth code 登录面板 |
 | `GET` | `/panel-api/v1/auth/console/bind` | 用户 token | 当前面板用户绑定 Console OAuth code |
 | `GET` | `/panel-api/v1/auth/console/info` | 用户 token | 获取 Console 注册状态、第三方 CD token、license 等 |
-| `GET` | `/panel-api/v1/auth/console/code/:code` | 用户 token | 代理优惠码请求 |
-| `ANY` | `/panel-api/v1/auth/console/proxy/*path` | founder token | Founder 代理 Console API |
+| `ANY` | `/panel-api/v1/auth/console/proxy/*path` | 用户 token | 代理 Console API |
 
 ## access_token 使用边界
 
@@ -730,7 +510,6 @@ Console OAuth 详细请求/响应字段见 [credentials.md](credentials.md)。�
 - OIDC 标准端点保持协议兼容，错误格式遵守 OAuth/OIDC 约定。
 - `redirect_uri` 必须校验，避免开放重定向；只有明确需要时才允许 `allow_any_redirect_uri`。
 - 不在日志、URL、响应体、前端 localStorage 中输出完整 code、access token、refresh token、client secret。
-- 动态注册 API 使用 snake_case，`OIDCClient` CRD 使用 camelCase，前后端不要混用字段名。
-- Founder 级 Console 代理接口必须保留更高权限检查。
+- Console 代理接口当前使用通用用户认证；如需提升到 Founder 权限，必须同步修改路由和本文。
 - 修改 OIDC Client CRD 后，同步检查系统设置页 `w7panel-ui/src/views/system/access-key/oidc-key.vue`。
 - 修改 `js-code` 后，同步检查 Wujie 事件 `getOidcCode` 和 [../frontend/wujie-events.md](../frontend/wujie-events.md)。

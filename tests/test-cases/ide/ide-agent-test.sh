@@ -3,7 +3,7 @@
 # 使用 agent-browser 进行界面功能测试
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 API_URL="${API_URL:-/k8s/webdav-agent/1/agent}"
 INITIAL_PATH="${INITIAL_PATH:-/tmp}"
 TOKEN="${K8S_TOKEN:-}"
@@ -433,7 +433,7 @@ main() {
             echo "  help        显示帮助"
             echo ""
             echo "环境变量:"
-            echo "  BASE_URL      服务地址 (默认: http://localhost:8080)"
+            echo "  BASE_URL      服务地址 (默认: http://localhost:8000)"
             echo "  API_URL       WebDAV API 路径 (默认: /k8s/webdav-agent/1/agent)"
             echo "  INITIAL_PATH  初始路径 (默认: /tmp)"
             echo "  K8S_TOKEN     认证 Token"

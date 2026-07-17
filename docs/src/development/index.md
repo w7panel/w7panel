@@ -113,7 +113,7 @@ export CAPTCHA_ENABLED=false
 export KUBECONFIG=$BASE_DIR/kubeconfig.yaml
 ```
 
-当前实现中，`w7panel-server/common/middleware/auth.go` 在 `LOCAL_MOCK=true` 时会从 `KUBECONFIG` 或默认路径读取 token 并填充 `k8s_token`，用于本地开发测试。新增接口不要依赖该行为作为生产鉴权逻辑；生产环境必须使用真实用户 token 或 ServiceAccount。
+`LOCAL_MOCK=true` 只切换本地 Kubernetes 和 Agent 访问方式，不改变面板用户认证。开发测试请求仍必须携带有效 Bearer token；`KUBECONFIG` 用于建立本地 Kubernetes 客户端，不能替代请求认证。
 
 ## 开发规范
 
@@ -282,14 +282,14 @@ tail -f /tmp/w7panel.log
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8080/panel-api/v1/example"
+  "http://localhost:8000/panel-api/v1/example"
 ```
 
 ### 常见问题
 
 | 问题 | 检查方向 |
 |------|----------|
-| 接口 401 | token 是否存在、是否走了公开接口、`LOCAL_MOCK` 下是否正确读取到 kubeconfig token |
+| 接口 401 | Bearer token 是否存在且有效、是否误用了公开接口或其它类型凭据 |
 | 接口 404 | 路由是否注册，前缀是否为 `/panel-api/v1/` 或 `/k8s-proxy/` |
 | 前端字段为空 | 后端响应字段、前端类型定义、页面取值路径是否一致 |
 | K8s 权限错误 | `LOCAL_MOCK`、`KUBECONFIG`、ServiceAccount、RBAC 是否正确 |

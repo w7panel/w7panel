@@ -20,7 +20,7 @@
 set -e
 
 # 配置
-BASE_URL="${BASE_URL:-http://localhost:8080}"
+BASE_URL="${BASE_URL:-http://localhost:8000}"
 USERNAME="${USERNAME:-admin}"
 PASSWORD="${PASSWORD:-123456}"
 WAIT_TIME=5

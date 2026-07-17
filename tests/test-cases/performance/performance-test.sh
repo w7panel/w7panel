@@ -39,7 +39,7 @@ fi
 
 echo ""
 echo "3. 测试服务..."
-if curl -s http://localhost:8080/ | grep -q "html"; then
+if curl -s http://localhost:8000/ | grep -q "html"; then
   echo "  ✓ 服务正常运行"
 else
   echo "  ✗ 服务未运行"
@@ -50,7 +50,7 @@ echo "4. 测试 API..."
 TOKEN=$(cat /home/wwwroot/w7panel-dev/kubeconfig.yaml | grep -A1 "token:" | tail -1 | awk '{print $2}')
 
 # 测试 namespace API
-RESULT=$(curl -s "http://localhost:8080/api/v1/namespaces" -H "Authorization: Bearer $TOKEN")
+RESULT=$(curl -s "http://localhost:8000/api/v1/namespaces" -H "Authorization: Bearer $TOKEN")
 if echo "$RESULT" | grep -q "items"; then
   echo "  ✓ Namespace API 正常"
 else

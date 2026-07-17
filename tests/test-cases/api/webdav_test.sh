@@ -23,7 +23,7 @@ test_move() {
     
     # 测试 MOVE
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X MOVE \
-        "http://localhost:8080/k8s/webdav-agent/$pid/agent$path" \
+        "http://localhost:8000/k8s/webdav-agent/$pid/agent$path" \
         -H "Authorization: Bearer $TOKEN" \
         -H "Destination: /k8s/webdav-agent/$pid/agent$dir/$new_name" \
         -H "Overwrite: T")
@@ -55,7 +55,7 @@ test_copy() {
     
     # 测试 COPY
     HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X COPY \
-        "http://localhost:8080/k8s/webdav-agent/$pid/agent$path" \
+        "http://localhost:8000/k8s/webdav-agent/$pid/agent$path" \
         -H "Authorization: Bearer $TOKEN" \
         -H "Destination: /k8s/webdav-agent/$pid/agent$dir/$new_name" \
         -H "Overwrite: T")
