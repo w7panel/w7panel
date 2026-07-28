@@ -383,7 +383,10 @@ $BASE_DIR/
 │   │   ├── metrics/                # 指标 API
 │   │   └── zpk/                    # ZPK 应用 API
 │   ├── common/service/             # 业务服务
+│   │   └── k8s/coordination/       # 通用 Kubernetes Lease 与分布式并发协调
 │   ├── common/middleware/          # 中间件
+│   ├── k8s/pkg/apis/bootstrap/      # BootstrapProfile API（w7panel.w7.com）
+│   ├── k8s/pkg/apis/bootstrapinstallation/ # BootstrapInstallation API（w7panel.w7.com）
 │   ├── dev-tools/scripts/          # 开发脚本
 │   ├── kodata/                     # 静态资源
 │   └── config.yaml
@@ -868,14 +871,56 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - 网关插件列表以 `higress-system` 命名空间的 Higress `WasmPlugin` 为唯一数据源。
 - 网关插件列表不单独展示前端包；关联的 MicroApp 仅用于决定配置时加载插件页面还是回退 YAML。
 - 网关插件列表的“插件”列固定为 360px，避免在宽屏下过度拉伸。
+- 网关插件列表与域名规则插件列表统一按“标题、标识+版本、描述”三层展示，标题使用常规字重，标识版本和描述使用 12px 灰色辅助文字。
+- 域名管理“更多”的插件列表只展示插件、规则状态和操作列，不展示“配置方式”列；配置时仍根据关联 MicroApp 自动打开操作界面或回退 YAML。
+- 网关插件列表使用“全局状态”列直接控制 Higress `spec.defaultConfigDisable`，不能连带修改 `matchRules[].configDisable`；只支持规则配置的插件不显示全局开关。无编辑权限时禁用开关，切换期间显示加载状态。
+- 网关插件通过 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间同名 AppGroup；AppGroup 带 `metadata.annotations["w7.cc/official-app"] == "true"` 时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识。网关插件列表同时禁止编辑插件元数据和卸载，但仍允许启停及修改全局/规则配置。插件的官方标记、编辑和卸载保护都只使用该官方应用标识判断，不能使用 `w7.cc/deny-delete` 推断官方身份。此类资源统一称为“官方应用提供的网关插件”，不要称为“官方插件”。
+- 网关插件更新通过 `w7.cc/group-name` 关联的 AppGroup 调用 `/panel-api/v1/zpk/upgrade-info` 检查，同一 AppGroup 只请求一次并向组内插件共享结果；“立即更新”必须携带 AppGroup 名称作为 `releaseName` 进入统一制品更新页，更新整个应用制品而不是单独修改 WasmPlugin。
 - 网关插件列表顶部的添加按钮与搜索框至少保留 12px 间距。
+- 网关插件列表应在表格上方提示“全局状态仅控制插件的全局配置，不影响域名规则”；域名管理“更多”的插件列表应提示“规则状态仅控制当前域名，不影响插件的全局配置或其他域名”。提示框与后续表格至少保留 12px 间距。
 - 网关插件列表右侧操作的确认浮层向左展开并限制内容宽度，避免浮层打开时触发页面横向滚动。
-- 插件能力和启停状态写入 `metadata.annotations`，不要向 Higress `spec` 添加非标准字段；制品安装的 WasmPlugin 与 MicroApp 通过共同的 `metadata.labels["w7.cc/group-name"]` 关联，旧资源可兼容 `w7.cc/plugin-microapp` annotation。
-- 全局配置的前端包菜单竖排，支持创始人端和普通用户端，并固定创始人端在普通用户端上方；规则配置只读取普通用户端菜单并横排展示。
+- 插件支持范围等扩展能力写入 `metadata.annotations`，实际全局和规则开关分别使用 Higress 原生 `spec.defaultConfigDisable` 与 `spec.matchRules[].configDisable`；制品安装的 WasmPlugin 与 MicroApp 通过共同的 `metadata.labels["w7.cc/group-name"]` 关联，旧资源可兼容 `w7.cc/plugin-microapp` annotation。
+- 编辑插件时取消“支持规则配置”必须明确提示：插件将从域名“更多”中隐藏，所有已启用的 `matchRules` 会停用，重新开启支持范围不会自动恢复；用户确认后才能保存。
+- 全局配置的前端包只读取创始人端（兼容旧名称 `found`）菜单并竖排展示，不显示普通用户端菜单；规则配置只读取普通用户端菜单并横排展示。当前作用域过滤后仅剩一个菜单项时，直接加载该页面，不显示左侧或顶部菜单栏。
 - MicroApp 当前作用域的 `bindings.menu` 有菜单项时才视为配置了前端包，并按照统一的静态资源与 Wujie/iframe 流程加载；无菜单或加载失败时回退 YAML。
-- 插件停用只影响全局配置和规则的运行状态；插件列表仍允许进入、修改并保存全局配置，修改内容在重新启用后生效。
-- 域名管理“更多”只显示已启用且支持规则配置的插件，不能在域名页面安装或卸载插件。
+- 有配置前端包时必须提供统一的“YAML 详情”入口；无配置前端包或加载失败时直接进入同一个 YAML 界面。两种入口都默认只读预览，通过“编辑”按钮切换为可修改状态。
+- 全局配置和域名规则按 Higress 原生逻辑独立启停：关闭全局状态不能关闭或隐藏路由规则，关闭某条路由规则也不能影响全局配置。
+- Higress 的 `defaultConfigDisable` 或已有 `matchRules[].configDisable` 未设置时按 `false`（启用）处理；没有匹配规则时才显示为规则未启用。
+- 域名规则兼容 Higress 原生 `ingress`、`domain`、`service` 三种匹配目标；修改同时覆盖多个同类目标的共享规则前，必须拆出当前匹配目标并保留其他目标的原配置和状态。
+- Ingress 的 Host/Path 重写只写 Ingress annotation，不得向所有 WasmPlugin 的 `matchRules[].config` 注入 `rewrite_host` 等插件私有字段。
+- 删除域名或路径对应的 Ingress 前，必须从所有 WasmPlugin 规则中移除该 `namespace/ingressName`；共享规则保留其他匹配目标，避免同名 Ingress 重建后旧插件配置意外恢复。
+- 域名管理“更多”显示所有已安装且支持规则配置的插件，不受全局状态影响；不能在域名页面安装或卸载插件。
 - 域名管理“更多”的提示框与插件表格之间保留 12px 间距。
+
+#### AI 代理消费者 UI 规范
+
+- AI 代理复用的 `key-auth.internal` 和 `request-validation.internal` 是网关通用插件，展示名称固定为“Key Auth 认证”和“请求校验”，不得添加 AI 专属前缀。
+- 域名编辑页的消费者使用列表展示，新增和编辑使用弹窗；消费者名称由系统自动生成并始终只读。
+- 认证方式使用 Tab 组织。当前只展示 Key Auth，OAuth2、JWT 等未实现方式不得提前显示。
+- Key Auth 表单对齐 Higress Console：支持多个认证令牌，并支持 Bearer Token、自定义 HTTP Header、查询参数三种令牌来源；Header 和 Query 来源必须显示并校验对应名称字段。
+- 删除消费者必须同步清理消费者 Secret、`key-auth.internal` 的 consumer 配置和当前域名 `allow` 引用；删除最后一个消费者时同步关闭该域名认证。
+
+#### AI 代理服务提供者 UI 规范
+
+- 新增、编辑服务提供者的字段、联动和候选值必须对齐 Higress Console ProviderForm，不能用一个通用“服务地址”代替供应商专属配置。
+- OpenAI、Qwen、Claude 必须区分官方服务与自定义服务；Azure 使用包含 `api-version` 的完整服务 URL；OpenAI 和 vLLM 支持多个同协议、同路径的静态 IP URL。
+- Qwen 支持搜索、兼容模式、文件 ID、自定义域名和推理内容处理模式；Bedrock、Vertex 的区域使用 Higress 候选列表并允许搜索；Vertex 支持 Gemini 安全类别和阈值设置。
+- 通用配置支持流式首包超时和 Token 故障转移。健康检查模型优先展示当前供应商的 Higress 预置模型，同时允许输入自定义模型名称。
+- 代理服务器从 `higress-system/default` McpBridge 的 `spec.proxies` 读取，并写入当前 Provider 对应 registry 的 `proxyName`；不得写入 `ai-proxy` Provider 配置。
+- 表单字段必须转换为 `ai-proxy.internal.spec.defaultConfig.providers[]` 的官方字段；多 URL、`failover`、`retryOnFailure`、`geminiSafetySetting` 等配置不能只保存在页面状态中。
+
+#### AI 代理删除任务 UI 规范
+
+- 删除 AI 代理必须使用任务弹窗依次展示“消费者数据、服务提供者数据、域名配置数据”的等待、执行、成功或失败状态，任务执行期间禁止关闭弹窗。
+- 任务弹窗复用 w7panel 现有任务状态风格：顶部居中展示 80px 成功/失败图标或 60px 旋转加载图，下方使用中性边框任务列表，单行右侧展示图标和“已删除、删除中、未执行、失败”，结束操作按钮居中排列。
+- 每一步不能只以 DELETE/PUT 请求成功作为完成条件，必须重新读取 Secret、WasmPlugin、McpBridge registry 或 Ingress，确认该步骤的关联资源已经不存在后才显示“已删除”并进入下一步。
+- 删除任务必须幂等。部分步骤成功后失败时保留错误信息和重试入口；重试应跳过已确认完成的步骤，并继续清理未完成资源。
+- 资源查询失败不得当作资源不存在。只有明确的 HTTP 404 可以作为单资源已删除的依据，列表查询或其他网络错误必须令任务失败。
+
+#### 资源列表 UI 规范
+
+- 镜像管理的镜像 ID 作为名称的辅助信息放在名称下方，使用 12px 灰色小字，不单独占用表格列。
+- 私有 DNS 属于网关管理能力，菜单名固定为“私有DNS”并放在“网关管理”下。
 
 ### 性能规范
 

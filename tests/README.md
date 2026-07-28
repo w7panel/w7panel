@@ -21,6 +21,24 @@ tests/
 
 ## 快速开始
 
+### BootstrapProfile 单元测试
+
+后端测试会严格解析并校验内置
+`w7panel-server/kodata/yaml/bootstrap-profile.yaml`，检查应用清单、职责边界和 Bootstrap 内部所有权注解：
+
+```bash
+cd "$BASE_DIR/w7panel-server"
+go test ./common/service/k8s/bootstrap
+```
+
+Bootstrap 使用 ServiceAccount Token 安装 ZPK 时，`PackageApp.K8sToken` 允许为空；以下回归测试确认 Helm Job 会安全回退到 `RealToken`，且用户 Token 存在时仍优先使用用户 Token：
+
+```bash
+cd "$BASE_DIR/w7panel-server"
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestPackageTokens -count=1
+LOCAL_MOCK=true go test ./common/service/k8s/bootstrap -run TestClusterTokenFromRESTConfig -count=1
+```
+
 ### 运行测试
 
 ```bash
@@ -120,6 +138,42 @@ go test ./common/service/k8s/permission -run TestFounderFallbackIncludesGatewayP
 ```bash
 cd $BASE_DIR/w7panel-server
 go test ./common/service/k8s/higress -run TestPreferredWasmPlugin -count=1
+```
+
+### BootstrapProfile 协调单元测试
+
+验证通用 Lease 的持有者隔离、过期接管、安全释放、原槽冲突重试和分布式并发限制，以及 Bootstrap Profile revision 状态汇总、失败 revision 清理重装、依赖失败策略、AppGroup 真实 Ready 判定、安装超时与 Lease 生命周期：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./k8s/pkg/apis/bootstrapinstallation/v1alpha1 ./common/service/k8s/coordination ./common/service/k8s/bootstrap -count=1
+```
+
+### 制品域名传递测试
+
+验证面板会移除仓库 URL 中不受信任的 `reinstall`，仅在用户确认强制覆盖时重新添加受控标记；同时验证域名、应用标识和 HTTP 409 订单绑定冲突解析：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPPassesDomainWithoutReinstall -count=1
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPReturnsArtifactInstallConflict -count=1
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPReturnsConflictWhenProxyChangesStatus -count=1
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPPassesControlledReinstall -count=1
+
+cd $BASE_DIR/../w7panel-zpk
+LOCAL_MOCK=true go test ./app/respo/logic -run TestTicketPreservesDomain -count=1
+
+cd $BASE_DIR/../cd-artifact-market
+LOCAL_MOCK=true go test ./app/respo/logic -run '^(TestValidateOrderDomain|TestOrderAppIdentifyMatches|TestOrderBindingConflictReason|TestDiscardUsedOrderClearsInstallationBinding|TestUseOrderReinstallOverwritesInstallationBinding)$' -count=1
+```
+
+### 插件微应用入口过滤测试
+
+验证带有 `w7.cc/manifest-type=gateway-plugin` 注解的 MicroApp 不会进入顶部菜单和“应用直达”共用列表：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./common/service/k8s/microapp -run TestIsPluginMicroApp -count=1
 ```
 
 ### agent-browser

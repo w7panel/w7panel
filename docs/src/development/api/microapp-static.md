@@ -113,9 +113,12 @@ curl 'http://localhost:8000/panel-api/v1/microapp/top' \
 |------|------|
 | 1 | 从 token 解析当前角色 `role` |
 | 2 | 从 root 集群读取所有 `MicroApp` CRD |
-| 3 | 只保留 `spec.config-v2.props.roleConfig` 中包含当前角色的多角色微应用 |
-| 4 | 非 `founder` 角色会过滤 `bindings` 和 `roleConfig`，并标记 `metadata.labels.microapp.w7.cc/from=root` |
-| 5 | 若读取失败，controller 返回空 `MicroAppList`，不会直接报错 |
+| 3 | 排除 `metadata.annotations.w7.cc/manifest-type=gateway-plugin` 的插件 MicroApp |
+| 4 | 只保留 `spec.config-v2.props.roleConfig` 中包含当前角色的多角色微应用 |
+| 5 | 非 `founder` 角色会过滤 `bindings` 和 `roleConfig`，并标记 `metadata.labels.microapp.w7.cc/from=root` |
+| 6 | 若读取失败，controller 返回空 `MicroAppList`，不会直接报错 |
+
+该接口同时用于顶部菜单和域名管理的“应用直达”选择器，因此插件不会出现在这两个入口中。
 
 响应参数：`MicroAppList`。
 

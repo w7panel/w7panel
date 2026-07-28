@@ -10,19 +10,39 @@
 
 列表、添加、修改和删除分别使用 K8s 代理的 GET、POST、PUT 和 DELETE。MicroApp 仅提供配置操作界面，不作为插件列表数据源。
 
+列表中的插件信息与域名规则插件信息统一按“标题、标识+版本、描述”展示，标题不加粗，后两项使用辅助文字样式。“全局状态”列直接映射 Higress `spec.defaultConfigDisable`；无编辑权限时开关禁用，提交期间显示加载状态。只支持规则配置的插件不显示全局开关。
+
+## 官方应用保护
+
+通过制品安装的官方应用不在 WasmPlugin 上重复写保护注解。前端使用 WasmPlugin 的 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间的同名 AppGroup，并读取 AppGroup 的注解：
+
+```yaml
+metadata:
+  annotations:
+    w7.cc/official-app: "true"
+```
+
+存在该注解时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识；网关插件列表同时禁止编辑 WasmPlugin 元数据和卸载插件。插件启停、全局配置和域名规则配置仍然可用。网关插件的官方标记、编辑和卸载保护统一只读取 `w7.cc/official-app`；`w7.cc/deny-delete` 只保留其通用的 AppGroup 删除保护语义，不能用于推断官方身份。AppGroup 查询失败时不能降级为普通应用，避免错误开放受保护操作。文档和代码统一使用“官方应用提供的网关插件”，不使用“官方插件”。
+
+## 插件更新
+
+插件更新复用应用列表的 AppGroup/ZPK 更新链路。前端按 WasmPlugin 的 `w7.cc/group-name` 找到 AppGroup，以 AppGroup 的命名空间和名称调用 `/panel-api/v1/zpk/upgrade-info`。同一 AppGroup 可能包含多个 WasmPlugin，更新检测必须按 AppGroup 名称去重，并将结果共享给组内插件。
+
+存在新版本时在插件标题右侧显示“新版本”，可查看后端返回的 `description`，并携带 AppGroup 名称作为 `releaseName`、更新结果或 AppGroup `spec.zpkUrl` 作为 `path` 进入 `/app/store-install`。更新操作升级整个应用制品，包括同组 WasmPlugin、MicroApp 和其他资源，不能只替换单个 WasmPlugin。
+
 ## Metadata 约定
 
 扩展能力写入 `metadata.annotations`，避免修改 Higress CRD：
 
 | Annotation | 默认值 | 说明 |
 |------------|--------|------|
-| `w7.cc/plugin-enabled` | `true` | 插件级启停状态 |
 | `w7.cc/plugin-support-global` | `true` | 是否支持全局配置 |
 | `w7.cc/plugin-support-rule` | `false` | 是否支持域名规则配置 |
 | `w7.cc/plugin-microapp` | 空 | 旧资源或手工添加时显式关联的 MicroApp 名称 |
-| `w7.cc/plugin-disabled-state` | 空 | 停用前的全局与规则开关快照 |
 
 旧插件没有 `plugin-support-rule` 时，仅在已经存在 `matchRules` 的情况下兼容识别为支持规则配置。
+
+“支持规则配置”同时约束域名入口可见性。编辑插件并取消该能力时，如果存在 `configDisable != true` 的规则，保存前必须展示危险确认，说明插件会从域名“更多”中隐藏、现有启用规则将全部停用，且重新开启能力不会自动恢复规则状态。确认后将所有 `matchRules[].configDisable` 写为 `true`。
 
 ## 配置映射
 
@@ -30,9 +50,17 @@
 |------------|-----------------|
 | 全局配置 | `spec.defaultConfig`、`spec.defaultConfigDisable` |
 | 规则配置 | `spec.matchRules[].config`、`spec.matchRules[].configDisable` |
-| 规则目标 | `spec.matchRules[].ingress = ["{namespace}/{ingressName}"]` |
+| 规则目标 | 统一使用 `ingress = ["{namespace}/{ingressName}"]` |
 
-域名“更多”必须同时满足 `plugin-enabled != false` 和支持规则配置才展示。
+全局配置和规则配置遵循 Higress 原生的独立开关语义：列表“全局状态”只修改 `defaultConfigDisable`，不能连带修改任何 `matchRules[].configDisable`。域名“更多”只要 WasmPlugin 存在且支持规则配置就展示；卸载 WasmPlugin 后自然消失。网关插件表格上方必须提示全局状态不影响域名规则；域名“更多”列表上方必须提示规则状态只影响当前域名，不影响全局配置或其他域名。
+
+域名“更多”的插件表格只保留插件、规则状态和操作列，不单独展示“配置方式”；用户点击配置后，仍按关联 MicroApp 是否存在可用菜单决定加载操作界面或回退 YAML。
+
+Higress 的 Disable 字段采用缺省启用语义：`defaultConfigDisable` 或已匹配规则的 `configDisable` 不存在时按 `false` 处理；只有没有匹配规则时，规则状态才显示为未启用。通用网关插件的域名配置只识别精确的 `namespace/ingressName` 目标，不接管 AI 代理自行维护的 `domain`、`service` 规则。修改一条包含多个 Ingress 目标的共享规则时，前端先复制其配置和状态，为当前 Ingress 建立独立规则，再保留其他目标。
+
+YAML 模式只编辑当前作用域的配置对象，不提供启用或停用操作；保存时必须保留原 `defaultConfigDisable` 或 `matchRules[].configDisable` 状态。全局启停统一在插件列表操作，规则启停统一在域名“更多”列表操作。
+
+删除 Ingress 前，前端遍历 `higress-system` 下的 WasmPlugin，从每条规则的 `ingress` 数组移除对应的 `namespace/name`；共享规则仍保留其他 Ingress、域名或服务目标。Ingress 重写由 Ingress annotation 独立维护，不能向任意插件配置写入通用 `rewrite_host` 字段。
 
 ## MicroApp 加载
 
@@ -51,6 +79,8 @@
 找到关联资源后，通过 `/panel-api/v1/microapp/{name}/info` 获取按当前用户角色过滤的资源信息，并沿用 MicroApp 静态资源状态、下载、`frontprops`、Wujie/iframe 加载流程。
 
 是否配置了插件前端包，以 MicroApp 当前作用域可用的 `spec.bindings[].menu` 是否包含菜单项为准，不能只根据 `frontendUrl` 或 `url` 判断。全局配置检查允许展示的创始人端/普通用户端菜单；规则配置只检查 `normal` binding。没有对应菜单时直接回退 YAML。
+
+无论是否存在配置前端包，配置抽屉都使用同一份当前作用域 YAML。存在前端包时，操作界面提供 **YAML 详情** 按钮；没有前端包或前端加载失败时直接进入同一个 YAML 界面。两种入口都先显示只读预览，通过 **编辑** 切换为可修改状态；取消预览时，有前端包会返回操作界面，没有前端包则关闭配置抽屉。YAML 保存仍通过当前作用域映射更新 `defaultConfig` 或对应 `matchRules[].config`，不能用规则配置入口修改整个 WasmPlugin。
 
 ## 配置前端 props
 

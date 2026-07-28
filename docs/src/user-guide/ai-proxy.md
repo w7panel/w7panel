@@ -33,19 +33,40 @@ AI 代理基于 Higress，把不同厂商或自建的大模型 API 统一到一�
 域名详情页上方的 **路由配置** 只作用于当前域名：
 
 - **模型名称**：在域名路由配置中输入该域名支持的模型名称。配置后，请求体中的 `model` 必须在列表内，否则网关返回 HTTP 403；留空表示不限制模型。
-- **认证**：启用后至少要创建一个消费者。客户端可通过请求头 `x-api-key`，或查询参数 `apikey` 携带消费者 Key。推荐使用请求头，避免 Key 出现在 URL 和访问日志中。
+- **认证**：启用后至少要创建一个消费者。消费者区域支持添加多个消费者，并展示消费者名称和认证方式。每个消费者可以配置多个认证令牌及独立的令牌来源。
 
-新增消费者时 Key 留空会自动生成。自动生成的 Key 只在保存成功时提示一次，请立即保存到密码管理器或客户端密钥配置中。编辑已有消费者时 Key 留空表示保留原 Key。
+点击 **添加消费者** 后会打开配置弹窗。消费者名称由系统自动生成且不能修改；认证方式使用 Tab 展示，当前只支持 **Key Auth**。Key Auth 支持添加多个认证令牌，每个令牌都可以手动填写或随机生成。令牌来源支持：
+
+- **Authorization: Bearer ${value}**：通过标准 `Authorization` 请求头发送，适合 OpenAI SDK 等客户端；
+- **自定义 HTTP Header**：需要同时填写 Header 名称，例如 `x-api-key`；
+- **查询参数**：需要同时填写参数名称，例如 `apikey`，只建议临时调试使用。
+
+点击弹窗确认后配置立即保存，不需要再次点击页面底部的 **保存配置**。编辑消费者时可以增加、删除或轮换认证令牌，也可以修改令牌来源及对应名称。
+
+删除消费者会立即清理对应 Secret、Key Auth 全局消费者配置和当前域名的 `allow` 引用。删除最后一个消费者时，该域名的认证会自动关闭。
 
 ## 配置服务提供者
 
-一个域名可以创建多个 AI 服务提供者。每个提供者可配置供应商类型、协议、上游 Token、服务地址、权重和启用状态。服务提供者不单独维护模型，支持模型统一在域名路由配置中设置。
+一个域名可以创建多个 AI 服务提供者。创建和编辑表单会按照 Higress 的供应商能力显示专属配置，而不是使用统一的服务地址。服务提供者不单独限制客户端可请求的模型；模型白名单仍在域名路由配置中统一维护。
 
 常用供应商包括 OpenAI/OpenAI 兼容服务、通义千问、DeepSeek、Azure OpenAI、Claude、智谱 AI、豆包、Gemini、Ollama、vLLM、AWS Bedrock 和 Google Vertex。不同类型会显示不同的专属字段。
 
 - 只有启用的提供者会参与请求转发。
 - 启用两个或更多提供者时，每个权重必须大于 0，且权重总和必须等于 100。
 - 提供者名称只要求在当前域名内唯一；不同域名可使用相同显示名称，底层资源会自动隔离。
+
+供应商专属配置包括：
+
+- **OpenAI**：官方服务或自定义兼容服务；自定义 URL 支持多个同协议、同路径的静态 IP 地址；
+- **通义千问**：联网搜索、OpenAI 兼容模式、文件 ID、官方/自定义域名和推理内容处理模式；
+- **Azure OpenAI**：填写包含 `api-version` 的完整服务 URL；
+- **Claude**：Anthropic 官方服务或自定义服务 URL，并支持 API 版本和 Claude Code 模式；
+- **Ollama / vLLM**：填写主机端口或一个、多个 vLLM 服务 URL；
+- **AWS Bedrock / Google Vertex**：从 Higress 区域候选中选择或搜索区域；Vertex 还支持认证 JSON、令牌刷新提前量和 Gemini 安全设置。
+
+所有供应商都可以设置流式首包超时。启用 **Token 故障转移** 后，还需设置连续失败/成功阈值、健康检查间隔、超时和健康检查模型；模型下拉优先显示当前供应商的 Higress 预置选项，也可以输入自定义模型名。
+
+如果 `higress-system/default` McpBridge 已配置代理服务器，提供者表单会显示 **代理服务器** 选项。选择后，该提供者访问上游模型服务的连接会经过对应代理；留空表示直接访问上游。代理服务器必须预先存在于该 McpBridge 的 `spec.proxies` 中。
 
 选择协议时：
 
@@ -71,10 +92,10 @@ AI 代理基于 Higress，把不同厂商或自建的大模型 API 统一到一�
 | 启用 | 是 |
 
 4. 在页面上方“路由配置”的模型名称中输入 `deepseek-chat` 并回车。
-5. 开启认证，添加消费者 `demo-client`。Key 可自行填写；留空则由面板生成。
-6. 点击 **保存配置**，并立即记录面板提示的消费者 Key。
+5. 开启认证并点击 **添加消费者**，保留默认的 Bearer Token 来源，记录自动生成的认证令牌后保存弹窗。
+6. 点击页面底部的 **保存配置**，保存模型名称等路由设置。
 
-注意：客户端使用的是消费者 Key，不是 DeepSeek 的上游 Token。
+注意：客户端使用的是消费者认证令牌，不是 DeepSeek 的上游 Token。
 
 ## 调用示例
 
@@ -86,7 +107,7 @@ export AI_API_KEY='替换为消费者Key'
 
 curl "$AI_BASE_URL/chat/completions" \
   -H 'Content-Type: application/json' \
-  -H "x-api-key: $AI_API_KEY" \
+  -H "Authorization: Bearer $AI_API_KEY" \
   -d '{
     "model": "deepseek-chat",
     "messages": [
@@ -96,7 +117,7 @@ curl "$AI_BASE_URL/chat/completions" \
   }'
 ```
 
-也可以用查询参数认证，但只建议临时调试：
+如果消费者的令牌来源选择了“查询参数”，并把参数名称设为 `apikey`，可以这样调用：
 
 ```bash
 curl "$AI_BASE_URL/models?apikey=$AI_API_KEY"
@@ -107,7 +128,7 @@ curl "$AI_BASE_URL/models?apikey=$AI_API_KEY"
 ```bash
 curl -N "$AI_BASE_URL/chat/completions" \
   -H 'Content-Type: application/json' \
-  -H "x-api-key: $AI_API_KEY" \
+  -H "Authorization: Bearer $AI_API_KEY" \
   -d '{
     "model": "deepseek-chat",
     "stream": true,
@@ -117,7 +138,7 @@ curl -N "$AI_BASE_URL/chat/completions" \
 
 ### OpenAI Python SDK
 
-多数 OpenAI 兼容 SDK 默认发送 `Authorization: Bearer`，而当前 AI 代理消费者认证使用 `x-api-key`，因此需要额外设置默认请求头：
+OpenAI 兼容 SDK 默认发送 `Authorization: Bearer`，因此消费者使用默认的 Bearer Token 来源时不需要额外设置请求头：
 
 ```python
 from openai import OpenAI
@@ -126,7 +147,6 @@ consumer_key = "替换为消费者Key"
 client = OpenAI(
     api_key=consumer_key,
     base_url="https://ai.example.com/v1",
-    default_headers={"x-api-key": consumer_key},
 )
 
 response = client.chat.completions.create(
@@ -145,7 +165,6 @@ const consumerKey = process.env.AI_API_KEY;
 const client = new OpenAI({
   apiKey: consumerKey,
   baseURL: 'https://ai.example.com/v1',
-  defaultHeaders: { 'x-api-key': consumerKey },
 });
 
 const response = await client.chat.completions.create({
@@ -165,11 +184,11 @@ console.log(response.choices[0].message.content);
 
 | 现象 | 检查项 |
 |------|--------|
-| HTTP 401/403，提示认证失败 | 是否启用了认证；`x-api-key` 是否为当前域名的消费者 Key |
+| HTTP 401/403，提示认证失败 | 是否启用了认证；请求携带方式、Header/参数名称和认证令牌是否与消费者配置一致 |
 | HTTP 403，提示模型不在允许列表 | 请求体是否包含 `model`，名称是否与路由配置完全一致 |
 | 保存多个提供者失败 | 所有启用项权重是否大于 0，权重总和是否为 100 |
 | 网关返回上游连接错误 | 服务地址能否从 Higress 访问；DNS、端口、协议和 TLS 是否正确 |
-| SDK 请求失败但 curl 成功 | SDK 是否使用正确的 `base_url`，以及是否显式发送 `x-api-key` |
+| SDK 请求失败但 curl 成功 | SDK 是否使用正确的 `base_url`；消费者是否选择了 SDK 默认支持的 Bearer Token 来源 |
 | 只有部分请求失败 | 多个启用提供者是否都支持相同模型和请求协议 |
 | HTTPS 证书未签发 | 域名是否解析到网关，ClusterIssuer 和证书控制器是否正常 |
 
@@ -191,5 +210,13 @@ console.log(response.choices[0].message.content);
 - McpBridge 服务注册；
 - 消费者 Secret 与 Key Auth 规则；
 - 模型白名单规则。
+
+确认删除后会打开任务检测界面，并依次执行：
+
+1. 删除并检查消费者 Secret、Key Auth 消费者和域名授权规则；
+2. 删除并检查 AI Provider、服务匹配规则、McpBridge registry 和旧版提供者 Secret；
+3. 删除并检查模型校验规则和 Ingress 域名配置。
+
+只有反查确认该阶段没有残留资源后，状态才会变为“已删除”。任务执行期间不能关闭弹窗；如果某一步失败，界面会保留错误信息，可以点击 **重试未完成任务** 继续清理，已经确认完成的步骤不会重复执行。
 
 删除操作不可恢复，执行前应确认域名已不再承载请求。

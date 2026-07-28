@@ -1,5 +1,48 @@
 # 应用、镜像和代码包组件
 
+## 应用详情外部服务入口
+
+源文件：`w7panel-ui/src/views/app/apps/detail.vue`
+
+应用详情页读取 `AppGroup.spec.externalServices`，将市场、授权中心、工单系统等第三方服务作为独立菜单展示。面板不识别服务提供方，也不解析订单参数。
+
+```yaml
+spec:
+  externalServices:
+    - key: billing
+      title: 授权与续费
+      url: https://market.example.com/embed/order/xxx
+      openMode: iframe
+```
+
+字段说明：
+
+| 字段 | 必填 | 说明 |
+|------|------|------|
+| `key` | 是 | AppGroup 内唯一的稳定标识，同时用于页面 query 定位 |
+| `title` | 是 | 面板菜单标题 |
+| `url` | 是 | HTTP 或 HTTPS 服务地址 |
+| `openMode` | 否 | 仅支持 `iframe`，未填写时也默认在详情区加载 |
+
+面板会忽略 key 重复、字段不完整、协议不受支持或打开方式无效的入口。`iframe` 服务需要由目标站点允许被面板嵌入。
+
+制品安装时，仓库信息接口可以返回同结构的 `data.external_services`。安装器会校验入口并写入根 AppGroup；内部子应用不会重复写入：
+
+```json
+{
+  "data": {
+    "external_services": [
+      {
+        "key": "billing",
+        "title": "授权与续费",
+        "url": "https://market.example.com/#/user-center?tab=orders&order_sn=ORDER-1",
+        "openMode": "iframe"
+      }
+    ]
+  }
+}
+```
+
 ## `StoreInstall`
 
 源文件：`w7panel-ui/src/components/store-install.vue`
