@@ -38,7 +38,6 @@ metadata:
 |------------|--------|------|
 | `w7.cc/plugin-support-global` | `true` | 是否支持全局配置 |
 | `w7.cc/plugin-support-rule` | `false` | 是否支持域名规则配置 |
-| `w7.cc/plugin-microapp` | 空 | 旧资源或手工添加时显式关联的 MicroApp 名称 |
 
 旧插件没有 `plugin-support-rule` 时，仅在已经存在 `matchRules` 的情况下兼容识别为支持规则配置。
 
@@ -66,7 +65,7 @@ YAML 模式只编辑当前作用域的配置对象，不提供启用或停用操
 
 面向用户的标准安装入口是 **应用管理 → 制品市场**。插件制品应把 WasmPlugin、可选的配置前端 MicroApp 和依赖资源一起交付；安装或升级后，用户再到 **网关管理 → 网关插件** 管理启停和配置。网关插件页的“添加插件”只用于开发调试、私有镜像验证和历史资源兼容，不负责安装 MicroApp 或维护完整制品生命周期。
 
-制品市场安装的插件通过 `metadata.labels["w7.cc/group-name"]` 自动关联同组 MicroApp。前端从 `default` 命名空间读取 MicroApp 列表，只有同组唯一匹配时才建立关联；找不到或同组存在多个 MicroApp 时回退 YAML。没有 `w7.cc/group-name` 的旧资源继续兼容 `w7.cc/plugin-microapp` 显式关联。
+制品市场安装的插件通过 `metadata.labels["w7.cc/group-name"]` 自动关联同组 MicroApp。前端从 `default` 命名空间读取 MicroApp 列表，只有同组唯一匹配时才建立关联；同组存在多个 MicroApp 时回退 YAML。旧版 MicroApp 没有分组标签时，兼容用与 WasmPlugin 分组完全同名的 `metadata.name` 精确匹配，不再读取 `w7.cc/plugin-microapp` 注解。新生成的 WasmPlugin 与 MicroApp 都必须写入相同的分组标签。
 
 制品开发时应保证：
 
@@ -80,7 +79,7 @@ YAML 模式只编辑当前作用域的配置对象，不提供启用或停用操
 
 是否配置了插件前端包，以 MicroApp 当前作用域可用的 `spec.bindings[].menu` 是否包含菜单项为准，不能只根据 `frontendUrl` 或 `url` 判断。全局配置检查允许展示的创始人端/普通用户端菜单；规则配置只检查 `normal` binding。没有对应菜单时直接回退 YAML。
 
-无论是否存在配置前端包，配置抽屉都使用同一份当前作用域 YAML。存在前端包时，操作界面提供 **YAML 详情** 按钮；没有前端包或前端加载失败时直接进入同一个 YAML 界面。两种入口都先显示只读预览，通过 **编辑** 切换为可修改状态；取消预览时，有前端包会返回操作界面，没有前端包则关闭配置抽屉。YAML 保存仍通过当前作用域映射更新 `defaultConfig` 或对应 `matchRules[].config`，不能用规则配置入口修改整个 WasmPlugin。
+无论是否关联到可用 MicroApp 配置页面，配置抽屉都使用同一份当前作用域 YAML。存在可用页面时，操作界面提供 **YAML 详情** 按钮；没有可用页面或页面加载失败时直接进入同一个 YAML 界面。两种入口都先显示只读预览，通过 **编辑** 切换为可修改状态；取消预览时，有可用页面会返回操作界面，没有可用页面则关闭配置抽屉。YAML 保存仍通过当前作用域映射更新 `defaultConfig` 或对应 `matchRules[].config`，不能用规则配置入口修改整个 WasmPlugin。
 
 ## 配置前端 props
 

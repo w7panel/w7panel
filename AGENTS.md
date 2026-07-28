@@ -872,6 +872,7 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - 网关插件列表不单独展示前端包；关联的 MicroApp 仅用于决定配置时加载插件页面还是回退 YAML。
 - 网关插件列表的“插件”列固定为 360px，避免在宽屏下过度拉伸。
 - 网关插件列表与域名规则插件列表统一按“标题、标识+版本、描述”三层展示，标题使用常规字重，标识版本和描述使用 12px 灰色辅助文字。
+- `w7.cc/manifest-type=gateway-plugin` 的插件应用只在“网关管理 → 网关插件”中管理，不在顶部菜单、应用直达和普通应用列表中展示。
 - 域名管理“更多”的插件列表只展示插件、规则状态和操作列，不展示“配置方式”列；配置时仍根据关联 MicroApp 自动打开操作界面或回退 YAML。
 - 网关插件列表使用“全局状态”列直接控制 Higress `spec.defaultConfigDisable`，不能连带修改 `matchRules[].configDisable`；只支持规则配置的插件不显示全局开关。无编辑权限时禁用开关，切换期间显示加载状态。
 - 网关插件通过 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间同名 AppGroup；AppGroup 带 `metadata.annotations["w7.cc/official-app"] == "true"` 时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识。网关插件列表同时禁止编辑插件元数据和卸载，但仍允许启停及修改全局/规则配置。插件的官方标记、编辑和卸载保护都只使用该官方应用标识判断，不能使用 `w7.cc/deny-delete` 推断官方身份。此类资源统一称为“官方应用提供的网关插件”，不要称为“官方插件”。
@@ -879,11 +880,11 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - 网关插件列表顶部的添加按钮与搜索框至少保留 12px 间距。
 - 网关插件列表应在表格上方提示“全局状态仅控制插件的全局配置，不影响域名规则”；域名管理“更多”的插件列表应提示“规则状态仅控制当前域名，不影响插件的全局配置或其他域名”。提示框与后续表格至少保留 12px 间距。
 - 网关插件列表右侧操作的确认浮层向左展开并限制内容宽度，避免浮层打开时触发页面横向滚动。
-- 插件支持范围等扩展能力写入 `metadata.annotations`，实际全局和规则开关分别使用 Higress 原生 `spec.defaultConfigDisable` 与 `spec.matchRules[].configDisable`；制品安装的 WasmPlugin 与 MicroApp 通过共同的 `metadata.labels["w7.cc/group-name"]` 关联，旧资源可兼容 `w7.cc/plugin-microapp` annotation。
+- 插件支持范围等扩展能力写入 `metadata.annotations`，实际全局和规则开关分别使用 Higress 原生 `spec.defaultConfigDisable` 与 `spec.matchRules[].configDisable`；制品安装的 WasmPlugin 与 MicroApp 通过共同的 `metadata.labels["w7.cc/group-name"]` 关联，同组必须唯一匹配。兼容尚未写入分组标签的旧 MicroApp 时，只允许用与分组完全同名的 `metadata.name` 精确匹配，不再读取 `w7.cc/plugin-microapp`。
 - 编辑插件时取消“支持规则配置”必须明确提示：插件将从域名“更多”中隐藏，所有已启用的 `matchRules` 会停用，重新开启支持范围不会自动恢复；用户确认后才能保存。
 - 全局配置的前端包只读取创始人端（兼容旧名称 `found`）菜单并竖排展示，不显示普通用户端菜单；规则配置只读取普通用户端菜单并横排展示。当前作用域过滤后仅剩一个菜单项时，直接加载该页面，不显示左侧或顶部菜单栏。
 - MicroApp 当前作用域的 `bindings.menu` 有菜单项时才视为配置了前端包，并按照统一的静态资源与 Wujie/iframe 流程加载；无菜单或加载失败时回退 YAML。
-- 有配置前端包时必须提供统一的“YAML 详情”入口；无配置前端包或加载失败时直接进入同一个 YAML 界面。两种入口都默认只读预览，通过“编辑”按钮切换为可修改状态。
+- 关联到可用 MicroApp 配置页面时必须提供统一的“YAML 详情”入口；未关联到可用页面或加载失败时直接进入同一个 YAML 界面。两种入口都默认只读预览，通过“编辑”按钮切换为可修改状态。
 - 全局配置和域名规则按 Higress 原生逻辑独立启停：关闭全局状态不能关闭或隐藏路由规则，关闭某条路由规则也不能影响全局配置。
 - Higress 的 `defaultConfigDisable` 或已有 `matchRules[].configDisable` 未设置时按 `false`（启用）处理；没有匹配规则时才显示为规则未启用。
 - 域名规则兼容 Higress 原生 `ingress`、`domain`、`service` 三种匹配目标；修改同时覆盖多个同类目标的共享规则前，必须拆出当前匹配目标并保留其他目标的原配置和状态。
