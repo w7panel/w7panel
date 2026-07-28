@@ -73,6 +73,9 @@ Authorization: Bearer <user-token>
 | `repoUrl` | query | string | 是 | ZPK 仓库地址 |
 | `thirdpartyCDToken` | query | string | 否 | 第三方持续交付 token |
 | `releaseName` | query | string | 否 | 已安装 Release 名称，升级场景可传入 |
+| `reinstall` | query | bool | 否 | 用户确认强制清除旧引用后重试配置读取；仅冲突确认流程传入 |
+
+读取配置时会把 `releaseName` 作为 `app_identify` 传给制品仓库。若仓库发现订单已绑定其他域名或已有应用引用，本接口与安装接口一样返回 HTTP 409 结构化冲突。前端据此展示原绑定域名或原面板地址；应用引用冲突确认强制清除后，会以 `reinstall=true` 重新读取配置，并在最终安装请求中继续携带该标记。
 
 响应参数：返回 `PackageAddConfig[]`。
 
@@ -139,6 +142,26 @@ Authorization: Bearer <user-token>
 
 功能：安装或升级 ZPK 应用，支持普通 ZPK、Helm ZPK、传统应用等安装参数。
 
+用户提交安装后，后端先将 `releaseName` 转为小写并把 `_` 规范化为 `-`，然后再次请求 ZPK 仓库 `info`，将 `ingressHost` 和规范化后的 `releaseName` 分别通过 `domain`、`app_identify` 参数传递。普通安装不发送 `reinstall`；只有用户在应用引用冲突提示中二次确认“强制清除并安装”后，才发送 `reinstall=true`。ZPK 将域名、应用标识和受控的重装标记写入加密 ticket；安装完成通知不再单独传递应用标识，ZPK 解票后再把这些字段传给市场。市场仅允许非升级安装使用 `reinstall` 覆盖旧绑定，升级请求始终校验域名和应用标识。订单预检响应同时返回已绑定的 `panel_url`、`panel_device_sn` 和 `conflict_reason`；其中 `domain_mismatch` 表示订单域名不一致，`app_identify_exists` 表示订单已有应用标识绑定。
+
+`/zpk/config` 和 `/zpk/install` 遇到订单绑定冲突时均返回 HTTP 409。`domain_mismatch` 显示原绑定域名；`app_identify_exists` 显示原 `panel_url`，用户可以前往原面板正常卸载，也可以在风险确认后以 `reinstall=true` 强制覆盖旧安装记录。强制覆盖可能导致老应用状态丢失且无法继续升级。面板向前端返回的冲突结构如下：
+
+```json
+{
+  "code": 409,
+  "error": "制品安装绑定冲突",
+  "data": {
+    "conflict_reason": "domain_mismatch",
+    "domain": "old.example.com",
+    "panel_url": "https://panel.example.com",
+    "panel_device_sn": "device-1",
+    "app_identify": "original-release-name"
+  }
+}
+```
+
+`app_identify_exists` 冲突会额外返回订单原绑定的 `app_identify`。安装页打开原面板时跳转到 `/app/apps?uninstallApp={app_identify}`；原面板应用列表按该标识定位并高亮对应 AppGroup，由用户确认后手动删除，不会自动执行卸载。
+
 请求参数：JSON Body。
 
 | 参数 | 类型 | 必填 | 说明 |
@@ -155,6 +178,7 @@ Authorization: Bearer <user-token>
 | `clusterId` | string | 否 | 集群 ID |
 | `isTrandition` | bool | 否 | 是否传统应用安装 |
 | `zipUrl` | string | 否 | ZIP 包地址 |
+| `reinstall` | bool | 否 | 强制覆盖旧安装绑定；仅由冲突确认流程设置，升级时不可绕过标识校验 |
 
 `InstallOption` 参数：
 
