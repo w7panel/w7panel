@@ -2,17 +2,50 @@
 
 ## 数据来源
 
-网关插件以 Higress `WasmPlugin` 为唯一数据源：
+网关插件页直接请求制品市场公开接口 `POST https://zm.w7.com/zpk-market/formula/list`。请求体固定携带 `tag: "网关插件"`，由市场服务端先按标签筛选；前端再校验 `application_type=gateway-plugin`，避免错误标签数据进入插件列表。请求读取第一页并设置足够覆盖完整市场列表的 `limit`，超时为 10 秒。
+
+```json
+{
+  "page": 1,
+  "limit": 500,
+  "tag": "网关插件"
+}
+```
+
+市场制品通过 `identify` 与 AppGroup `spec.identifie` 关联，再通过 WasmPlugin 的 `w7.cc/group-name` 找到真实插件资源。关联到 WasmPlugin 时显示已安装状态并保留配置、启停、更新和卸载能力；未关联时显示“待安装”，点击“安装”携带 `formula_url` 进入 `/app/store-install`。市场请求失败时不能影响已安装 WasmPlugin 的管理；不在市场中的历史或手工插件归入“其他”分类继续展示。
+
+AppGroup、MicroApp API 以及通用分组、官方和删除保护元数据集中维护在 `src/utils/w7panel-resource.ts`，网关插件工具只维护 Higress WasmPlugin 协议。插件页先读取必须展示的 WasmPlugin，再根据其中实际出现的 `w7.cc/group-name` 定向读取对应 AppGroup，并用标签选择器读取同组 MicroApp；旧版无分组 MicroApp 才按同名资源做兼容 GET。禁止全量读取 AppGroup 或 MicroApp 后在浏览器筛选。
+
+卸载属于完整应用生命周期操作：列表必须删除插件关联的 `default` 命名空间 AppGroup，由 AppGroup Controller 清理同组 WasmPlugin、MicroApp 和其他关联资源，不能直接删除某一个 WasmPlugin。同一个 AppGroup 包含多个插件时，任一插件行触发的都是整个应用卸载；没有关联 AppGroup 的历史或手工插件不显示卸载入口。
+
+已安装状态和插件操作仍以 Higress `WasmPlugin` 为准：
 
 ```text
 /k8s-proxy/apis/extensions.higress.io/v1alpha1/namespaces/higress-system/wasmplugins
 ```
 
-列表、添加、修改和删除分别使用 K8s 代理的 GET、POST、PUT 和 DELETE。MicroApp 仅提供配置操作界面，不作为插件列表数据源。
+列表、添加、修改和删除分别使用 K8s 代理的 GET、POST、PUT 和 DELETE。MicroApp 仅提供配置操作界面，不作为市场列表或安装状态的数据源。
+
+网关插件主列表和域名管理“更多”都使用市场 `plugin_type` 分类，且只渲染非空分类：
+
+| `plugin_type` | 分类标题 |
+|---------------|----------|
+| `auth` | 认证鉴权 |
+| `security` | 安全防护 |
+| `traffic` | 流量管控 |
+| `transform` | 请求响应转换 |
+| `o11y` | 可观测性 |
+| `ai` | AI |
+| 空值 | 其他 |
+| 未知值 | 市场原始分类名 |
+
+网关插件主列表展示市场全部网关插件；域名管理“更多”仍只展示已安装且支持规则配置的插件，并通过关联 AppGroup 的 `spec.identifie` 取得对应市场分类。没有对应市场项的已安装插件归入“其他”。
+
+每个非空分类默认展开，分类标题显示当前插件数量，点击标题可以独立收起或展开。所有分类置于同一个 4px 圆角的扁平列表容器中，使用中性分隔线和统一高度标题行；收起标题为白底，展开标题使用主色浅背景和左侧状态线。分类标题已经承担分组层级，因此分类内表格隐藏重复表头，展开后直接显示插件数据行；全部收起时形成紧凑、连续的分类列表。折叠状态仅属于当前组件实例，不写入浏览器存储；重新进入页面或重新打开域名策略时恢复默认展开。
 
 列表中的插件信息与域名规则插件信息统一按“标题、标识+版本、描述”展示，标题不加粗，后两项使用辅助文字样式。“全局状态”列直接映射 Higress `spec.defaultConfigDisable`；无编辑权限时开关禁用，提交期间显示加载状态。只支持规则配置的插件不显示全局开关。
 
-## 官方应用保护
+## 官方标识与卸载保护
 
 通过制品安装的官方应用不在 WasmPlugin 上重复写保护注解。前端使用 WasmPlugin 的 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间的同名 AppGroup，并读取 AppGroup 的注解：
 
@@ -20,9 +53,10 @@
 metadata:
   annotations:
     w7.cc/official-app: "true"
+    w7.cc/deny-delete: "true"
 ```
 
-存在该注解时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识；网关插件列表同时禁止编辑 WasmPlugin 元数据和卸载插件。插件启停、全局配置和域名规则配置仍然可用。网关插件的官方标记、编辑和卸载保护统一只读取 `w7.cc/official-app`；`w7.cc/deny-delete` 只保留其通用的 AppGroup 删除保护语义，不能用于推断官方身份。AppGroup 查询失败时不能降级为普通应用，避免错误开放受保护操作。文档和代码统一使用“官方应用提供的网关插件”，不使用“官方插件”。
+`w7.cc/official-app` 只表示官方身份：存在该注解时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识，网关插件列表同时禁止编辑 WasmPlugin 元数据。是否允许卸载独立读取 `w7.cc/deny-delete`，值为 `"true"` 时隐藏卸载入口并在执行前再次阻止删除；没有该注解时允许卸载关联 AppGroup。官方身份不能隐含卸载保护，删除保护也不能用于推断官方身份。插件启停、全局配置和域名规则配置仍然可用。AppGroup 查询失败时不能降级为普通应用，避免错误开放受保护操作。文档和代码统一使用“官方应用提供的网关插件”，不使用“官方插件”。
 
 ## 插件更新
 
@@ -55,7 +89,7 @@ metadata:
 
 域名“更多”的插件表格只保留插件、规则状态和操作列，不单独展示“配置方式”；用户点击配置后，仍按关联 MicroApp 是否存在可用菜单决定加载操作界面或回退 YAML。
 
-Higress 的 Disable 字段采用缺省启用语义：`defaultConfigDisable` 或已匹配规则的 `configDisable` 不存在时按 `false` 处理；只有没有匹配规则时，规则状态才显示为未启用。通用网关插件的域名配置只识别精确的 `namespace/ingressName` 目标，不接管 AI 代理自行维护的 `domain`、`service` 规则。修改一条包含多个 Ingress 目标的共享规则时，前端先复制其配置和状态，为当前 Ingress 建立独立规则，再保留其他目标。
+Higress 的 Disable 字段采用缺省启用语义：`defaultConfigDisable` 或已匹配规则的 `configDisable` 不存在时按 `false` 处理；只有没有匹配规则时，规则状态才显示为未启用。所有域名级插件配置只识别精确的 `namespace/ingressName` 目标，不读取或迁移旧 `domain`/裸 Ingress 目标；AI Provider 自行维护的 `service` 规则不由通用域名配置接管。修改一条包含多个 namespaced Ingress 目标的共享规则时，前端先复制其配置和状态，为当前 Ingress 建立独立规则，再保留其他目标。
 
 YAML 模式只编辑当前作用域的配置对象，不提供启用或停用操作；保存时必须保留原 `defaultConfigDisable` 或 `matchRules[].configDisable` 状态。全局启停统一在插件列表操作，规则启停统一在域名“更多”列表操作。
 
@@ -95,11 +129,14 @@ YAML 模式只编辑当前作用域的配置对象，不提供启用或停用操
 | `path` | `string` | 空字符串 | 有值 | Ingress 第一条规则的第一条路径 |
 | `pluginConfig` | `Record<string, unknown>` | `spec.defaultConfig` | `matchRules[].config` | 当前配置的深拷贝快照 |
 | `pluginEnabled` | `boolean` | 全局开关 | 当前规则开关 | 推荐使用的启用状态字段 |
+| `globalPluginConfig` | `Record<string, unknown>` | 当前全局配置 | 当前全局配置 | 全局配置只读快照；规则配置前端可据此判断全局值 |
+| `globalPluginEnabled` | `boolean` | 全局开关 | 全局开关 | 全局启用状态，只读，不代表当前规则状态 |
+| `ruleConfigs` | `Array<Record<string, unknown>>` | 原始 `spec.matchRules` 深拷贝 | 不注入 | 仅全局配置页面提供的规则只读上下文，不展开或改写规则结构 |
 | `pluginConfigEnabled` | `boolean` | 同上 | 同上 | 兼容旧插件前端的字段名 |
 | `microappRole` | `string` | 按当前角色加载 | `normal` | 当前插件配置前端使用的角色 |
 | `savePluginConfig` | `(config, enabled?) => Promise<WasmPlugin>` | 可用 | 可用 | 保存当前作用域配置并返回更新后的 WasmPlugin |
 
-`pluginConfig` 不包含整个 WasmPlugin，只包含当前作用域的配置对象。需要插件名称、域名或 Ingress 信息时使用对应的独立字段，不要从配置内容中反推。
+`pluginConfig` 不包含整个 WasmPlugin，只包含当前作用域的配置对象。`globalPluginConfig` 和 `globalPluginEnabled` 是全局/规则页面都提供的只读判断上下文；`ruleConfigs` 仅在全局页面提供，同样只读，不代表保存目标。插件前端不得通过修改这些字段来保存配置。需要插件名称、域名或 Ingress 信息时使用对应的独立字段，不要从配置内容中反推。
 
 ### 读取 props
 
@@ -115,6 +152,9 @@ export type GatewayPluginProps = {
   path?: string;
   pluginConfig?: Record<string, unknown>;
   pluginEnabled?: boolean;
+  globalPluginConfig?: Record<string, unknown>;
+  globalPluginEnabled?: boolean;
+  ruleConfigs?: Array<Record<string, unknown>>;
   pluginConfigEnabled?: boolean;
   microappRole?: string;
   savePluginConfig?: (
@@ -225,6 +265,7 @@ await props.savePluginConfig(nextConfig);        // enabled 省略时默认启�
 - 保存是**整体替换当前作用域配置**，不是字段级合并。表单只编辑部分字段时，应先复制 `pluginConfig`，再覆盖目标字段，以免删除插件不认识但需要保留的配置。
 - 全局作用域保存到 `spec.defaultConfig`，开关保存到 `spec.defaultConfigDisable`。
 - 规则作用域保存到当前 Ingress 对应的 `spec.matchRules[].config`，开关保存到 `configDisable`；规则不存在时面板会自动创建。
+- `savePluginConfig` 只保存打开配置抽屉时的当前作用域：全局入口不能修改规则，规则入口不能修改全局；`globalPluginConfig`、`globalPluginEnabled`、`ruleConfigs` 永远不会成为保存目标。
 - `savePluginConfig` 返回 Promise，只有 Promise resolve 后才能提示成功或离开页面；失败时应保留表单并允许重试。
 - 注入的 `pluginConfig` 是启动时快照。保存成功后如需继续编辑，以本地表单为准；不要假设旧的 props 对象会自动更新。
 - 插件前端不得直接调用 K8s API 修改 WasmPlugin，统一通过 `savePluginConfig`，以保留作用域和开关映射逻辑。

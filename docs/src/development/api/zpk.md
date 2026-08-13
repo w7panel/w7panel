@@ -77,6 +77,8 @@ Authorization: Bearer <user-token>
 
 读取配置时会把 `releaseName` 作为 `app_identify` 传给制品仓库。若仓库发现订单已绑定其他域名或已有应用引用，本接口与安装接口一样返回 HTTP 409 结构化冲突。前端据此展示原绑定域名或原面板地址；应用引用冲突确认强制清除后，会以 `reinstall=true` 重新读取配置，并在最终安装请求中继续携带该标记。
 
+跨应用更新时，制品仓库返回的 `identifie` 可以与原应用不同，但配置响应中的根应用 `releaseName` 和 `deployName` 仍返回已有 AppGroup 的名称。前端使用该稳定名称读取原 Deployment 环境变量和 Helm values；新的 `identifie` 只表示本次更新使用的制品内容。此规则只约束配置读取，不改变安装接口现有的资源命名流程。
+
 响应参数：返回 `PackageAddConfig[]`。
 
 | 字段 | 类型 | 说明 |

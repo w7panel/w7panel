@@ -1,47 +1,39 @@
 # 应用、镜像和代码包组件
 
-## 应用详情外部服务入口
+## 应用详情制品市场菜单
 
 源文件：`w7panel-ui/src/views/app/apps/detail.vue`
 
-应用详情页读取 `AppGroup.spec.externalServices`，将市场、授权中心、工单系统等第三方服务作为独立菜单展示。面板不识别服务提供方，也不解析订单参数。
+应用详情页仅使用 MicroApp Binding 渲染菜单。制品库在 `info` 请求完成订单校验后，动态覆盖本次 Helm 包中 MicroApp 的 `name: zpk-market` Binding；前端按普通 MicroApp 菜单统一渲染和切换。
 
 ```yaml
-spec:
-  externalServices:
-    - key: billing
-      title: 授权与续费
-      url: https://market.example.com/embed/order/xxx
-      openMode: iframe
+bindings:
+  - name: zpk-market
+    title: 服务中心
+    support: thirdparty_cd
+    menu:
+      - title: 授权与续费
+        do: '#/user-orders?tab=orders&order_sn=ORDER-1'
+        location: back
 ```
 
 字段说明：
 
 | 字段 | 必填 | 说明 |
 |------|------|------|
-| `key` | 是 | AppGroup 内唯一的稳定标识，同时用于页面 query 定位 |
-| `title` | 是 | 面板菜单标题 |
-| `url` | 是 | HTTP 或 HTTPS 服务地址 |
-| `openMode` | 否 | 仅支持 `iframe`，未填写时也默认在详情区加载 |
+| `name` | 是 | 固定为 `zpk-market`，用于覆盖制品内原有市场分组 |
+| `title` | 是 | 分组标题 |
+| `support` | 是 | 使用现有值 `thirdparty_cd`，进入普通微应用菜单流程 |
+| `menu[].location` | 否 | 菜单位置，服务中心使用 `back` 展示在应用菜单底部 |
+| `menu[].do` | 是 | 微应用内路由，不包含域名；可包含安装后获得的订单参数 |
 
-面板会忽略 key 重复、字段不完整、协议不受支持或打开方式无效的入口。`iframe` 服务需要由目标站点允许被面板嵌入。
+面板不识别或硬编码 `zpk-market`：`founder` 按现有规则展示全部 Binding 菜单，其他角色只展示自身角色菜单。菜单分组使用现有默认图标，不新增 Binding `icon` 或菜单 `key` 字段。
 
-制品安装时，仓库信息接口可以返回同结构的 `data.external_services`。安装器会校验入口并写入根 AppGroup；内部子应用不会重复写入：
+`location: back` 的菜单统一在侧边栏底部平铺展示，不显示 Binding 分组标题；Binding 归属仍用于查找对应的运行配置。
 
-```json
-{
-  "data": {
-    "external_services": [
-      {
-        "key": "billing",
-        "title": "授权与续费",
-        "url": "https://market.example.com/#/user-center?tab=orders&order_sn=ORDER-1",
-        "openMode": "iframe"
-      }
-    ]
-  }
-}
-```
+制品库同步修改 Helm `values.yaml` 中的 `bindings` 和 `backend_config`：`backend_config[role=zpk-market]` 独立定义为 `type=external`、`load_mode=iframe`，后端地址保存市场域名，菜单 `do` 只保存站内路由。应用详情页和顶部微应用页切换菜单时都按 Binding 名称选择对应的 `roleConfig`，再依据 `load_mode` 与 `serverUrl` 加载，因此市场入口不会继承应用 `founder` 的后端、代理或前端属性。没有市场 Binding 时直接返回原 Helm 包地址，不执行动态替换；有市场 Binding 时其他配置不变。
+
+动态包从 `PackFormulaToHelmAndPack(..., false)` 取得当前缓存包，并使用基础包状态与 Bindings 内容生成缓存键；相同内容直接复用，变化时才解包重打。同一进程的并发生成会合并。动态文件与原包位于同一目录，按 `{原文件名去扩展名}-{hash}.tgz` 命名；公共缓存包不会写入订单 URL。
 
 ## `StoreInstall`
 

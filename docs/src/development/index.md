@@ -54,7 +54,7 @@
 | [performance/backend.md](./performance/backend.md) | 后端性能规范，覆盖文件处理、认证 token、K8s 客户端、缓存、并发和日志 |
 | [performance/frontend.md](./performance/frontend.md) | 前端性能规范，覆盖 API 请求、轮询清理、状态缓存、列表渲染和资源加载 |
 | [CHANNELLOCAL_PERFORMANCE_ANALYSIS.md](./CHANNELLOCAL_PERFORMANCE_ANALYSIS.md) | ChannelLocal 性能分析专题 |
-| [bootstrap-installation.md](./bootstrap-installation.md) | BootstrapProfile 与 BootstrapInstallation 预装制品架构、资源定义和运行策略 |
+| [bootstrap-installation.md](./bootstrap-installation.md) | BootstrapInstallation 预装制品架构、资源定义和删除卸载策略 |
 | [k8s-coordination.md](./k8s-coordination.md) | 通用 Kubernetes Lease、资源互斥与持久化分布式并发槽 |
 
 ## 仓库结构
@@ -71,11 +71,10 @@ $BASE_DIR/
 │   │   └── zpk/                     # ZPK 应用 API
 │   ├── common/                      # 公共服务、中间件和工具
 │   │   └── service/k8s/
-│   │       ├── bootstrap/           # 预装 Profile 与单制品协调 Controller
+│   │       ├── bootstrap/           # BootstrapInstallation 预装协调 Controller
 │   │       └── coordination/        # 通用 Lease 与分布式并发协调
-│   ├── k8s/pkg/apis/bootstrap/      # BootstrapProfile API 类型（w7panel.w7.com）
 │   ├── k8s/pkg/apis/bootstrapinstallation/ # BootstrapInstallation API 类型（w7panel.w7.com）
-│   ├── kodata/                      # 后端静态资源、CRD、BootstrapProfile 和商店 Chart
+│   ├── kodata/                      # 后端静态资源、CRD、BootstrapInstallation 和商店 Chart
 │   └── install/                     # 安装相关资源
 ├── w7panel-ui/                      # 前端源码，Vue 3 + TypeScript + Arco Design
 │   ├── config/                      # Vite 和构建配置

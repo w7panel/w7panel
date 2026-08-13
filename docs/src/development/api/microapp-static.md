@@ -114,11 +114,11 @@ curl 'http://localhost:8000/panel-api/v1/microapp/top' \
 | 1 | 从 token 解析当前角色 `role` |
 | 2 | 从 root 集群读取所有 `MicroApp` CRD |
 | 3 | 排除 `metadata.annotations.w7.cc/manifest-type=gateway-plugin` 的插件 MicroApp |
-| 4 | 只保留 `spec.config-v2.props.roleConfig` 中包含当前角色的多角色微应用 |
+| 4 | 只统计名称为面板角色（`founder`、`super`、`normal`）且 `support=thirdparty_cd` 的 Binding；保留 `roleConfig` 包含当前角色且面板角色 Binding 数量大于 1 的微应用，功能菜单分组不参与顶部入口计数 |
 | 5 | 非 `founder` 角色会过滤 `bindings` 和 `roleConfig`，并标记 `metadata.labels.microapp.w7.cc/from=root` |
 | 6 | 若读取失败，controller 返回空 `MicroAppList`，不会直接报错 |
 
-该接口同时用于顶部菜单和域名管理的“应用直达”选择器，因此插件不会出现在这两个入口中。
+该接口同时用于顶部菜单和域名管理的“应用直达”选择器，因此插件不会出现在这两个入口中。`zpk-market` 等功能 Binding 仍可在应用详情中展示，但不会把单角色应用提升为顶部微应用。
 
 响应参数：`MicroAppList`。
 

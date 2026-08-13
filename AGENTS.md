@@ -385,7 +385,6 @@ $BASE_DIR/
 │   ├── common/service/             # 业务服务
 │   │   └── k8s/coordination/       # 通用 Kubernetes Lease 与分布式并发协调
 │   ├── common/middleware/          # 中间件
-│   ├── k8s/pkg/apis/bootstrap/      # BootstrapProfile API（w7panel.w7.com）
 │   ├── k8s/pkg/apis/bootstrapinstallation/ # BootstrapInstallation API（w7panel.w7.com）
 │   ├── dev-tools/scripts/          # 开发脚本
 │   ├── kodata/                     # 静态资源
@@ -861,6 +860,11 @@ slog.Info("操作成功", "user", userID, "action", "create")
 
 - **目录**: 控制器 `w7panel-server/app/{module}/http/controller/`，服务 `w7panel-server/common/service/`
 
+#### ZPK 更新规范
+
+- 跨应用更新允许新制品 `identifie` 与已有 AppGroup 的 `spec.identifie` 不同；`/panel-api/v1/zpk/config` 返回的根应用 `releaseName`、`deployName` 必须沿用已有 AppGroup 名称，以便安装界面读取原实例参数。安装接口的资源命名逻辑独立维护，不能仅因配置回填调整而改变。
+- 内置预装应用直接声明在 `w7panel-server/kodata/yaml/bootstrap-installations.yaml`；不再使用 BootstrapProfile，也不维护 revision。内置资源必须保留 `w7.cc/bootstrap-builtin=true` 标签；从清单移除条目后，升级脚本会在该标签和 BootstrapInstallation 类型范围内安全清理，并由 finalizer 自动卸载其拥有的 AppGroup。
+
 ### 前端规范
 
 - **目录**: API `w7panel-ui/src/api/`，页面 `w7panel-ui/src/views/`，组件 `w7panel-ui/src/components/`，Hooks `w7panel-ui/src/hooks/`
@@ -868,14 +872,18 @@ slog.Info("操作成功", "user", userID, "action", "create")
 
 #### 网关插件 UI 规范
 
-- 网关插件列表以 `higress-system` 命名空间的 Higress `WasmPlugin` 为唯一数据源。
+- AppGroup、MicroApp 的通用 API 地址以及 `w7.cc/group-name`、`w7.cc/official-app`、`w7.cc/deny-delete` 等跨模块资源元数据统一维护在 `src/utils/w7panel-resource.ts`，不得放入网关插件专用工具。已知名称或标识的资源必须使用单资源 GET 或 Kubernetes `labelSelector` 定向查询，禁止先全量读取 AppGroup/MicroApp 再在前端筛选。
+- 网关插件列表以 `POST https://zm.w7.com/zpk-market/formula/list` 为展示主数据源，请求固定携带 `tag=网关插件`，并在前端二次筛选 `application_type=gateway-plugin`；随后与 `higress-system` 命名空间的 Higress `WasmPlugin`、同组 AppGroup 合并安装状态。未安装制品显示“待安装”，并可在列表直接进入统一制品安装页；市场中不存在的历史或手工 WasmPlugin 继续在“其他”分类展示。
+- 网关插件列表和域名管理“更多”的插件列表统一按制品市场 `plugin_type` 分类：`auth`、`security`、`traffic`、`transform`、`o11y`、`ai` 分别显示“认证鉴权、安全防护、流量管控、请求响应转换、可观测性、AI”；无分类显示“其他”，未知分类保留市场原始名称，没有插件的分类不渲染。域名列表仍只展示已安装且支持规则配置的插件。
+- 插件分类默认展开，分类标题显示插件数量并支持独立展开或收起；所有分类使用一个 4px 圆角的扁平列表容器，分类之间以中性分隔线区分。收起标题使用面板白底列表行，展开标题使用主色浅背景和左侧状态线；分类内表格隐藏重复表头，直接展示插件数据行。折叠状态只保留在当前页面生命周期内，不写入 localStorage/sessionStorage。
 - 网关插件列表不单独展示前端包；关联的 MicroApp 仅用于决定配置时加载插件页面还是回退 YAML。
 - 网关插件列表的“插件”列固定为 360px，避免在宽屏下过度拉伸。
 - 网关插件列表与域名规则插件列表统一按“标题、标识+版本、描述”三层展示，标题使用常规字重，标识版本和描述使用 12px 灰色辅助文字。
 - `w7.cc/manifest-type=gateway-plugin` 的插件应用只在“网关管理 → 网关插件”中管理，不在顶部菜单、应用直达和普通应用列表中展示。
 - 域名管理“更多”的插件列表只展示插件、规则状态和操作列，不展示“配置方式”列；配置时仍根据关联 MicroApp 自动打开操作界面或回退 YAML。
 - 网关插件列表使用“全局状态”列直接控制 Higress `spec.defaultConfigDisable`，不能连带修改 `matchRules[].configDisable`；只支持规则配置的插件不显示全局开关。无编辑权限时禁用开关，切换期间显示加载状态。
-- 网关插件通过 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间同名 AppGroup；AppGroup 带 `metadata.annotations["w7.cc/official-app"] == "true"` 时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识。网关插件列表同时禁止编辑插件元数据和卸载，但仍允许启停及修改全局/规则配置。插件的官方标记、编辑和卸载保护都只使用该官方应用标识判断，不能使用 `w7.cc/deny-delete` 推断官方身份。此类资源统一称为“官方应用提供的网关插件”，不要称为“官方插件”。
+- 网关插件通过 `metadata.labels["w7.cc/group-name"]` 关联 `default` 命名空间同名 AppGroup；AppGroup 带 `metadata.annotations["w7.cc/official-app"] == "true"` 时，网关插件列表和域名管理“更多”列表都在插件标题右侧显示紧凑的“官方”标识，并禁止编辑插件元数据。是否允许卸载独立读取关联 AppGroup 的 `metadata.annotations["w7.cc/deny-delete"]`：值为 `"true"` 时禁止卸载，否则允许卸载。官方身份不能隐含卸载保护，删除保护也不能用于推断官方身份；插件启停及全局/规则配置不受这两个注解影响。此类资源统一称为“官方应用提供的网关插件”，不要称为“官方插件”。
+- 网关插件列表的“卸载”必须删除插件关联的 AppGroup，由 AppGroup Controller 按标准应用卸载流程清理同组 WasmPlugin、MicroApp 及其他关联资源，禁止直接删除单个 WasmPlugin。没有关联 AppGroup 的历史或手工 WasmPlugin 不显示应用卸载入口。
 - 网关插件更新通过 `w7.cc/group-name` 关联的 AppGroup 调用 `/panel-api/v1/zpk/upgrade-info` 检查，同一 AppGroup 只请求一次并向组内插件共享结果；“立即更新”必须携带 AppGroup 名称作为 `releaseName` 进入统一制品更新页，更新整个应用制品而不是单独修改 WasmPlugin。
 - 网关插件列表顶部的添加按钮与搜索框至少保留 12px 间距。
 - 网关插件列表应在表格上方提示“全局状态仅控制插件的全局配置，不影响域名规则”；域名管理“更多”的插件列表应提示“规则状态仅控制当前域名，不影响插件的全局配置或其他域名”。提示框与后续表格至少保留 12px 间距。
@@ -886,6 +894,7 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - MicroApp 当前作用域的 `bindings.menu` 有菜单项时才视为配置了前端包，并按照统一的静态资源与 Wujie/iframe 流程加载；无菜单或加载失败时回退 YAML。
 - 关联到可用 MicroApp 配置页面时必须提供统一的“YAML 详情”入口；未关联到可用页面或加载失败时直接进入同一个 YAML 界面。两种入口都默认只读预览，通过“编辑”按钮切换为可修改状态。
 - 全局配置和域名规则按 Higress 原生逻辑独立启停：关闭全局状态不能关闭或隐藏路由规则，关闭某条路由规则也不能影响全局配置。
+- 网关插件 MicroApp 注入只读的 `globalPluginConfig`、`globalPluginEnabled` 上下文，供全局或规则配置页面判断全局状态；仅全局配置页面额外注入 `ruleConfigs`（`spec.matchRules` 原始配置的深拷贝），规则配置页面不注入该字段。这些字段不得作为保存目标。`savePluginConfig` 必须严格按 `configScope` 写入：全局入口只能保存 `spec.defaultConfig`，规则入口只能保存当前 Ingress 的 `matchRules[].config`。
 - Higress 的 `defaultConfigDisable` 或已有 `matchRules[].configDisable` 未设置时按 `false`（启用）处理；没有匹配规则时才显示为规则未启用。
 - 域名规则兼容 Higress 原生 `ingress`、`domain`、`service` 三种匹配目标；修改同时覆盖多个同类目标的共享规则前，必须拆出当前匹配目标并保留其他目标的原配置和状态。
 - Ingress 的 Host/Path 重写只写 Ingress annotation，不得向所有 WasmPlugin 的 `matchRules[].config` 注入 `rewrite_host` 等插件私有字段。
@@ -896,6 +905,11 @@ slog.Info("操作成功", "user", userID, "action", "create")
 #### AI 代理消费者 UI 规范
 
 - AI 代理复用的 `key-auth.internal` 和 `request-validation.internal` 是网关通用插件，展示名称固定为“Key Auth 认证”和“请求校验”，不得添加 AI 专属前缀。
+- AI 代理、Key Auth、请求校验的固定制品 identify 分别为 `w7panel-pluginaiproxy`、`w7panel-pluginkeyauth`、`w7panel-pluginrequestvalidation`，其规范化 identify 直接作为 `w7.cc/group-name` 定向查询 WasmPlugin；无需先查询 AppGroup，也不得按 `*.internal` 资源名兜底。AI 代理列表初始化只检测 AI 代理插件，Key Auth 与请求校验仅在域名配置页检测；列表删除任务因清理关联规则可按需解析后两者。
+- AI 代理未安装时禁用新增并引导安装 `https://zpk.w7.cc/zpk/respo/info/w7panel-pluginaiproxy`；Key Auth 未安装时禁用认证开关并在同一栏引导安装 `https://zpk.w7.cc/zpk/respo/info/w7panel-pluginkeyauth`；请求校验未安装时禁用模型名称输入并引导安装 `https://zpk.w7.cc/zpk/respo/info/w7panel-pluginrequestvalidation`。这些入口不得运行时请求制品市场列表。
+- AI 代理、Key Auth 与请求校验都按域名或服务 `matchRules` 生效，不能用 `spec.defaultConfigDisable` 判断 AI 代理域名、认证或模型限制是否启用；该字段只控制插件无规则命中时的全局配置。
+- AI 代理列表页检测到 AI Proxy WasmPlugin 已安装后，应复用域名管理“更多”的规则方法，按 `ingress: ["namespace/ingressName"]` 检测并自动开启当前 AI 域名规则；规则不存在时创建，存在共享目标时拆出当前目标。不得使用 `domain`、裸 Ingress 名或 Provider `service` rule 判断域名插件状态。域名编辑页不提供 AI 代理总开关，Provider service rule 仍负责 `activeProviderId`。不得修改 `spec.defaultConfigDisable`，也不得另建 Ingress 注解保存重复启停状态。
+- AI 代理页面禁止自动创建 `ai-proxy.internal`、`key-auth.internal` 或 `request-validation.internal`，也不得用硬编码镜像和版本标签覆盖制品安装结果；缺少依赖时必须引导安装或阻止相关配置保存。
 - 域名编辑页的消费者使用列表展示，新增和编辑使用弹窗；消费者名称由系统自动生成并始终只读。
 - 认证方式使用 Tab 组织。当前只展示 Key Auth，OAuth2、JWT 等未实现方式不得提前显示。
 - Key Auth 表单对齐 Higress Console：支持多个认证令牌，并支持 Bearer Token、自定义 HTTP Header、查询参数三种令牌来源；Header 和 Query 来源必须显示并校验对应名称字段。

@@ -21,15 +21,17 @@ tests/
 
 ## 快速开始
 
-### BootstrapProfile 单元测试
+### BootstrapInstallation 单元测试
 
 后端测试会严格解析并校验内置
-`w7panel-server/kodata/yaml/bootstrap-profile.yaml`，检查应用清单、职责边界和 Bootstrap 内部所有权注解：
+`w7panel-server/kodata/yaml/bootstrap-installations.yaml`，检查自包含资源、执行策略、内置资源 prune 标签和 Bootstrap 内部所有权注解：
 
 ```bash
 cd "$BASE_DIR/w7panel-server"
 go test ./common/service/k8s/bootstrap
 ```
+
+协调回归测试还会验证失败的自有 AppGroup 先删除再重新安装、`maxRetries` 表示实际允许的重新安装次数、Ready 后停止主动协调、Failed 资源修正或提高重试额度后恢复，以及达到上限时不产生状态写循环。
 
 Bootstrap 使用 ServiceAccount Token 安装 ZPK 时，`PackageApp.K8sToken` 允许为空；以下回归测试确认 Helm Job 会安全回退到 `RealToken`，且用户 Token 存在时仍优先使用用户 Token：
 
@@ -113,6 +115,37 @@ echo "执行测试..."
 
 ## 测试工具
 
+### 工作负载根 CA 注入测试
+
+验证带 `w7.cc/inject-root-ca: "true"` 注解的 Pod 会为普通容器和
+initContainer 幂等挂载集群 CA，并注入 Go/OpenSSL、curl、Python、Node.js、
+Git、AWS SDK/CLI 与 gRPC 使用的 CA 环境变量，同时保留用户显式设置的
+`SSL_CERT_DIR`：
+
+```bash
+cd "$BASE_DIR/w7panel-server"
+LOCAL_MOCK=true go test ./common/service/k8s/webhook -count=1
+```
+
+### AppGroup workload 分组标签测试
+
+验证 AppGroup Controller 能为缺少分组信息的 Deployment、StatefulSet、DaemonSet 和 Job 补充 `w7.cc/group-name`，并保留已有的非空分组标签：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./common/service/k8s/appgroup -run '^TestEnsureWorkloadGroupNameLabel' -count=1
+```
+
+### AppGroup 卸载协调测试
+
+验证 AppGroup 删除只移除面板自身 finalizer、NotFound 删除保持幂等、删除态清理错误持续退避重试，以及控制器专用 Helm 卸载不会等待所有资源消失：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./common/service/k8s/appgroup -run '^(TestIsDeletingAppGroupEvent|TestRemoveManagedAppGroupFinalizers|TestIgnoreDeleteNotFound|TestGetAppGroupFromROReturnsDeepCopy)$' -count=1
+LOCAL_MOCK=true go test ./common/service/k8s -run '^TestNewUninstallAction$' -count=1
+```
+
 ### LOCAL_MOCK 鉴权单元测试
 
 验证测试模式只改变 Kubernetes 访问方式，不会绕过面板用户 Token 校验：
@@ -140,9 +173,9 @@ cd $BASE_DIR/w7panel-server
 go test ./common/service/k8s/higress -run TestPreferredWasmPlugin -count=1
 ```
 
-### BootstrapProfile 协调单元测试
+### BootstrapInstallation 协调单元测试
 
-验证通用 Lease 的持有者隔离、过期接管、安全释放、原槽冲突重试和分布式并发限制，以及 Bootstrap Profile revision 状态汇总、失败 revision 清理重装、依赖失败策略、AppGroup 真实 Ready 判定、安装超时与 Lease 生命周期：
+验证通用 Lease 的持有者隔离、过期接管、安全释放和分布式并发限制，以及 Installation Ready 终态停止、Failed 恢复与重试上限静默、AppGroup 真实 Ready 判定、删除资源自动卸载、安装超时与 Lease 生命周期：
 
 ```bash
 cd $BASE_DIR/w7panel-server
@@ -151,7 +184,7 @@ LOCAL_MOCK=true go test ./k8s/pkg/apis/bootstrapinstallation/v1alpha1 ./common/s
 
 ### 制品域名传递测试
 
-验证面板会移除仓库 URL 中不受信任的 `reinstall`，仅在用户确认强制覆盖时重新添加受控标记；同时验证域名、应用标识和 HTTP 409 订单绑定冲突解析：
+验证面板会移除仓库 URL 中不受信任的 `reinstall`，仅在用户确认强制覆盖时重新添加受控标记；同时验证域名、应用标识、HTTP 409 订单绑定冲突解析，以及 ZPK 请求不会携带 `X-W7Panel-Token`：
 
 ```bash
 cd $BASE_DIR/w7panel-server
@@ -159,6 +192,7 @@ LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPPassesDomainWi
 LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPReturnsArtifactInstallConflict -count=1
 LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPReturnsConflictWhenProxyChangesStatus -count=1
 LOCAL_MOCK=true go test ./app/zpk/logic -run TestLoadPackageByHTTPPassesControlledReinstall -count=1
+LOCAL_MOCK=true go test ./app/zpk/logic -run TestZPKRequestDoesNotForwardPanelToken -count=1
 
 cd $BASE_DIR/../w7panel-zpk
 LOCAL_MOCK=true go test ./app/respo/logic -run TestTicketPreservesDomain -count=1
@@ -174,6 +208,16 @@ LOCAL_MOCK=true go test ./app/respo/logic -run '^(TestValidateOrderDomain|TestOr
 ```bash
 cd $BASE_DIR/w7panel-server
 LOCAL_MOCK=true go test ./common/service/k8s/microapp -run TestIsPluginMicroApp -count=1
+```
+
+### 顶部微应用角色计数测试
+
+验证顶部入口只统计面板支持的角色 Binding，`zpk-market`、`test` 等功能菜单分组不会参与多角色判定：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./common/service/k8s/microapp -run TestPanelRoleBindingCount -count=1
+LOCAL_MOCK=true go test ./common/service/k8s/permission -run TestIsPanelRole -count=1
 ```
 
 ### agent-browser
