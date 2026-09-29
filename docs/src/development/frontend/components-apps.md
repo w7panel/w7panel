@@ -29,6 +29,14 @@ bindings:
 
 面板不识别或硬编码 `zpk-market`：`founder` 按现有规则展示全部 Binding 菜单，其他角色只展示自身角色菜单。菜单分组使用现有默认图标，不新增 Binding `icon` 或菜单 `key` 字段。
 
+应用详情和顶部微应用入口都兼容同名 MicroApp，并按 `w7.cc/group-name` 聚合同一 AppGroup 下的全部 MicroApp 菜单。菜单使用包含 MicroApp 名称的复合 key，点击时同时切换所属 MicroApp 和 Binding 运行配置；各菜单分组仍使用所属 Binding 的 `title`，`MicroApp.spec.title` 只表示微应用标题，不覆盖 Binding 分组标题。
+
+传统应用还会以 `w7.cc/depends-<当前 AppGroup 名称>=true` 查询候选依赖方，使用候选 `spec.dependencies` 的 namespace、name 校验逻辑依赖目标，并只聚合 `w7.cc/manifest-type=app-plugin` 的 MicroApp。插件 MicroApp 本身不迁移、不复制，仍使用插件 AppGroup 的单数 `w7.cc/group-name`。复数 `w7.cc/group-names` 不再使用。
+
+应用详情和顶部菜单启动 Wujie 时，会把依赖当前实际 MicroApp 所属 AppGroup 的应用摘要注入 `props.reverse_dependent_apps`。每项包含 `appgroup`、`identifie`、`type`、`title` 和 `version`；其中 `type` 来自 `w7.cc/manifest-type`。候选 MicroApp 必须命中 `w7.cc/depends-<当前 AppGroup 名称>=true`，删除中的 MicroApp 不注入；结果按 `w7.cc/group-name` 去重。该字段仅表示反向依赖方，不表示当前 AppGroup 的正向依赖。
+
+菜单展示排序不会改写 MicroApp 资源：当前应用使用原始 `w7.cc/order`，依赖插件使用 `w7.cc/order + 200` 的展示值。展示值相同时优先当前应用，再按 AppGroup 名称、MicroApp 名称稳定排序；聚合后的排序结果同时用于菜单生成、默认 MicroApp 和默认菜单，MicroApp 内部菜单继续按 `displayorder` 降序。
+
 `location: back` 的菜单统一在侧边栏底部平铺展示，不显示 Binding 分组标题；Binding 归属仍用于查找对应的运行配置。
 
 制品库同步修改 Helm `values.yaml` 中的 `bindings` 和 `backend_config`：`backend_config[role=zpk-market]` 独立定义为 `type=external`、`load_mode=iframe`，后端地址保存市场域名，菜单 `do` 只保存站内路由。应用详情页和顶部微应用页切换菜单时都按 Binding 名称选择对应的 `roleConfig`，再依据 `load_mode` 与 `serverUrl` 加载，因此市场入口不会继承应用 `founder` 的后端、代理或前端属性。没有市场 Binding 时直接返回原 Helm 包地址，不执行动态替换；有市场 Binding 时其他配置不变。
@@ -73,6 +81,7 @@ Events：
 
 - 非组件模式依赖路由参数：`path`、`releasename`、`completeName`、`domain`、`thirdpartyCDToken` 等。
 - 组件内部会请求存储、镜像仓库、IngressClass、白名单、zpk 配置等资源。
+- 提交安装时会从启用模块的 `dependsOnes` 汇总依赖 Release，并在普通安装和 capture 模式中携带 `dependencies`。
 
 ## `StoreInstallDrawer`
 

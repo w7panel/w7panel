@@ -34,12 +34,24 @@
 | 应用详情微应用 | `w7panel-ui/src/views/app/apps/detail.vue` | 应用详情内嵌微应用 |
 | 应用商店 ZPK 页面 | `w7panel-ui/src/views/app/store/store-zpk.vue` | 应用商店页面内嵌微应用 |
 
+### 多 MicroApp 菜单分组
+
+应用详情与顶部微应用入口使用相同的菜单组织规则：先按 Binding 角色合并菜单；只有同一角色下存在两个或更多提供菜单的 MicroApp 时，才增加 MicroApp 二级分组。二级分组按 `metadata.labels["w7.cc/order"]` 的非负整数升序排列，标签缺失或非法时保持接口原顺序；标题读取 MicroApp `spec.title`（缺失时回退 `metadata.name`）。分组默认全部展开，组内菜单使用紧凑缩进。单 MicroApp 角色维持原有菜单层级，`location: back` 菜单也采用同一判断规则。
+
+聚合后的 MicroApp 可以声明通用展示协议：`metadata.labels["w7.cc/presentation-key"]` 表示能力类型，`metadata.annotations["w7.cc/presentation-mode"]` 决定同类能力的入口数量。`multiple` 保留全部候选；`singleton` 复用现有 MicroApp 显示排序，只保留排序第一的候选。未声明协议、模式未知或同一 key 中包含 `multiple` 时不隐藏任何候选。面板不根据具体 `presentation-key` 写业务分支。
+
+面板不再通过 AppGroup 依赖查询关联入口。独立的 MicroApp Controller 在创建、更新及启动初始扫描时，根据 MicroApp 的 `w7.cc/group-name` 读取所属 AppGroup，并重建该 MicroApp 的 `w7.cc/depends-*` 标签。当前应用入口按 `w7.cc/group-name=<当前 AppGroup>` 查询；反向依赖方按 `w7.cc/depends-<当前 AppGroup>=true` 查询，两次 MicroApp 请求并行执行。依赖方只有 `metadata.annotations["w7.cc/manifest-type"]` 为 `app-plugin` 时参与菜单聚合；`reverse_dependent_apps` 则从全部依赖方 MicroApp 汇总，并按 `w7.cc/group-name` 去重。兼容旧版缺少 `w7.cc/group-name` 的 MicroApp：标签查询没有返回当前组资源时，精确读取与 AppGroup 同名的 MicroApp，并用资源名（去除旧 `-root` 后缀）作为归组兜底；新资源仍必须写入分组标签。
+
 ## 常见 props
 
 | 字段 | 说明                                                                |
 |------|-------------------------------------------------------------------|
 | `url` | 面板代理请求微应用后端服务的地址，可能会把相对 `backendUrl` 拼成当前 origin 下的绝对地址           |
-| `group` | 应用标识分组；如果应用下有多个子应用，该值为主应用标识                                       |
+| `group` / `appgroup` | AppGroup 名称；同一 AppGroup 下切换多个 MicroApp 时保持不变                         |
+| `microappName` | 当前实际加载的 MicroApp `metadata.name`；切换到同组其他 MicroApp 菜单时随之变化             |
+| `reverse_dependent_apps` | 依赖当前 AppGroup 的应用摘要数组；不包含当前 AppGroup 自身依赖的应用                 |
+| `handles.getAppDynamicValues` | 按需读取应用动态值；`appgroup` 不传时读取当前 AppGroup，传入时由面板从已安装 AppGroup 解析制品来源；返回 `{status, data}`，默认缓存 30 秒 |
+| `handles.validateApp` | 复用动态值查询并只返回市场生成的 `{valid, reason, message}`；无法获取时返回 `null` |
 | `userid` | 面板登录用户 ID                                                         |
 | `role` | 面板用户角色，取值包括 `founder`、`super`、`normal`、`technician`               |
 | `access_token` | 面板登录用户自身维护的 access token，只能用于获取用户信息，不能准确定位 appid                  |
@@ -63,6 +75,33 @@ type W7PanelMicroAppProps = {
   url?: string;
   requestUrl?: string;
   group?: string;
+  appgroup?: string;
+  microappName?: string;
+  reverse_dependent_apps?: Array<{
+    appgroup: string;
+    identifie: string;
+    type: string;
+    title: string;
+    version: string;
+  }>;
+  handles?: {
+    getAppDynamicValues?: (
+      appgroup?: string,
+      options?: { force?: boolean },
+    ) => Promise<{
+      status: 'ready' | 'not_supported' | 'unavailable';
+      data: Record<string, unknown> | null;
+    }>;
+    validateApp?: (
+      appgroup?: string,
+      options?: { force?: boolean },
+    ) => Promise<null | {
+      valid: boolean;
+      reason: string;
+      message: string;
+    }>;
+    [name: string]: unknown;
+  };
   userid?: string | number;
   openid?: string;
   nickname?: string;
@@ -87,6 +126,43 @@ export function getMicroBackendBaseURL() {
   return props.requestUrl || props.url || '';
 }
 ```
+
+进入非“授权与续费”MicroApp 页面时，宿主会在后台调用一次 `validateApp()`，并复用默认 30 秒缓存。市场明确返回 `valid=false` 时显示原因和处理提示；查询失败返回 `null`，不阻断已经安装的应用启动。需要完整订单动态值的页面可以主动调用：
+
+```ts
+const result = await getPanelProps().handles?.getAppDynamicValues?.();
+if (result?.status === 'ready') {
+  const { order_status, license_type, trial_expire_at, validate } = result.data || {};
+  const validity = validate as undefined | {
+    valid: boolean;
+    reason: string;
+    message: string;
+  };
+  if (validity?.valid === false) {
+    console.warn(validity.reason, validity.message);
+  }
+}
+```
+
+只关心应用是否可用时可直接调用：
+
+```ts
+const validation = await getPanelProps().handles?.validateApp?.();
+if (validation?.valid === false) {
+  console.warn(validation.reason, validation.message);
+}
+```
+
+指定关联 AppGroup 时把名称作为第一个参数传入；强制刷新当前 AppGroup 时，第一个参数传 `undefined`：
+
+```ts
+await getPanelProps().handles?.getAppDynamicValues?.('plugin-appgroup');
+await getPanelProps().handles?.validateApp?.(undefined, { force: true });
+```
+
+`appgroup` 可省略，省略时读取当前应用；指定时读取当前命名空间中对应的已安装 AppGroup。调用方不传 ZPK URL，面板后端从 `AppGroup.spec.zpkUrl` 解析来源，因此目标应用不需要提供 MicroApp。`order_status` 包含 `none`、`pending`、`paid`、`refund_pending`、`refunding`、`refund_rejected`、`refunded`；`license_type` 为 `paid` 或 `trial`。试用转正式后 `trial_started_at` 和 `trial_expire_at` 为空；转正式订单退款并回退为试用后，按当前试用授权重新返回时间。
+
+`validate` 由制品市场统一返回 `{valid, reason, message}`。应用应以 `valid` 判断当前订单能否使用，以 `reason` 做稳定的程序分支，以 `message` 展示具体原因；不要在前端重新根据试用时间或退款状态计算。当前试用到期、试用缺少到期时间、订单未支付、订单不存在、状态异常及退款完成均返回 `valid=false`；退款申请中、退款处理中和退款拒绝在退款完成前仍返回 `valid=true`。动态值请求自身失败时，外层 `status` 为 `unavailable`，`validateApp` 返回 `null`，不能视为订单无效。
 
 请求面板 API 时使用 `paneltoken` 作为 Bearer token：
 
@@ -119,6 +195,8 @@ const { group, userid, nickname, role, domain } = getPanelProps();
 
 约定：
 
+- `group` 和 `appgroup` 始终表示 AppGroup；需要区分同组当前加载的 MicroApp 时使用 `microappName`。
+- `reverse_dependent_apps` 以当前实际加载的 MicroApp 所属 AppGroup 为基准，从带 `w7.cc/depends-<当前 AppGroup>=true` 的 MicroApp 汇总；字段读取该 MicroApp 的 `group-name`、`identifie`、`manifest-type`、`spec.title` 和 `version`，同一 AppGroup 下多个 MicroApp 只返回一项。
 - `paneltoken` 只用于请求面板 API。
 - `url` / `requestUrl` 只表示微应用后端代理地址，不代表面板 API 前缀。
 - `Authorization` 是微应用自身认证，通常不是 Bearer 用户 token。

@@ -131,6 +131,7 @@ curl 'http://localhost:8000/panel-api/v1/microapp/top' \
 | `items[].metadata.name` | string | MicroApp 名称；非 founder 从 root 集群过滤时可能带 `-root` |
 | `items[].metadata.namespace` | string | 命名空间，当前读取固定为 `default` |
 | `items[].metadata.labels` | object | 标签，常见 `w7.cc/identifie`、`w7.cc/version`、`microapp.w7.cc/from` |
+| `items[].metadata.labels.w7.cc/order` | string | 同一 AppGroup 内 MicroApp 展示顺序；由制品 manifest 的 `application.order` 原样生成，主应用为 `0`，子应用按当前列表从 `1` 编号，ZPK Market 动态 MicroApp 固定为 `9999` |
 | `items[].spec.framework` | string | 微应用框架类型 |
 | `items[].spec.frontendUrl` | string | 前端入口地址 |
 | `items[].spec.backendUrl` | string | 后端入口或兼容字段 |
@@ -331,6 +332,20 @@ curl 'http://localhost:8000/panel-api/v1/microapp/demo-root/info' \
 }
 ```
 
+### GET `/panel-api/v1/microapp/:name/frontprops`
+
+功能：按 MicroApp 资源名获取当前用户上下文，并生成注入微应用的前端属性。
+
+认证：`Authorization: Bearer {user-token}`
+
+请求参数：
+
+| 参数 | 位置 | 必填 | 类型 | 说明 |
+|------|------|------|------|------|
+| `name` | path | 是 | string | 当前 MicroApp 的 `metadata.name`，不是父 AppGroup 名称 |
+
+响应中的 `group` 与 `appgroup` 优先使用 MicroApp 的 `metadata.labels["w7.cc/group-name"]`，旧资源缺少该标签时回退 `metadata.name`。因此同一 AppGroup 下切换不同 MicroApp 时，`group/appgroup` 保持不变。
+
 ### ANY `/panel-api/v1/microapp/:name/proxy/*path`
 
 功能：代理请求微应用后端服务。
@@ -422,7 +437,7 @@ curl 'http://localhost:8000/panel-api/v1/static/demo/status?version=1.0.0&releas
 | `version` 非空 | 调用 `DownStaticStatus(identifie, version, releaseName)` 查询 `static-download-{identifie}{version}` |
 | `version` 为空 | 查询 `static-download-{releaseName}` |
 | `releaseName` 非空且 AppGroup 存在 | 从 root 集群 `default` 命名空间读取 AppGroup |
-| AppGroup 有 `spec.zpkUrl` | 对 `zpkUrl` 做 base64url 编码并生成 `proxyUrl` |
+| AppGroup 有 `spec.zpkUrl` | `respoUrl` 保留完整地址及查询参数；`zpkUrl` 仅保留 `scheme://host` 供静态回源使用 |
 | AppGroup annotation 有 `w7.cc/ticket` | 返回 `ticket`，并缓存到 `frontend-ticket-{identifie}` 供回源代理使用，缓存 2 小时 |
 | AppGroup 不存在或读取失败 | 仍返回状态，但 `zpkUrl`、`ticket`、`proxyUrl` 为空 |
 
@@ -432,7 +447,8 @@ curl 'http://localhost:8000/panel-api/v1/static/demo/status?version=1.0.0&releas
 |------|------|------|
 | `status` | string | `no_download`、`downloading`、`download_success` |
 | `proxyUrl` | string | 静态资源回源代理基础路径，只有 `releaseName` 对应 AppGroup 且 `zpkUrl` 非空时返回 |
-| `zpkUrl` | string | AppGroup `spec.zpkUrl` |
+| `zpkUrl` | string | 从 AppGroup `spec.zpkUrl` 提取的 `scheme://host` 回源根地址 |
+| `respoUrl` | string | AppGroup `spec.zpkUrl` 的完整制品详情地址，保留路径、订单信息等查询参数 |
 | `ticket` | string | AppGroup annotation `w7.cc/ticket` |
 
 响应示例：
@@ -442,6 +458,7 @@ curl 'http://localhost:8000/panel-api/v1/static/demo/status?version=1.0.0&releas
   "status": "no_download",
   "proxyUrl": "/panel-api/v1/static/aHR0cHM6Ly96cGsuZXhhbXBsZS5jb20/demo/1.0.0/frontend/",
   "zpkUrl": "https://zpk.example.com",
+  "respoUrl": "https://zpk.example.com/zpk/respo/info/demo?order_sn=order-1",
   "ticket": "ticket-value"
 }
 ```
@@ -480,9 +497,9 @@ curl -X POST 'http://localhost:8000/panel-api/v1/static/default/download/demo' \
 | 2 | 如果 `name` 包含 `-root`，去掉后缀并使用 root SDK |
 | 3 | 优先从指定 namespace 和当前用户集群读取 AppGroup |
 | 4 | NotFound 时回退 root 集群读取 |
-| 5 | 调用 `appgroup.DownStatic(appgroupObj)` |
-| 6 | `STATIC_DOWN_ENABLED != true` 时只记录日志，不下载 |
-| 7 | AppGroup annotation `w7.cc/front-type` 包含 `thirdparty_cd` 时才下载 |
+| 5 | 立即返回成功响应，并在后台调用 `appgroup.DownStatic(appgroupObj, microAppClient)` |
+| 6 | 查询同组 MicroApp 的 `w7.cc/identifie`、`w7.cc/version`，每个前端包解压到自己的版本目录 |
+| 7 | `STATIC_DOWN_ENABLED != true` 或下载失败时记录具体错误，并将对应状态恢复为 `no_download` |
 
 下载数据来源：
 
@@ -494,7 +511,7 @@ curl -X POST 'http://localhost:8000/panel-api/v1/static/default/download/demo' \
 | `MICROAPP_PATH/{releaseName}` | 解压兼容目录 |
 | `MICROAPP_PATH/{identifie}/{version}` | 解压版本目录 |
 
-响应参数：当前 controller 调用 `DownStatic` 后没有显式写入响应体。HTTP 状态通常为 200，调用方应通过 `GET /panel-api/v1/static/:identifie/status` 轮询确认状态。
+响应参数：接口成功受理后台下载任务后立即返回统一成功响应，不等待下载和解压结束。
 
 下载失败时，状态会回到 `no_download`；下载成功时状态为 `download_success`。
 
@@ -552,10 +569,10 @@ curl 'http://localhost:8000/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS
 1. 前端使用用户 token 调用 `/panel-api/v1/microapp/top` 获取可见微应用列表。
 2. 用户进入某个微应用时，调用 `/panel-api/v1/microapp/:name/info` 获取前端入口和 roleConfig。
 3. 若微应用前端包需要下载，使用 `identifie`、`version`、`releaseName` 调用 `/panel-api/v1/static/:identifie/status`。
-4. 状态为 `no_download` 时，调用 `/panel-api/v1/static/:namespace/download/:name` 触发下载。
-5. 状态为 `downloading` 时保持 loading 并轮询。
-6. 状态为 `download_success` 时使用 `frontendUrl` 启动 Wujie 应用。
-7. 本地资源缺失时，可使用 `/panel-api/v1/static/proxy/:zpkUrl/:identifie/:version/frontend/*path` 回源。
+4. 状态为 `no_download` 时，调用 `/panel-api/v1/static/:namespace/download/:name` 触发后台下载，同时立即使用 `/ui/microapp/{identifie}/{version}/...` 启动应用；本次请求由面板回源到 ZPK。
+5. 状态为 `downloading` 时不重复触发任务，当前请求继续由面板回源到 ZPK，不阻塞用户加载应用。
+6. 状态为 `download_success` 时，相同 `/ui/microapp/{identifie}/{version}/...` 路径直接读取本地版本目录。
+7. 本地资源缺失时，也可使用 `/panel-api/v1/static/proxy/:zpkUrl/:identifie/:version/frontend/*path` 兼容路径回源。
 8. 微应用后端请求统一走 `/panel-api/v1/microapp/:name/proxy/*path`，由面板注入 header/query 并代理到 `serverUrl`。
 
 ## Wujie props
@@ -565,7 +582,8 @@ curl 'http://localhost:8000/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `url` | string | 面板代理请求微应用后端服务的地址，通常指向 `/panel-api/v1/microapp/:name/proxy` |
-| `group` | string | 应用标识分组；多子应用时为主应用标识 |
+| `group` / `appgroup` | string | AppGroup 名称；同组多个 MicroApp 切换时保持不变 |
+| `microappName` | string | 当前加载的 MicroApp `metadata.name` |
 | `paneltoken` | string | 面板用户 token |
 | `w7PanelToken` | string | Console 第三方 CD token |
 | `Authorization` | string | 微应用自身 Basic 认证 |
@@ -589,7 +607,7 @@ curl 'http://localhost:8000/panel-api/v1/static/proxy/aHR0cHM6Ly96cGsuZXhhbXBsZS
 ## 开发检查
 
 - 需要访问微应用后端时优先使用面板代理 `url`，避免浏览器跨域和内网地址暴露。
-- 静态资源下载是异步过程，前端必须处理 `no_download`、`downloading`、`download_success` 三种状态。
+- 静态资源下载是异步过程；前端在 `no_download` 时触发后台下载，在 `no_download` 和 `downloading` 状态下均直接使用 ZPK 回源，不应阻塞当前页面加载。
 - `STATIC_DOWN_ENABLED` 默认关闭，测试下载流程前要确认环境变量为 `true`。
 - `MICROAPP_PATH` 需要可写，否则下载解压会失败并回到 `no_download`。
 - 修改 roleConfig 合并或过滤逻辑时，同步检查 `ListTop`、`ListInfo`、微应用容器和本文档。

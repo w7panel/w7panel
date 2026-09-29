@@ -870,6 +870,11 @@ slog.Info("操作成功", "user", userID, "action", "create")
 - **目录**: API `w7panel-ui/src/api/`，页面 `w7panel-ui/src/views/`，组件 `w7panel-ui/src/components/`，Hooks `w7panel-ui/src/hooks/`
 - **Hooks 规范**: 见下方「前端性能规范」第5节 Hooks 使用规范
 
+#### MicroApp 菜单 UI 规范
+
+- 应用详情和顶部微应用入口都按 Binding 角色展示菜单。同一角色只有一个 MicroApp 提供菜单时保持原菜单层级；同一角色有多个 MicroApp 提供菜单时，才在角色下增加以 MicroApp `spec.title` 命名的二级分组。分组顺序优先读取 `metadata.labels["w7.cc/order"]` 的非负整数值，缺失或非法时保持接口原顺序。
+- 多 MicroApp 二级分组默认全部展开并允许用户收起；分组内功能菜单使用紧凑缩进。`location: back` 菜单遵守相同的按角色判断规则，单 MicroApp 时继续平铺。
+
 #### 网关插件 UI 规范
 
 - AppGroup、MicroApp 的通用 API 地址以及 `w7.cc/group-name`、`w7.cc/official-app`、`w7.cc/deny-delete` 等跨模块资源元数据统一维护在 `src/utils/w7panel-resource.ts`，不得放入网关插件专用工具。已知名称或标识的资源必须使用单资源 GET 或 Kubernetes `labelSelector` 定向查询，禁止先全量读取 AppGroup/MicroApp 再在前端筛选。

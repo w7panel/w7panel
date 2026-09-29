@@ -201,6 +201,17 @@ cd $BASE_DIR/../cd-artifact-market
 LOCAL_MOCK=true go test ./app/respo/logic -run '^(TestValidateOrderDomain|TestOrderAppIdentifyMatches|TestOrderBindingConflictReason|TestDiscardUsedOrderClearsInstallationBinding|TestUseOrderReinstallOverwritesInstallationBinding)$' -count=1
 ```
 
+### 制品 Ticket 与 AppGroup 默认域名测试
+
+验证域名 URL 的共享解析、安装请求域名优先，并在请求未提供域名时从最终解析的 `DOMAIN_URL` 或 `DOMAIN_SSL_URL` 启动参数设置制品请求域名、生成 `w7.cc/default-domain`；覆盖依赖模块参数、显式协议、HTTPS 和未解析占位符：
+
+```bash
+cd $BASE_DIR/w7panel-server
+LOCAL_MOCK=true go test ./common/helper -run TestParseDomainURL -count=1
+LOCAL_MOCK=true go test ./common/service/k8s/zpk/logic/types -run TestPackageAppDefaultDomainAnnotation -count=1
+LOCAL_MOCK=true go test ./common/service/k8s/zpk/logic -run TestInstallRequestDomain -count=1
+```
+
 ### 插件微应用入口过滤测试
 
 验证带有 `w7.cc/manifest-type=gateway-plugin` 注解的 MicroApp 不会进入顶部菜单和“应用直达”共用列表：
