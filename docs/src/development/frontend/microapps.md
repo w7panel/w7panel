@@ -50,8 +50,8 @@
 | `group` / `appgroup` | AppGroup 名称；同一 AppGroup 下切换多个 MicroApp 时保持不变                         |
 | `microappName` | 当前实际加载的 MicroApp `metadata.name`；切换到同组其他 MicroApp 菜单时随之变化             |
 | `reverse_dependent_apps` | 依赖当前 AppGroup 的应用摘要数组；不包含当前 AppGroup 自身依赖的应用                 |
-| `handles.getAppDynamicValues` | 按需读取应用动态值；`appgroup` 不传时读取当前 AppGroup，传入时由面板从已安装 AppGroup 解析制品来源；返回 `{status, data}`，默认缓存 30 秒 |
-| `handles.validateApp` | 复用动态值查询并只返回市场生成的 `{valid, reason, message}`；无法获取时返回 `null` |
+| `handles.getAppDynamicValues` | 按需读取应用动态值；`appgroup` 不传时读取当前 AppGroup，传入时由面板从已安装 AppGroup 解析制品来源；返回 `{status, title, data}`，默认缓存 30 秒 |
+| `handles.validateApp` | 复用动态值查询并返回 `{title, valid, reason, message}`；无法获取时返回 `null` |
 | `userid` | 面板登录用户 ID                                                         |
 | `role` | 面板用户角色，取值包括 `founder`、`super`、`normal`、`technician`               |
 | `access_token` | 面板登录用户自身维护的 access token，只能用于获取用户信息，不能准确定位 appid                  |
@@ -90,12 +90,14 @@ type W7PanelMicroAppProps = {
       options?: { force?: boolean },
     ) => Promise<{
       status: 'ready' | 'not_supported' | 'unavailable';
+      title: string;
       data: Record<string, unknown> | null;
     }>;
     validateApp?: (
       appgroup?: string,
       options?: { force?: boolean },
     ) => Promise<null | {
+      title: string;
       valid: boolean;
       reason: string;
       message: string;
@@ -162,7 +164,7 @@ await getPanelProps().handles?.validateApp?.(undefined, { force: true });
 
 `appgroup` 可省略，省略时读取当前应用；指定时读取当前命名空间中对应的已安装 AppGroup。调用方不传 ZPK URL，面板后端从 `AppGroup.spec.zpkUrl` 解析来源，因此目标应用不需要提供 MicroApp。`order_status` 包含 `none`、`pending`、`paid`、`refund_pending`、`refunding`、`refund_rejected`、`refunded`；`license_type` 为 `paid` 或 `trial`。试用转正式后 `trial_started_at` 和 `trial_expire_at` 为空；转正式订单退款并回退为试用后，按当前试用授权重新返回时间。
 
-`validate` 由制品市场统一返回 `{valid, reason, message}`。应用应以 `valid` 判断当前订单能否使用，以 `reason` 做稳定的程序分支，以 `message` 展示具体原因；不要在前端重新根据试用时间或退款状态计算。当前试用到期、试用缺少到期时间、订单未支付、订单不存在、状态异常及退款完成均返回 `valid=false`；退款申请中、退款处理中和退款拒绝在退款完成前仍返回 `valid=true`。动态值请求自身失败时，外层 `status` 为 `unavailable`，`validateApp` 返回 `null`，不能视为订单无效。
+`validate` 由制品市场统一返回 `{valid, reason, message}`，`validateApp` 会额外补充当前制品的 `title`。应用应以 `valid` 判断当前订单能否使用，以 `reason` 做稳定的程序分支，以 `message` 展示具体原因；不要在前端重新根据试用时间或退款状态计算。当前试用到期、试用缺少到期时间、订单未支付、订单不存在、状态异常及退款完成均返回 `valid=false`；退款申请中、退款处理中和退款拒绝在退款完成前仍返回 `valid=true`。动态值请求自身失败时，外层 `status` 为 `unavailable`，`validateApp` 返回 `null`，不能视为订单无效。
 
 请求面板 API 时使用 `paneltoken` 作为 Bearer token：
 

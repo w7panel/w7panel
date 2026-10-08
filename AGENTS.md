@@ -869,6 +869,7 @@ slog.Info("操作成功", "user", userID, "action", "create")
 
 - **目录**: API `w7panel-ui/src/api/`，页面 `w7panel-ui/src/views/`，组件 `w7panel-ui/src/components/`，Hooks `w7panel-ui/src/hooks/`
 - **Hooks 规范**: 见下方「前端性能规范」第5节 Hooks 使用规范
+- 应用管理按 AppGroup `w7.cc/manifest-type` 分为普通应用、传统应用和轻量虚拟机列表；安装完成返回、制品安装页及应用详情面包屑必须统一复用 `src/utils/appgroup.ts` 的列表路由映射，禁止固定跳转普通应用列表。专用制品市场页面包屑按路由 `activeMenu` 返回入口对应列表。
 
 #### MicroApp 菜单 UI 规范
 
