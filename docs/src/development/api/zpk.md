@@ -14,6 +14,16 @@ ZPK 接口用于从应用仓库读取安装配置，并完成安装、升级、�
 4. 安装后通过 ZPK 列表、详情、升级等接口管理应用。
 5. 如果应用带微前端静态包，再结合 [microapp-static.md](./microapp-static.md) 查询静态资源状态或触发下载。
 
+### AppGroup 依赖关系
+
+安装请求可携带 `dependencies`，每项包含依赖应用的 `namespace`、`releaseName` 和 `identifie`。后端不会直接信任客户端提供的对象信息，而是按 namespace 和 releaseName 查询实际 AppGroup；任何提交的依赖不存在都会终止安装。解析成功后，在新 AppGroup 的 `spec.dependencies` 中记录目标的 namespace、name、应用标识和应用类型。
+
+依赖方 AppGroup 同时维护 `w7.cc/depends-<目标 releaseName>: "true"` 标签，供目标应用反向筛选依赖者；查询结果仍需使用 `spec.dependencies` 中的 namespace 和 name 二次校验。依赖按逻辑 Release 关联，同名 Release 重装后关系继续生效。插件应用的 MicroApp 保持归属于插件 AppGroup，传统应用展示时再聚合依赖它的 `app-plugin` MicroApp。
+
+ZPK 和 Helm 构造 AppGroup 时会从 manifest 来源同时初始化 `metadata.annotations["w7.cc/manifest-type"]` 和同名 `metadata.labels`，供 Kubernetes 标签选择器按应用类型查询；该标签只写入 AppGroup，不扩散到 Deployment、Service、Job 等应用资源。
+
+复数标签 `w7.cc/group-names` 已移除。单数 `w7.cc/group-name` 仍用于同一 Release 内 Workload、MicroApp 等资源的主归属，不能用于表达跨应用依赖。
+
 ### 场景选择
 
 | 场景 | 使用接口 | 说明 |
@@ -70,16 +80,21 @@ Authorization: Bearer <user-token>
 
 | 参数 | 位置 | 类型 | 必填 | 说明 |
 |------|------|------|------|------|
-| `repoUrl` | query | string | 是 | ZPK 仓库地址 |
+| `repoUrl` | query | string | 条件必填 | 普通配置读取时必填；`runtimeContext=true` 时忽略，由面板从 AppGroup 获取 |
 | `thirdpartyCDToken` | query | string | 否 | 第三方持续交付 token |
-| `releaseName` | query | string | 否 | 已安装 Release 名称，升级场景可传入 |
+| `releaseName` | query | string | 条件必填 | 已安装 Release 名称；`runtimeContext=true` 时必填 |
 | `reinstall` | query | bool | 否 | 用户确认强制清除旧引用后重试配置读取；仅冲突确认流程传入 |
+| `runtimeContext` | query | bool | 否 | 仅返回已安装应用的动态值，不生成安装配置；由 Wujie 宿主按需调用 |
 
 读取配置时会把 `releaseName` 作为 `app_identify` 传给制品仓库。若仓库发现订单已绑定其他域名或已有应用引用，本接口与安装接口一样返回 HTTP 409 结构化冲突。前端据此展示原绑定域名或原面板地址；应用引用冲突确认强制清除后，会以 `reinstall=true` 重新读取配置，并在最终安装请求中继续携带该标记。
+
+订单存在待审核或已同意的退款申请时，配置读取和安装、升级请求返回 HTTP 403，错误码为 `ZPK_ORDER_REFUNDING`。面板应直接展示“订单正在退款处理中，暂不能安装或升级”，不得允许通过重装参数绕过。
 
 跨应用更新时，制品仓库返回的 `identifie` 可以与原应用不同，但配置响应中的根应用 `releaseName` 和 `deployName` 仍返回已有 AppGroup 的名称。前端使用该稳定名称读取原 Deployment 环境变量和 Helm values；新的 `identifie` 只表示本次更新使用的制品内容。此规则只约束配置读取，不改变安装接口现有的资源命名流程。
 
 响应参数：返回 `PackageAddConfig[]`。
+
+当 `runtimeContext=true` 时，面板根据 `releaseName` 查询已安装 AppGroup，并使用其 `spec.zpkUrl` 请求动态值；目标应用不需要创建 MicroApp。响应为 `{status: "ready", title, data: dynamicValues}`，其中 `title` 是当前制品标题；AppGroup 不存在或没有 ZPK 来源时返回 `{status: "not_supported", data: null}`。当前订单动态值包括 `order_sn`、`order_status`、`license_type`、`trial_started_at`、`trial_expire_at`、`service_expire_at` 和 `validate`。退款过程合并在 `order_status` 中，不返回单独退款字段。`validate` 为 `{valid, reason, message}`，由制品市场统一计算；面板与应用不应重复实现试用到期和退款完成等有效性规则。
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
@@ -89,7 +104,7 @@ Authorization: Bearer <user-token>
 | `requireDomain` | bool | 是否需要配置域名 |
 | `requireDomainHttps` | bool | 是否需要 HTTPS |
 | `requireDomainForce` | bool | 是否强制配置域名 |
-| `startParams` | object | 启动参数配置 |
+| `startParams` | array | 启动参数配置；参数可通过 `dependencySource.identifie/name` 引用同一制品内主应用或前序子应用的启动参数 |
 | `identifie` | string | 应用唯一标识 |
 | `name` | string | 应用名称 |
 | `ingress` | object | Ingress 配置 |
@@ -145,6 +160,8 @@ Authorization: Bearer <user-token>
 功能：安装或升级 ZPK 应用，支持普通 ZPK、Helm ZPK、传统应用等安装参数。
 
 用户提交安装后，后端先将 `releaseName` 转为小写并把 `_` 规范化为 `-`，然后再次请求 ZPK 仓库 `info`，将 `ingressHost` 和规范化后的 `releaseName` 分别通过 `domain`、`app_identify` 参数传递。普通安装不发送 `reinstall`；只有用户在应用引用冲突提示中二次确认“强制清除并安装”后，才发送 `reinstall=true`。ZPK 将域名、应用标识和受控的重装标记写入加密 ticket；安装完成通知不再单独传递应用标识，ZPK 解票后再把这些字段传给市场。市场仅允许非升级安装使用 `reinstall` 覆盖旧绑定，升级请求始终校验域名和应用标识。订单预检响应同时返回已绑定的 `panel_url`、`panel_device_sn` 和 `conflict_reason`；其中 `domain_mismatch` 表示订单域名不一致，`app_identify_exists` 表示订单已有应用标识绑定。
+
+安装页会在提交前按表单顺序解析启动参数的 `dependencySource`。`identifie` 指向同一制品中的主应用或前序已启用子应用，`name` 按大小写精确匹配来源启动参数；目标为 `PVC_NAME` 时同步安装项的 `pvcname`，其他参数写入 `envkv`。存储容量在表单内保持纯数值，只在提交时补充 `Gi`。来源应用未启用、位于消费方之后或不存在对应参数时，前端阻止安装并显示具体依赖。
 
 `/zpk/config` 和 `/zpk/install` 遇到订单绑定冲突时均返回 HTTP 409。`domain_mismatch` 显示原绑定域名；`app_identify_exists` 显示原 `panel_url`，用户可以前往原面板正常卸载，也可以在风险确认后以 `reinstall=true` 强制覆盖旧安装记录。强制覆盖可能导致老应用状态丢失且无法继续升级。面板向前端返回的冲突结构如下：
 
