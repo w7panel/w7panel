@@ -56,7 +56,7 @@ w7panel-sitemanager/
 | 镜像 + 前端 | 有面板内 UI，但后端部署仍是单容器 | Docker 镜像、`frontend.zip`、前端入口说明 |
 | Helm 应用 | 多容器、PVC、ServiceAccount、RBAC、子 Chart、复杂 values | Docker 镜像、Helm Chart、可选 `frontend.zip` |
 
-建议优先从“镜像应用”开始，只有在以下情况再引入 Helm Chart：
+建议优先从“镜像应用”开始，在内置配置无法满足以下需求时再引入 Helm Chart：
 
 - 需要 PVC、ConfigMap、Secret、ServiceAccount 或 RBAC。
 - 需要部署多个 Deployment、Service、Job 或子应用。
@@ -295,7 +295,7 @@ func (a Auth) Process(ctx *gin.Context) {
 
 ## 前端接入面板
 
-面板内应用通常作为微应用打开，前端需要读取 `window.$wujie.props`。`w7panel-sitemanager` 中常见的传入值包括：
+面板内应用通常作为微应用打开，前端需要读取 `window.$wujie.props`。下表是本文 `demo-manager` 示例约定的参数；实际参数应以应用的 bindings、frontend_props 和面板注入为准。
 
 | 参数 | 用途 |
 |------|------|
@@ -629,6 +629,7 @@ dev:
 4. 登录官方制品库。
 5. 推送镜像。
 6. 在应用制品信息中声明镜像地址、启动端口和必要环境变量。
+7. 在制品库提交配置并核对版本发布结果；市场审核与面板安装另行验证。推送运行镜像本身不会完成制品发布。
 
 命令示例：
 
@@ -647,14 +648,14 @@ docker push zpk.w7.cc/public/demo-manager:v0.1.0
 | port | `8000` | 应用 HTTP 端口 |
 | health | `/health` | 健康检查路径 |
 | env | `OAUTH_TOKEN` | 必需环境变量 |
-| frontend | `frontend.zip` | 有面板 UI 时提供 |
+| frontend | `frontend.zip` | 使用本地静态 UI 时提供；外部页面可配置地址 |
 
 注意事项：
 
 - 镜像 tag 必须稳定，不要使用会被覆盖的临时 tag 作为正式版本。
 - 官方制品库中的应用版本应能追溯到 Git tag 或 commit。
 - 环境变量默认值只能用于开发，生产敏感值必须由安装时配置。
-- 如果应用需要 PVC、RBAC、多 Service 等复杂资源，改用 Helm 应用形态。
+- 当内置容器、存储、子应用和权限配置无法表达需求时，再使用自带 Helm Chart；存在 PVC 或多个服务本身不代表必须上传 Chart。
 
 ## Helm Chart（可选）
 
@@ -727,12 +728,12 @@ helm package charts --destination charts
 
 发布检查：
 
-- tag、镜像 tag、应用制品版本是否一致。
-- 使用 Helm 时，Chart `version`、Chart `appVersion` 是否与镜像 tag 同步。
+- Git tag、镜像 tag 和制品版本是否有清晰的对应关系；它们不要求使用完全相同的字符串格式。
+- 使用 Helm 时，Chart `version`、`appVersion` 与实际镜像是否对应同一次交付。
 - Docker registry 凭证是否可用。
 - ZPK 账号是否有目标 artifact 权限。
 - 镜像制品是否已推送到官方制品库。
-- 有 UI 时，前端包是否已附加。
+- 使用本地静态 UI 时是否附加前端包；外部页面是否配置好地址和菜单。
 - 使用 Helm 时，Helm 包是否已附加。
 - 发布后在面板应用市场或安装入口能看到新版本。
 
@@ -800,3 +801,5 @@ helm package charts --destination charts
 ## 参考实现
 
 - [w7panel-sitemanager](https://github.com/w7panel/w7panel-sitemanager)：包含 Go 后端、前端 UI、Dockerfile、Helm Chart、ZPK 发布流程，是复杂面板内应用开发的完整参考。简单应用可只参考其中的后端、前端和镜像发布部分。
+
+制品配置以安装版本支持的格式为准。菜单生成不强制要求前端 ZIP；内置容器配置也能表达部分存储和子应用需求，不必仅因存在 PVC 就改用自带 Chart。

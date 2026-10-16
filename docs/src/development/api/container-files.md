@@ -10,7 +10,7 @@
 
 1. 使用用户 token 调用 `/panel-api/v1/pid`，传入 namespace、节点 IP、Pod/容器信息。
 2. 后端返回 `pid`、`subPid`、`webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
-3. WebDAV 读写、压缩解压、权限修改使用返回的 URL 和 `Authorization: Bearer {webdavToken}`。
+3. WebDAV 读写、压缩解压、权限修改使用返回的 URL，凭据选择见下文“鉴权”。
 4. 挂载文件、分片上传、下载复制等场景按各自接口处理，不要手动拼生产代理路径。
 
 ### 场景选择
@@ -26,7 +26,7 @@
 
 ### 使用边界
 
-- `webdavToken` 当前来自 `/pid` 返回字段，本质上是当前请求上下文里的 token。
+- `webdavToken` 来自请求上下文的 `k8s_token`，是服务端取得的 Kubernetes 凭据，不等于浏览器的面板登录 JWT。
 - WebDAV 标准方法必须保留 XML、文件流等协议响应，不要包装为普通 JSON。
 - `LOCAL_MOCK=true` 只改变 rootfs 定位路径，不代表跳过用户认证。
 - `/proc`、`/sys`、`/dev`、socket、fifo、device 等特殊文件需要按文档限制处理。
@@ -42,7 +42,7 @@
 Authorization: Bearer <token>
 ```
 
-`/panel-api/v1/pid` 返回的 `webdavToken` 当前就是用户 token。前端访问 WebDAV、压缩、权限接口时，应使用：
+`/panel-api/v1/pid` 返回的 `webdavToken` 来自 `ctx[k8s_token]`。当前 UI 文件页优先使用最新的面板登录 token，旧快照仅作回退；主面板代理会验证面板身份并取得下游凭据。直接访问 Agent 时应按其认证链路使用文件访问凭据，不能把两种 token 视为同一个值。文件凭据请求格式为：
 
 ```http
 Authorization: Bearer <webdavToken>
@@ -76,8 +76,10 @@ Authorization: Bearer <webdavToken>
 
 1. 前端使用用户 token 调用 `/panel-api/v1/pid`，传入 `namespace`、`HostIp`、`podName`、`containerName` 或 `containerId`。
 2. 后端返回 `webdavUrl`、`webdavBasePath`、`compressUrl`、`permissionUrl`、`webdavToken`。
-3. 前端使用 `webdavToken` 访问 WebDAV、压缩和权限接口。
+3. 当前 UI 优先使用最新面板 token 访问返回地址；直接 Agent 调用应核对文件凭据及认证链路。
 4. 需要生产 Agent 代理时，前端使用后端返回的 URL，不自行拼接生产代理路径。
+
+URL 是否带代理前缀由 `PidResult.ToArray` 中 `ProxyIp` 是否为空决定（`podIp` 字段取自该值），不能仅按 `LOCAL_MOCK` 推导。以下仅说明文件系统基础路径。
 
 ## LOCAL_MOCK 路径差异
 
@@ -113,11 +115,11 @@ Authorization: Bearer <webdavToken>
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| `podName` | string | Agent Pod 名称，不一定是原始业务 Pod 名称 |
+| `podName` | string | Agent Pod 名称；没有 AgentPod 对象时为 default，不是原始业务 Pod 名称 |
 | `pid` | string | 主进程 PID |
 | `subPid` | string | 子进程 PID；无子进程时为空字符串 |
-| `namespace` | string | Agent Pod namespace |
-| `containerName` | string | Agent Pod 第一个容器名 |
+| `namespace` | string | Agent Pod namespace；没有 AgentPod 对象时为 default |
+| `containerName` | string | 目标容器名；未指定且 Agent Pod 只有一个容器时回退到该容器名 |
 | `podIp` | string | Agent Pod IP，也用于生产代理地址 |
 | `webdavUrl` | string | WebDAV 访问基础路径 |
 | `webdavBasePath` | string | 编辑器用于截断/展示路径的基础路径，不带开头 `/` |
@@ -125,7 +127,7 @@ Authorization: Bearer <webdavToken>
 | `permissionUrl` | string | 权限修改 API 基础路径 |
 | `pwd` | string | 初始工作目录 |
 | `agentUrl` | string | Agent 代理基础路径 |
-| `webdavToken` | string | 文件访问 token，当前等于用户 token |
+| `webdavToken` | string | 文件访问凭据，来自 ctx[k8s_token]，不同于面板 JWT |
 
 生产模式响应示例：
 

@@ -222,5 +222,6 @@ LOCAL_MOCK=true
 提交前检查：
 
 ```bash
-go test ./...
+cd "$BASE_DIR/w7panel-server"
+LOCAL_MOCK=true make test TEST_PACKAGES=./...
 ```

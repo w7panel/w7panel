@@ -11,8 +11,10 @@ ZPK 接口用于从应用仓库读取安装配置，并完成安装、升级、�
 1. 调用 `/panel-api/v1/zpk/config` 读取仓库配置，确认应用名称、命名空间、部署项、镜像构建、PVC、域名和依赖项。
 2. 需要构建镜像时，调用 ZPK buildimage 接口创建构建任务，并结合 [container-images.md](./container-images.md) 查看镜像能力。
 3. 安装或升级应用时，调用 `/panel-api/v1/zpk/install`，后端根据配置应用 Helm 或 Kubernetes 资源。
-4. 安装后通过 ZPK 列表、详情、升级等接口管理应用。
+4. 当前 UI 通过 AppGroup 的 `status.deployStatus` 轮询安装结果，`deployed` 才表示成功；安装响应只表示提交阶段完成。安装接口另有创始人身份检查。
 5. 如果应用带微前端静态包，再结合 [microapp-static.md](./microapp-static.md) 查询静态资源状态或触发下载。
+
+应用列表卸载会建立反向依赖计划，再并发提交删除，不等待资源完全清理；部分失败不会撤销已提交删除。插件页默认继续等待 AppGroup 消失。
 
 ### AppGroup 依赖关系
 

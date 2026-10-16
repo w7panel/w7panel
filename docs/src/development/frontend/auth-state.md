@@ -15,7 +15,7 @@
 | 普通请求 | axios 拦截器自动加 `Authorization` | 后端 `middleware.Auth` 校验 Bearer token |
 | token 过期 | 拦截器捕获 401，尝试刷新 | `/panel-api/v1/auth/refresh-token2` 使用 refresh token 换新 token |
 | 刷新失败 | 清理登录态并跳转登录页 | 前端统一退出或重新登录 |
-| 特殊凭据 | 使用 `customToken` 覆盖默认 token | 文件、WebDAV、跨用户资源等明确场景 |
+| 特殊凭据 | 使用 `customToken` 传递指定凭据 | K8s 代理写专用 Header，其他路径覆盖 Bearer |
 
 ### token 怎么用
 
@@ -45,7 +45,7 @@ panelApi.get('/some-api', {
 });
 ```
 
-`customToken` 会让拦截器改用：
+非 `/k8s-proxy` 路径的 `customToken` 会让拦截器改用：
 
 ```http
 Authorization: Bearer <customToken>
@@ -60,7 +60,7 @@ Authorization: Bearer <customToken>
 | 用户 token | 登录接口返回并写入 `w7panel-token` | 请求面板业务 API 和 K8s 代理 API | 默认 axios 拦截器自动注入 |
 | refresh token | 登录接口返回并写入 `w7panel-refresh-token` | 用户 token 过期后换新 token | 只由 401 刷新逻辑使用 |
 | `customToken` | 页面或接口拿到的临时/代用户 token | 用另一个身份访问指定接口 | axios 请求配置里传 `customToken` |
-| `webdavToken` | 文件接口返回 | WebDAV、外部编辑器、文件代理请求 | 手动放到 `Authorization: Bearer` |
+| `webdavToken` | `/pid` 返回的服务端 Kubernetes 凭据 | 直接 Agent 文件访问等指定场景 | 与面板 JWT 区分，按目标链路使用 |
 | 第三方持续交付 token | Console/第三方接口返回 | 调用 Console 或第三方持续交付接口 | 通常作为 `customToken` 或专用 Header |
 
 用户 token 是默认凭据。页面请求面板接口时只调用 `panelApi` 或 `k8sproxy`，不要手动拼 Header：
@@ -106,15 +106,15 @@ await k8sproxy.put(resourceUrl, resourceBody, {
 });
 ```
 
-`customToken` 会覆盖默认 `getToken()`，所以不要在普通页面请求里随手传空字符串或旧 token。
+`customToken` 在 `/k8s-proxy` 请求中写入 `X-W7Panel-K8s-Token`，保留 `Authorization` 中的面板登录态；其他路径才覆盖默认 Bearer。服务端仍会按自己的认证和授权逻辑处理，不表示任意集群凭据都能改变最终代理身份。不要在普通请求里传旧 token。
 
-WebDAV 和文件编辑器使用后端返回的 `webdavToken`，它不是面板登录 token。WebDAV 请求一般不走普通 `panelApi`，需要按协议手动带 Header：
+`/pid` 返回的 `webdavToken` 来自 `ctx[k8s_token]`，不是面板登录 JWT。当前文件页的公共请求头优先取最新面板 token，普通 axios 请求也经过全局拦截器；不能因为未使用 `panelApi` 就认定它绕过了拦截器。以下示例针对通过主面板返回地址访问文件；直接 Agent 调用需另核对其认证链路：
 
 ```ts
 await fetch(webdavUrl, {
   method: 'PROPFIND',
   headers: {
-    Authorization: `Bearer ${webdavToken}`,
+    Authorization: `Bearer ${getToken()}`,
     Depth: '1',
   },
 });
@@ -133,7 +133,7 @@ await axios.get('https://console.w7.cc/api/thirdparty-cd/k8s-offline/license', {
 | 运行环境 | 默认 token 来源 | 说明 |
 |----------|-----------------|------|
 | 面板主应用 | localStorage `w7panel-token` | 登录后写入 |
-| 特殊请求 | axios `customToken` | 覆盖默认 token |
+| 特殊请求 | axios `customToken` | K8s 代理写专用 Header，其他路径覆盖 Bearer |
 
 ### refresh token 怎么用
 
@@ -154,7 +154,7 @@ refresh token 只用于刷新登录态，不用于普通业务 API。当前前�
 | 普通面板请求 | 默认 axios 拦截器 | 自动读取 `getToken()` |
 | 刷新登录态 | refresh token | 拦截器统一处理 401 |
 | 代用户或临时授权请求 | axios `customToken` | 覆盖默认 Authorization |
-| 文件/WebDAV 请求 | `webdavToken` | 手动设置 `Authorization: Bearer {webdavToken}` |
+| 文件/WebDAV 请求 | 主面板优先用当前面板 token | 直接 Agent 凭据见容器文件 API |
 | Console/第三方接口 | 第三方持续交付 token | 作为 `customToken` 或专用 Header |
 | 用户信息和权限 | `src/utils/auth.ts` | 统一读写本地缓存 |
 | 全局业务状态 | Pinia store | 不把同一后端对象长期存多份 |
@@ -167,7 +167,7 @@ axios 拦截器位于 `src/api/interceptor.ts`。普通请求会自动注入：
 Authorization: Bearer <getToken()>
 ```
 
-当请求配置存在 `customToken` 时，会覆盖默认 token：
+当请求配置存在 `customToken` 时，K8s 代理使用专用 Header，其他路径覆盖默认 Bearer。例如：
 
 ```ts
 panelApi.get('/some-api', {
@@ -253,3 +253,5 @@ const debug = userInfo?.['w7.cc/debug'] === 'true';
 - 401、刷新 token、退出登录必须走统一逻辑，不在页面内各自处理。
 - 权限、用户信息和能力状态不能当作鉴权凭据使用。
 - 后端修改 token 字段、刷新接口或鉴权方式时，需要同步检查本文、[../api/credentials.md](../api/credentials.md) 和前端拦截器。
+
+凭据与代理说明见 [容器文件 API](../api/container-files.md)。

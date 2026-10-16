@@ -86,11 +86,18 @@ exports = module.exports = [
     ]
   },
   {
-    text: '应用开发示例',
+    text: '应用与制品',
     collapsible: true,
     items: [
-      { text: '应用开发示例', link: '/development/examples/' },
-      { text: '制品库操作示例', link: '/development/examples/zpk-product-workflow' },
+      { text: '应用开发', link: '/development/examples/' },
+      {
+        text: '制品开发',
+        link: '/development/zpk/',
+        collapsible: true,
+        items: [
+          { text: '操作示例', link: '/development/examples/zpk-product-workflow' },
+        ]
+      },
     ]
   }
 ]

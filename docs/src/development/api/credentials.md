@@ -4,14 +4,14 @@
 
 ## 整体使用方式
 
-W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默认规则是：前端或普通业务调用使用面板用户 token；容器文件操作使用 `webdavToken`；后端建立 Kubernetes 客户端时使用 ServiceAccount 或本地 kubeconfig；微应用和第三方系统按各自协议使用独立凭据。
+W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默认规则是：前端或普通业务调用使用面板用户 token；容器文件操作根据面板代理或直接 Agent 的认证链路选择凭据；后端建立 Kubernetes 客户端时使用 ServiceAccount 或本地 kubeconfig；微应用和第三方系统按各自协议使用独立凭据。
 
 ### 基本流程
 
 1. 登录面板，调用 `/panel-api/v1/login` 获取 `token` 和 `refreshToken`。
 2. 普通面板 API 请求统一携带 `Authorization: Bearer {token}`。
 3. token 过期后，使用 `/panel-api/v1/auth/refresh-token2` 和 `refreshToken` 换取新 token。
-4. 进入容器文件、WebDAV、压缩、权限修改等场景时，先从容器信息接口获取 `webdavToken`，再用 `Authorization: Bearer {webdavToken}` 调用文件类接口。
+4. 进入容器文件场景时，先获取文件 URL；当前 UI 优先使用最新面板 token。直接访问 Agent 时按对应认证链路使用文件凭据，详见容器文件 API。
 5. 微应用内调用面板 API 时优先使用 Wujie props 或 micro-app data 传入的 `paneltoken`；调用微应用自身后端时使用该微应用自己的 Basic 认证或业务 token。
 6. OIDC Client 按标准 OAuth/OIDC 流程获取 `access_token`，只用于 OIDC `/userinfo` 等协议接口，不等同于面板用户 token。
 
@@ -22,9 +22,9 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 | 登录、初始化用户、刷新 token | 无用户 token 或 refresh token | 登录接口返回 `refreshToken` | form `refreshToken` |
 | 普通面板业务 API | 用户 token | `/panel-api/v1/login` 或刷新接口 | `Authorization: Bearer {user-token}` |
 | K8s 代理和面板聚合接口 | 用户 token | 前端登录态或微应用 `paneltoken` | `Authorization: Bearer {user-token}` |
-| 容器文件、WebDAV、压缩、权限修改 | webdavToken | 容器 PID/文件入口相关接口返回 | `Authorization: Bearer {webdavToken}` |
+| 容器文件、WebDAV、压缩、权限修改 | 面板 token 或 Agent 文件凭据 | 面板登录态；直接 Agent 凭据见 `/pid` 返回 | 面板代理用面板 Bearer，直接 Agent 按其认证链路传文件凭据 |
 | 后端服务访问 Kubernetes | ServiceAccount token | Pod 内自动挂载 | 后端内部使用，不暴露给前端 |
-| `LOCAL_MOCK=true` 开发测试 | 面板用户 token | 登录接口或 kubeconfig 中可用于认证的用户 token | `Authorization: Bearer {token}` |
+| `LOCAL_MOCK=true` 开发测试 | 面板用户 token | 面板登录接口 | `Authorization: Bearer {token}` |
 | Console 签名登录 | ConsoleSignature | Console 请求签名 | 签名请求头/参数 |
 | Console OAuth 登录/绑定 | Console OAuth code | `/auth/console/oauth` 跳转后回调 | query/form `code` |
 | 微应用自身后端 | 微应用 Basic 认证 | MicroApp/ZPK 配置 | `Authorization: Basic ...` |
@@ -35,10 +35,10 @@ W7Panel 的调用凭据按“谁在调用、调用什么资源”来选择。默
 - `user-token` 是面板业务默认凭据，适用于绝大多数 `/panel-api/v1/*` 和 `/k8s-proxy/*` 调用。
 - `refreshToken` 只用于刷新登录态，不用于普通业务 API。
 - `webdavToken` 只用于目标容器文件系统相关操作，不应拿来调用普通面板业务 API。
-- ServiceAccount token 和 kubeconfig token 只应在后端内部或 `LOCAL_MOCK` 开发测试中使用，不应返回给前端。
+- 后端配置的 ServiceAccount/kubeconfig 原始凭据用于建立 Kubernetes 客户端，不应作为面板登录凭据散发。当前 `/pid` 会返回请求上下文的 `k8s_token`，主面板认证下通常是为当前身份签发的 Kubernetes 凭据，不能笼统写成前端永远收不到 Kubernetes token。
 - `w7PanelToken` 是 Console 第三方 CD token，不等同于 `paneltoken`。
 - OIDC `access_token` 只服务于 OIDC 协议，不保证能调用面板业务 API。
-- 不要在 URL、日志、响应体、localStorage 调试输出中暴露完整 token、密码、密钥或 OIDC code。
+- 不要把完整 token、密码、密钥或 OIDC code 写入日志、截图及无关响应。登录和 `/pid` 等协议明确返回凭据的接口应按其认证和有效期管理，不能据此向其他响应扩散。
 
 ## 通用说明
 
@@ -134,7 +134,7 @@ Authorization: Bearer <getToken()>
 | 1 | Wujie props | `window.$wujie.props.refreshToken` |
 | 2 | localStorage | `w7panel-refresh-token` 或 `iframe-w7panel-refresh-token` |
 
-请求配置中的 `customToken` 会覆盖默认 `Authorization`，适用于文件编辑器、容器文件等需要使用 `webdavToken` 的场景。
+请求配置中的 `customToken` 对 `/k8s-proxy` 路径写入 `X-W7Panel-K8s-Token`，保留面板 `Authorization`；其他路径才覆盖 `Authorization`。当前文件页优先取最新面板 token，`/pid` 返回的 `webdavToken` 来自服务端 `k8s_token`，两者不能混为一谈。
 
 ## 登录与刷新
 

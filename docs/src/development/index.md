@@ -2,6 +2,24 @@
 
 本文档是 W7Panel 开发资料入口，面向后端、前端、应用示例、联调测试和文档维护。
 
+## 阅读范围
+
+这里面向修改面板代码、接入面板内部接口、开发独立应用和维护部署的人员。产品功能的配置与调用示例（包括 AI 代理 SDK 调用）请阅读 [使用手册](../user-guide/index.md)。
+
+- [制品开发工具](zpk/index.md)：制作、管理版本和发布安装包。
+
+## 文档目录
+
+专题文档按用途归档，根目录仅保留开发指南入口和侧边栏配置。
+
+| 目录 | 内容 |
+|------|------|
+| `zpk/` | 制品开发工具 |
+| `api/` | 后端业务 API、认证和开发约定 |
+| `frontend/` | 前端规范、组件与微应用接入 |
+| `performance/` | 性能规范与分析专题 |
+| `examples/` | 应用开发与制品操作示例 |
+
 ## 快速入口
 
 ### 后端
@@ -53,9 +71,6 @@
 | [performance/index.md](./performance/) | 性能开发规范入口，覆盖后端 API、WebDAV、K8s 调用、前端请求、列表渲染和资源加载 |
 | [performance/backend.md](./performance/backend.md) | 后端性能规范，覆盖文件处理、认证 token、K8s 客户端、缓存、并发和日志 |
 | [performance/frontend.md](./performance/frontend.md) | 前端性能规范，覆盖 API 请求、轮询清理、状态缓存、列表渲染和资源加载 |
-| [CHANNELLOCAL_PERFORMANCE_ANALYSIS.md](./CHANNELLOCAL_PERFORMANCE_ANALYSIS.md) | ChannelLocal 性能分析专题 |
-| [bootstrap-installation.md](./bootstrap-installation.md) | BootstrapInstallation 预装制品架构、资源定义和删除卸载策略 |
-| [k8s-coordination.md](./k8s-coordination.md) | 通用 Kubernetes Lease、资源互斥与持久化分布式并发槽 |
 
 ## 仓库结构
 
@@ -72,7 +87,7 @@ $BASE_DIR/
 │   ├── common/                      # 公共服务、中间件和工具
 │   │   └── service/k8s/
 │   │       ├── bootstrap/           # BootstrapInstallation 预装协调 Controller
-│   │       └── coordination/        # 通用 Lease 与分布式并发协调
+│   │       └── coordination/        # 通用 Lease 与任务并发控制
 │   ├── k8s/pkg/apis/bootstrapinstallation/ # BootstrapInstallation API 类型（w7panel.w7.com）
 │   ├── kodata/                      # 后端静态资源、CRD、BootstrapInstallation 和商店 Chart
 │   └── install/                     # 安装相关资源
@@ -99,9 +114,12 @@ $BASE_DIR/
 每次开发前先同步 `dev-v1`。本文中的 `$BASE_DIR` 指仓库根目录：
 
 ```bash
-cd $BASE_DIR
+cd "$BASE_DIR/w7panel-server"
 git fetch origin dev-v1
-git pull origin dev-v1
+git pull --ff-only origin dev-v1
+cd "$BASE_DIR/w7panel-ui"
+git fetch origin dev-v1
+git pull --ff-only origin dev-v1
 ```
 
 如果本地分支和远端分支已分叉，先确认使用 merge、rebase 还是 fast-forward，再执行 `git pull`。
@@ -191,7 +209,7 @@ rg "localStorage\\.|sessionStorage\\." w7panel-ui/src
 | 新增、修改、删除 API | `docs/src/development/api/{module}.md`，必要时同步 `docs/src/development/api/index.md` |
 | 新增前端公共组件 | `docs/src/development/frontend/components.md` |
 | 新增 Wujie 事件 | `docs/src/development/frontend/wujie-events.md` |
-| 修改构建、部署、环境变量 | `docs/src/user-guide/quick-start.md`、`docs/src/user-guide/overview/faq.md` 或新增部署专题文档 |
+| 修改构建、部署、环境变量 | `docs/src/development/index.md`；仅安装入口和用户可操作的排查同步到使用手册 |
 | 新增或修改测试 | `tests/README.md` |
 | 新增功能模块或用户流程变化 | `docs/src/user-guide/` |
 | 完成开发 | `docs/src/user-guide/overview/changelog/{version}.md` |
@@ -211,17 +229,17 @@ rg "localStorage\\.|sessionStorage\\." w7panel-ui/src
 
 ```bash
 cd $BASE_DIR/w7panel-server
-mkdir -p $BASE_DIR/dist
-go build -o $BASE_DIR/dist/w7panel .
-go test ./...
+LOCAL_MOCK=true make dev KUBECONFIG_FILE="$BASE_DIR/kubeconfig.yaml"
+# 在另一终端执行测试；构建镜像使用 make image
+LOCAL_MOCK=true make test TEST_PACKAGES=./...
 ```
 
 ### 前端
 
 ```bash
 cd $BASE_DIR/w7panel-ui
-npm run dev
-npm run build
+LOCAL_MOCK=true W7PANEL_PROXY_URL=http://127.0.0.1:18000 make dev
+LOCAL_MOCK=true npm run build
 ```
 
 ### Helm Chart
@@ -285,7 +303,7 @@ tail -f /tmp/w7panel.log
 
 ```bash
 curl -H "Authorization: Bearer $TOKEN" \
-  "http://localhost:8000/panel-api/v1/example"
+  "http://localhost:18000/panel-api/v1/example"
 ```
 
 ### 常见问题
@@ -303,8 +321,8 @@ curl -H "Authorization: Bearer $TOKEN" \
 | 检查项 | 命令或说明 |
 |--------|------------|
 | 文档格式 | `git diff --check` |
-| 后端编译和测试 | `cd $BASE_DIR/w7panel-server && go test ./...` |
-| 前端构建 | `cd $BASE_DIR/w7panel-ui && npm run build` |
+| 后端编译和测试 | `cd $BASE_DIR/w7panel-server && LOCAL_MOCK=true make test TEST_PACKAGES=./...` |
+| 前端构建 | `cd $BASE_DIR/w7panel-ui && LOCAL_MOCK=true npm run build` |
 | 旧命名检查 | `rg "offline|k8soffline" .` |
 | API 路径检查 | 确认面板业务 API 使用 `/panel-api/v1/`，K8s 代理使用 `/k8s-proxy/` |
 | 接口文档 | 确认新增或变更 API 已更新到 `docs/src/development/api/` |

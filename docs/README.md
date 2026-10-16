@@ -40,7 +40,7 @@ docs/
 ├── README.md              # 本说明
 ├── src/
 │   ├── index.md           # 文档站首页
-│   ├── user-guide/        # 用户操作手册、部署运维、概述与版本日志
+│   ├── user-guide/        # 用户操作手册、安装入门、概述与版本日志
 │   ├── development/       # 开发文档、API、前端规范
 │   └── public/            # 文档站静态资源
 │       └── user-guide/    # 仓库 README 展示图片
@@ -62,6 +62,7 @@ docs/
 - [文件管理](./src/user-guide/file-management.md)
 - [存储管理](./src/user-guide/storage-management.md)
 - [域名管理](./src/user-guide/domain-management.md)
+- [AI 代理与调用示例](./src/user-guide/ai-proxy.md)
 - [镜像管理](./src/user-guide/image-management.md)
 - [计划任务](./src/user-guide/scheduled-tasks.md)
 - [快速开始](./src/user-guide/quick-start.md)
@@ -69,6 +70,7 @@ docs/
 
 ### 开发文档
 
+- [制品开发工具](src/development/zpk/index.md)
 - [开发文档首页](./src/development/index.md)
 - [API 文档首页](./src/development/api/index.md)
 - [API 设计约定](./src/development/api/conventions.md)
@@ -92,9 +94,9 @@ docs/
 ## 维护规则
 
 - 新增用户操作流程时，优先更新 `docs/src/user-guide/`。
-- 新增或调整 API 时，优先更新 `docs/src/development/api/`。
+- 新增或调整面板开发 API 时，优先更新 `docs/src/development/api/`；使用产品功能所需的调用示例放在对应用户手册中。
 - 新增前端组件、接口调用或微前端事件时，优先更新 `docs/src/development/frontend/`。
-- 修改部署方式、环境变量或故障处理步骤时，同步更新 `docs/src/user-guide/quick-start.md`、`docs/src/user-guide/overview/faq.md` 或新增相应部署专题文档。
+- 文档按使用目的划分：完成产品功能所需的设置、参数、命令和代码示例写入用户手册；修改系统实现所需的源码构建、内部协议、调用链和维护说明写入开发文档。
 - 完成面向用户或开发者的变更后，同步更新 `docs/src/user-guide/overview/changelog/1.0.0.md`。
 
 ### 子项目说明
@@ -107,3 +109,12 @@ docs/
 
 - 如果你想先了解产品能力、技术架构、适用场景和安装方式，请阅读仓库根目录的 [README.md](../README.md)。
 - 如果要查看线上文档站源码和导航结构，请从 [src/index.md](./src/index.md) 开始。
+
+## 两类文档的写作边界
+
+| 类型 | 读者与写法 | 不应混入的内容 |
+| --- | --- | --- |
+| 使用手册 | 按功能任务写入口、配置、步骤、结果和错误处理；技术功能直接提供必要的 curl、SDK、脚本及配置示例，并解释前提、替换项与结果 | 与功能使用无关的内部字段、资源标签、控制器机制 |
+| 开发文档 | 写源码位置、调用链、接口协议、权限、资源关系、联调与验证方式 | 未经代码核对或运行验证的能力承诺 |
+
+站点管理、缓存及制品开发等独立应用，应说明需要另行安装，能力以对应版本为准。按内容用途调整归属时更新侧边栏和站内链接，保留旧链接的说明页。不能仅因出现专业词汇或代码示例就归入开发文档。整理已有页面时沿用原有有效章节、操作步骤、表格和截图，在对应功能下修正和补充，避免将完整说明压缩为概要或仅保留跳转链接。版本日志对用户描述实际变化，内部字段与历史实现放在更新记录。
