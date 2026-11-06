@@ -238,3 +238,7 @@ HELM_PACKAGE_IMAGE_TAG=...
 ### GitHub Actions 找不到 Helm 包
 
 确认 `make publish` 已执行成功，并且 `CHART_PACKAGE_DIR` 指向 `charts`。
+
+
+运行镜像需包含 `jq`：Helm 面板初始化 Job 使用它识别其他 Helm 组件管理的 CRD，
+避免镜像捆绑的旧 CRD 定义覆盖独立组件。项目 Dockerfile 的 final 阶段已安装此依赖。

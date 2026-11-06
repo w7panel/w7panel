@@ -4,8 +4,8 @@ metadata:
   name: w7panel-offline
   namespace: kube-system
 spec:
-  chart: https://w7panel.com/installer/charts/w7panel-offline-1.1.102.tgz
-  version: v1.1.102
+  chart: https://w7panel.com/installer/charts/w7panel-offline/w7panel-offline-1.1.106.tgz
+  version: v1.1.106
   targetNamespace: default
   createNamespace: true
   set:

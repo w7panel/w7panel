@@ -5,8 +5,8 @@ metadata:
   name: higress
   namespace: kube-system
 spec:
-  chart: https://w7panel.com/installer/charts/higress-2.2.3.tgz
-  version: v2.2.3
+  chart: https://w7panel.com/installer/charts/higress/higress-2.2.3.tgz
+  version: 2.2.3
   targetNamespace: higress-system
   createNamespace: true
   set:

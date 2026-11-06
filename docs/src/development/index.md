@@ -8,6 +8,8 @@
 
 - [制品开发工具](zpk/index.md)：制作、管理版本和发布安装包。
 
+- 安装器回归技能：仓库 `skills/w7panel-installer-test/SKILL.md`；详细流程位于同目录 `references/docker-regression.md`，覆盖 mkcert、本地 HTTPS、Docker 内 K3s 安装、官方卸载重装和故障处理。测试证据保存在 `tests/reports/`。
+
 ## 文档目录
 
 专题文档按用途归档，根目录仅保留开发指南入口和侧边栏配置。

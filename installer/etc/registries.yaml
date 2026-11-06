@@ -2,8 +2,6 @@ mirrors:
   registry.local.w7.cc:
   docker.io:
     endpoint:
-      - "https://mirror.ccs.tencentyun.com"
-      - "https://registry.cn-hangzhou.aliyuncs.com"
       - "https://docker.m.daocloud.io"
       - "https://docker.1panel.live"
   quay.io:

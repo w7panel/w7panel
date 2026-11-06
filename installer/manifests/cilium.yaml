@@ -4,7 +4,7 @@ metadata:
   name: cilium
   namespace: kube-system
 spec:
-  chart: https://w7panel.com/installer/charts/cilium-1.16.4.tgz
+  chart: https://w7panel.com/installer/charts/cilium/cilium-1.16.4.tgz
   version: 1.16.4
   targetNamespace: kube-system
   bootstrap: true

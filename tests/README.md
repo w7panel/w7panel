@@ -248,3 +248,20 @@ agent-browser close
 
 - [test-case-creation技能](../.opencode/skills/test-case-creation/SKILL.md)
 - [UI菜单地图](../docs/testing/ui/ui-menu-map.md)
+
+
+## 安装脚本资源回归
+
+```bash
+bash -n installer/install.sh
+python3 tests/check-installer-assets.py
+```
+
+从仓库根目录运行，检查安装脚本引用的资源是否存在，以及每个 HelmChart
+URL 指向的归档版本是否一致。完整回归需要独立 systemd 测试机，以 mkcert
+证书启动本地 HTTPS 服务并信任其根 CA，执行安装、官方卸载、重新安装，
+检查 `k3s kubectl get nodes`、`k3s kubectl get pods -A` 和面板 HTTP 就绪状态。
+
+完整操作与已遇故障见项目技能 [w7panel-installer-test](../skills/w7panel-installer-test/SKILL.md)。验收还须确认初始化 Job Complete，不能仅凭 HTTP 200 判定成功；测试完成后同步更新技能和 `tests/reports/` 中的实际结果。
+
+宿主安装结果见 [2026-11-06 宿主回归](reports/2026-11-06-installer-host.md)，包括默认 overlayfs、启动期重试及保留环境说明。

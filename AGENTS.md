@@ -1106,3 +1106,18 @@ helm upgrade --install w7panel ./charts/w7panel -n default \
 ## 故障排查
 
 ---
+
+
+### installer 本地回归
+
+- `installer/` 通过 HTTPS 的 `/installer/` 发布；mkcert 私钥不得入库，测试机须信任根证书。
+- 安装依赖 systemd、curl、wget、sudo、iproute2；嵌套容器安装 fuse-overlayfs 后可设置 `K3S_SNAPSHOTTER=fuse-overlayfs`，或使用较慢的 `native`（默认 `overlayfs`），并准备 `/sys`、`/run/cilium` 的 shared 挂载传播。
+- 使用 `helm package charts/w7panel --version 1.1.102 --app-version 1.1.102 --destination installer/charts` 补齐面板 Chart，manifest 的版本和路径须保持一致。
+- Chart 下载到 K3s 静态目录后安装；镜像默认在线拉取，支持导入已有 tar。
+- 完成安装脚本修改后记录版本日志，并在独立测试机执行安装、官方卸载、重新安装回归。
+
+- 安装资源静态回归：`bash -n installer/install.sh`、`python3 tests/check-installer-assets.py`。
+
+- 安装器按默认路由选择访问地址，支持 `INTERNAL_IP` 覆盖（不替代 K3s `--node-ip`）；面板初始化 Job 不覆盖其他 Helm 组件管理的 CRD。
+
+- 项目技能目录 `skills/w7panel-installer-test/`：入口 [SKILL.md](skills/w7panel-installer-test/SKILL.md)，包含 mkcert、本地 HTTPS、独立 systemd Docker 安装/卸载重装和故障处理。执行此类回归时读取该技能，结束后更新技能与测试报告。

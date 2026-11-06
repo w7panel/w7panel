@@ -43,7 +43,7 @@ RUN set -eux; \
 FROM alpine:3.20 AS final
 
 RUN sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories \
-    && apk add --no-cache ca-certificates curl kubectl helm k9s zip tzdata \
+    && apk add --no-cache ca-certificates curl kubectl helm k9s zip tzdata jq \
     && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
 

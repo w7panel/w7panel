@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o pipefail
 
 # 检查终端是否支持颜色输出
 if [ -t 1 ]; then
@@ -99,13 +100,13 @@ download_files() {
     local filename=$(basename "$path")
     sudo mkdir -p "$save_path" || fatal "创建目录失败: $save_path"
 
-    if [ -f "$path" ]; then
+    if [ -s "$path" ]; then
         info "文件已存在: ${path}"
         return 0
     fi
 
     # 重试配置参数
-    local max_retries=10
+    local max_retries=3
     local retry_delay=5
     local retry_count=0
 
@@ -115,14 +116,15 @@ download_files() {
             info "正在尝试第 ${retry_count}/${max_retries} 次重试..."
         fi
 
-        if sudo wget -q --show-progress --progress=bar:force:noscroll --no-check-certificate \
-            -c --timeout=10 --tries=10 --retry-connrefused \
-            -O "$path" "$url"; then
+        if sudo wget -q --show-progress --progress=bar:force:noscroll \
+            -c --timeout=10 --tries=1 --retry-connrefused \
+            -O "$path.part" "$url"; then
+            sudo mv "$path.part" "$path"
             return 0
         fi
 
         # 重试前清理失败的文件
-        [ -f "$path" ] && sudo rm -f "$path"
+        [ ! -f "$path.part" ] || sudo rm -f "$path.part"
         
         # 未超过最大重试次数时等待
         if [ $retry_count -lt $max_retries ]; then
@@ -139,12 +141,6 @@ download_files() {
 downloadResource() {
     info "开始下载微擎面板资源..."
     local resources="
-        https://w7panel.com/installer/images/cilium.cilium-v1.16.4.tar
-        https://w7panel.com/installer/images/cilium.operator-generic-v1.16.4.tar
-        https://w7panel.com/installer/images/jetstack.cert-manager-cainjector-v1.16.2.tar
-        https://w7panel.com/installer/images/jetstack.cert-manager-controller-v1.16.2.tar
-        https://w7panel.com/installer/images/jetstack.cert-manager-webhook-v1.16.2.tar
-        https://w7panel.com/installer/images/jetstack.cert-manager-startupapicheck-v1.16.2.tar
         https://w7panel.com/installer/manifests/cert-manager.yaml
         https://w7panel.com/installer/manifests/cilium.yaml
         https://w7panel.com/installer/manifests/higress.yaml
@@ -160,7 +156,7 @@ downloadResource() {
 publicNetworkIp() {
     # publicIp 为空，则重新获取publicIp
     if [ -z "$PUBLIC_IP" ]; then
-        PUBLIC_IP=$(curl -s ifconfig.me)
+        PUBLIC_IP=$(curl -fsS --max-time 10 https://ifconfig.me)
         echo "$PUBLIC_IP"
     else
         echo "$PUBLIC_IP"
@@ -170,14 +166,9 @@ publicNetworkIp() {
 # 获取内网IP（兼容多系统）
 internalIP() {
     if [ -z "$INTERNAL_IP" ]; then
-        INTERNAL_IP=$(
-            ip -o -4 addr show | \
-            awk '{print $4}' | \
-            grep -v '127.0.0.1' | \
-            cut -d/ -f1 | \
-            head -1
-        )
-        [ -z "$INTERNAL_IP" ] && INTERNAL_IP=$(hostname -I | awk '{print $1}')
+        # 使用默认路由的源地址，避免重装后选中残留的 cilium_host 等虚拟网卡。
+        INTERNAL_IP=$(ip -4 route get 1.1.1.1 | awk '{for (i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')
+        [ -n "$INTERNAL_IP" ] || fatal "无法检测节点 IP，请显式设置 INTERNAL_IP"
         echo "$INTERNAL_IP"
     else
         echo "$INTERNAL_IP"
@@ -224,26 +215,14 @@ etcPrivaterRegistry() {
 
 # 处理systemd配置
 etcSystemd() {
-    # 下载资源文件
-    download_files "https://w7panel.com/installer/etc/systemd/k3s.service.env"
-    
-    if systemctl is-active --quiet k3s; then
-        local service_name="k3s"
-        local env_file="k3s.service.env"
-    else
-        local service_name="k3s-agent"
-        local env_file="k3s-agent.service.env"
+    download_files "https://w7panel.com/installer/etc/k3s.service.d/override.conf"
+    local service_name="k3s"
+    if [ -n "$K3S_URL" ] && [[ "$K3S_NODE_NAME" == agent* ]]; then
+        service_name="k3s-agent"
     fi
-
-    local ETC_PATH="/etc/systemd/system/"
-    local source_env="./w7panel/etc/systemd/k3s.service.env"
-
-    # 处理环境变量文件
-    if [ -f "$source_env" ]; then
-        cat "$source_env" | sudo tee -a "${ETC_PATH}/${env_file}" > /dev/null || {
-            fatal "Failed to append content to ${ETC_PATH}/${env_file}"
-        }
-    fi
+    local target="/etc/systemd/system/${service_name}.service.d"
+    sudo mkdir -p "$target"
+    sudo cp ./w7panel/etc/k3s.service.d/override.conf "$target/override.conf"
 
     # 重新加载 systemd 管理器配置
     sudo systemctl daemon-reload || {
@@ -261,7 +240,7 @@ etcSystemd() {
 checkK3SInstalled() {
     info 'start check server is installed 检测k3s是否已安装'
     if [ -x "/usr/local/bin/k3s" ]; then
-        if systemctl is-active --quiet k3s; then
+        if [ -f /usr/local/bin/k3s-uninstall.sh ]; then
             local type="Server"
             local uninstall="/usr/local/bin/k3s-uninstall.sh"
         else
@@ -271,20 +250,18 @@ checkK3SInstalled() {
         
         warn "K3s $type has been installed , Please execute $uninstall to uninstall k3s "
         warn "K3s $type 已安装 , 请先执行 $uninstall 命令卸载 "
-        exit
+        exit 1
     fi
 }
 
 # 检查微擎面板是否安装成功
 checkW7panelInstalled() {
     printf "${INFO_COLOR}[INFO]${NC} %s" "微擎面板正在初始化，预计需要3-5分钟，请耐心等待..."
-    local spinpid
+    local deadline=$((SECONDS + 600))
     while true; do
-        curl -s --max-time 2 -I "http://$(internalIP):9090" | grep -q "HTTP/" && break
-        sleep 1 &
-        show_progress $! &
-        spinpid=$!
-        wait $spinpid
+        curl -fsS --max-time 2 -o /dev/null "http://$(internalIP):9090" 2>/dev/null && break
+        [ "$SECONDS" -lt "$deadline" ] || fatal "等待面板就绪超时，请检查 k3s kubectl get pods -A 和 journalctl -u k3s"
+        sleep 2
     done
     echo
 }
@@ -294,9 +271,11 @@ importImages() {
     local IMAGES_DIR="./w7panel/images"
     [ ! -d "$IMAGES_DIR" ] && return 0
 
-    local total=$(ls $IMAGES_DIR/*.tar 2>/dev/null | wc -l)
+    local total
+    total=$(find "$IMAGES_DIR" -maxdepth 1 -type f -name "*.tar" | wc -l)
     local count=0
-    for IMAGE_FILE in $IMAGES_DIR/*.tar; do
+    for IMAGE_FILE in "$IMAGES_DIR"/*.tar; do
+        [ -f "$IMAGE_FILE" ] || continue
         count=$((count+1))
         info "导入镜像中 [$count/$total] $(basename $IMAGE_FILE)"
         sudo /usr/local/bin/k3s ctr -n=k8s.io images import "$IMAGE_FILE" >/dev/null 2>&1 || {
@@ -309,10 +288,19 @@ importImages() {
 installHelmCharts() {
     info 'start install helm charts'
     local M_PATH="/var/lib/rancher/k3s/server/manifests/"
-    sudo cp -r "./w7panel/manifests/." "$M_PATH" || {
-        fatal "Failed to copy manifests to $M_PATH"
-        return 1
-    }
+    # 先下载 Chart 到 K3s 静态目录，避免启动期 Pod DNS 和私有 CA 依赖。
+    local static_path="/var/lib/rancher/k3s/server/static/charts"
+    sudo mkdir -p "$M_PATH" "$static_path"
+    local manifest chart_url chart_name
+    for manifest in ./w7panel/manifests/*.yaml; do
+        chart_url=$(awk '$1 == "chart:" {print $2}' "$manifest")
+        [ -n "$chart_url" ] || continue
+        download_files "$chart_url"
+        chart_name=$(basename "$chart_url")
+        sudo cp "./w7panel/${chart_url#https://w7panel.com/installer/}" "$static_path/$chart_name"
+        sed "s|$chart_url|https://%{KUBERNETES_API}%/static/charts/$chart_name|" "$manifest" | \
+            sudo tee "$M_PATH/$(basename "$manifest")" >/dev/null
+    done
 }
 
 # 安装K3S
@@ -320,7 +308,7 @@ _setup_k3s_env() {
     export INSTALL_K3S_SKIP_SELINUX_RPM=true
     export INSTALL_K3S_SELINUX_WARN=true
     export INSTALL_K3S_MIRROR=cn
-    export INSTALL_K3S_MIRROR_URL=rancher-mirror.cdn.w7.cc
+    export INSTALL_K3S_MIRROR_URL=https://rancher-mirror.cdn.w7.cc
 }
 
 k3sInstallServer() {
@@ -341,6 +329,7 @@ k3sInstallServer() {
 
     curl -sfL https://rancher-mirror.cdn.w7.cc/k3s/k3s-install.sh | \
     sh -s - server \
+        --snapshotter "${K3S_SNAPSHOTTER:-overlayfs}" \
         --tls-san "$(internalIP)" \
         --kubelet-arg="image-gc-high-threshold=70" \
         --kubelet-arg="image-gc-low-threshold=60" \
@@ -364,7 +353,7 @@ k3sInstallAgent() {
     fi
 
     curl -sfL https://rancher-mirror.rancher.cn/k3s/k3s-install.sh | \
-    sh -s - agent
+    sh -s - agent --snapshotter "${K3S_SNAPSHOTTER:-overlayfs}"
 }
 
 # 检测multipath并配置blacklist
@@ -508,16 +497,19 @@ checkDependencies() {
     command -v curl >/dev/null || fatal "请先安装 curl"
     command -v wget >/dev/null || fatal "请先安装 wget"
     command -v ip >/dev/null || fatal "需要 iproute2 工具包"
+    command -v sudo >/dev/null || fatal "请先安装 sudo"
+    [ -d /run/systemd/system ] || fatal "安装需要使用 systemd 的 Linux 系统"
 }
 
 # 主执行函数
 main() {
-    process_args "$@"
     
     checkDependencies
+    INTERNAL_IP=$(internalIP)
+    export INTERNAL_IP
+    checkK3SInstalled
     handleSELinux
     handleFirewall
-    checkK3SInstalled
     
     etcSysctl
     etcPrivaterRegistry
