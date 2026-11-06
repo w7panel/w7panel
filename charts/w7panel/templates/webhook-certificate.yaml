@@ -1,0 +1,43 @@
+{{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
+{{- $fullname := include "helm.fullname" . }}
+{{- $issuerName := default "webhook-ca-issuer" .Values.webhook.certManager.issuer.name }}
+{{- $issuerKind := default "ClusterIssuer" .Values.webhook.certManager.issuer.kind }}
+{{- $certificateName := default (printf "%s-webhook-tls" $fullname) .Values.webhook.certManager.certificate.name }}
+{{- if .Values.webhook.certManager.issuer.create }}
+apiVersion: cert-manager.io/v1
+kind: {{ $issuerKind }}
+metadata:
+  name: {{ $issuerName | quote }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  {{- if .Values.webhook.certManager.issuer.selfSigned }}
+  selfSigned: {}
+  {{- else }}
+  {{- fail "webhook.certManager.issuer.create=true requires webhook.certManager.issuer.selfSigned=true or an existing external issuerRef" }}
+  {{- end }}
+---
+{{- end }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $certificateName | quote }}
+  labels:
+    {{- include "helm.labels" . | nindent 4 }}
+spec:
+  secretName: {{ printf "%s-webhook-tls" $fullname | quote }}
+  duration: {{ .Values.webhook.certManager.certificate.duration | quote }}
+  renewBefore: {{ .Values.webhook.certManager.certificate.renewBefore | quote }}
+  dnsNames:
+    - {{ printf "%s.%s.svc" $fullname .Release.Namespace | quote }}
+    - {{ printf "%s.%s.svc.cluster.local" $fullname .Release.Namespace | quote }}
+  usages:
+    - server auth
+  issuerRef:
+    name: {{ $issuerName | quote }}
+    kind: {{ $issuerKind | quote }}
+    group: {{ .Values.webhook.certManager.issuer.group | quote }}
+  privateKey:
+    algorithm: {{ .Values.webhook.certManager.certificate.privateKey.algorithm | quote }}
+    size: {{ .Values.webhook.certManager.certificate.privateKey.size }}
+{{- end }}

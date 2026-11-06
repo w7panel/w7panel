@@ -9,7 +9,9 @@ metadata:
   labels:
     {{- include "helm.labels" . | nindent 4 }}
 spec:
-  activeDeadlineSeconds: 300
+  # The upgrade includes Helm/plugin operations that each allow up to 600s.
+  # Keep the Job deadline above the combined migration window.
+  activeDeadlineSeconds: 1800
   ttlSecondsAfterFinished: 300
   template:
     spec:
@@ -17,30 +19,7 @@ spec:
       containers:
         - name: registerjob
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          command:
-            - sh
-            - -ec
-            - |
-              # 独立 Helm 组件拥有的 CRD 由其 Chart 升级，避免捆绑旧定义覆盖它们。
-              crd_dir=$(mktemp -d)
-              kubectl create --dry-run=client --validate=false -f "$KO_DATA_PATH/crds" -o json > "$crd_dir/resources.json"
-              jq -c 'if .kind == "List" then .items[] else . end' "$crd_dir/resources.json" > "$crd_dir/resources.jsonl"
-              mkdir "$crd_dir/selected"
-              while IFS= read -r resource; do
-                name=$(printf '%s' "$resource" | jq -r '.metadata.name')
-                existing=$(kubectl get crd "$name" --ignore-not-found --show-managed-fields=true -o json)
-                owner=$(printf '%s' "$existing" | jq -r '.metadata.annotations["meta.helm.sh/release-name"] // ""')
-                owner_namespace=$(printf '%s' "$existing" | jq -r '.metadata.annotations["meta.helm.sh/release-namespace"] // ""')
-                helm_managed=$(printf '%s' "$existing" | jq -r 'any(.metadata.managedFields[]?; .manager == "helm")')
-                if { [ -n "$owner" ] || [ "$helm_managed" = true ]; } && { [ "$owner" != "$RELEASE_NAME_SUFFIX" ] || [ "$owner_namespace" != "$NAMESPACE" ]; }; then
-                  echo "保留其他 Helm release 管理的 CRD: $name ($owner_namespace/$owner)"
-                  continue
-                fi
-                printf '%s\n' "$resource" > "$crd_dir/selected/$name.json"
-              done < "$crd_dir/resources.jsonl"
-              mv "$KO_DATA_PATH/crds" "$crd_dir/original"
-              mv "$crd_dir/selected" "$KO_DATA_PATH/crds"
-              exec sh "$KO_DATA_PATH/shell/upgrade.sh"
+          command: ["sh", "-c", "$KO_DATA_PATH/shell/upgrade.sh"]
           env:
             - name: RELEASE_NAME_SUFFIX
               value: {{ .Release.Name }}   
@@ -53,4 +32,5 @@ spec:
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Release.Name }}     
       restartPolicy: Never
-  backoffLimit: 4
+  # Do not automatically replay a partially completed destructive migration.
+  backoffLimit: 1

@@ -7,6 +7,24 @@ replicaCount: 1
 apiServerUrl: ""
 tmpCdToken: ""
 
+# Shared HMAC key for panel JWTs. When empty, the chart creates a random key
+# on first install and preserves it on upgrades. Set a non-empty value only
+# when an externally managed, deterministic key is required.
+panelAuth:
+  signingKey: ""
+
+mcp:
+  writeEnabled: false
+
+# HTTPS artifact hosts allowed for Helm metadata, chart archives and frontend
+# fallback resources. Private, loopback and link-local resolutions are always
+# rejected even when a hostname is listed here.
+artifact:
+  allowedHosts:
+    - zpk.w7.cc
+    - zpk.fan.b2.sz.w7.com
+    - cdn.w7.cc
+
 # 控制台注册功能，默认不开启
 console:
   enabled: false
@@ -18,6 +36,7 @@ image:
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
+  digest: ""
 
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -32,8 +51,7 @@ serviceAccount:
   # Automatically mount a ServiceAccount's API credentials?
   automount: true
   # Annotations to add to the service account
-  annotations:
-    w7.cc/menu-name: k3k.permission.founder
+  annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: "w7"
@@ -87,12 +105,8 @@ servicelb:
   type: LoadBalancer
 
 register:
-  create: true
-  apiServerUrl: ""
-  thirdPartyCDToken: ""
   username: "admin"
   password: ""
-  offlineUrl: ""
   consoleBaseUrl: "https://console.w7.cc"
   userAgent: ""
   needInitUser: false # 是否需要初始化用户 需要就创建configmap
@@ -169,6 +183,21 @@ timezone: "Asia/Shanghai"
 
 webhook:
   enabled: true
+  certManager:
+    enabled: true
+    issuer:
+      create: false
+      name: webhook-ca-issuer
+      kind: ClusterIssuer
+      group: cert-manager.io
+      selfSigned: true
+    certificate:
+      name: ""
+      duration: 8760h
+      renewBefore: 720h
+      privateKey:
+        algorithm: RSA
+        size: 2048
 storage:
   enabled: false
   storageClassName: "longhorn"
@@ -185,37 +214,13 @@ gpustack:
   watch: true
 log:
   level: "error"
-k3k:
-  watch: true
-  runtimedir: "/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io"
 k8s:
   watch: true
 k3s:
   runtimedir: "/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io"
 
-# Example configuration for CronJob
-cronjob:
+privatedns:
   enabled: true
-  schedule: "0 0/1 * * *"
-  timezone: "Asia/Shanghai"
-  concurrencyPolicy: "Allow"
-  suspend: false
-  startingDeadlineSeconds: 300
-  command:
-    - /bin/sh
-    - -c
-  args:
-    - w7panel k3k-return-check
-  env: []
-  # resources:
-  #   limits:
-  #     cpu: 100m
-  #     memory: 128Mi
-  #   requests:
-  #     cpu: 100m
-  #     memory: 128Mi
-  restartPolicy: Never
-  # Job template specific options
   jobTemplate:
     backoffLimit: 4
   # Pod specific options
@@ -236,5 +241,3 @@ cronjob:
   volumes: []
   volumeMounts: []
   annotations: {}
-
-  

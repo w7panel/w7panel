@@ -5,7 +5,6 @@ metadata:
   name: {{ .Release.Name }}
   annotations:
     {{- include "helm.annotations" . | nindent 4 }}
-    w7.cc/menu-name: k3k.permission.founder
   labels:
     {{- include "helm.labels" . | nindent 4 }}
 
@@ -37,7 +36,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}
-  namespace: default
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Release.Name }}

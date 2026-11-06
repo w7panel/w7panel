@@ -90,6 +90,11 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{/* Name of the Secret shared by the panel and its Agent DaemonSet. */}}
+{{- define "helm.panelAuthSecretName" -}}
+{{- printf "%s-panel-auth" (include "helm.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
 {{- define "helm.vmkConfig" -}}
 global:
     scrape_interval: 30s
