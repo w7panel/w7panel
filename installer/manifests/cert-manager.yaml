@@ -5,7 +5,7 @@ metadata:
   name: cert-manager
   namespace: kube-system
 spec:
-  chart: https://cdn.w7.cc/w7panel/charts/cert-manager-v1.16.2.tgz
+  chart: https://w7panel.com/installer/charts/cert-manager-v1.20.1.tgz
   version: v1.16.2
   targetNamespace: cert-manager
   createNamespace: true

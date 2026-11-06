@@ -94,7 +94,7 @@ show_progress() {
 # 下载文件函数（带重试机制）
 download_files() {
     local url=$1
-    local path=".$(echo "$url" | sed -E 's|^https?://[^/]+||')"
+    local path=".$(echo "$url" | sed -E 's|^https?://[^/]+/installer/|/w7panel/|')"
     local save_path=$(dirname "$path")
     local filename=$(basename "$path")
     sudo mkdir -p "$save_path" || fatal "创建目录失败: $save_path"
@@ -139,16 +139,16 @@ download_files() {
 downloadResource() {
     info "开始下载微擎面板资源..."
     local resources="
-        https://cdn.w7.cc/w7panel/images/cilium.cilium-v1.16.4.tar
-        https://cdn.w7.cc/w7panel/images/cilium.operator-generic-v1.16.4.tar
-        https://cdn.w7.cc/w7panel/images/jetstack.cert-manager-cainjector-v1.16.2.tar
-        https://cdn.w7.cc/w7panel/images/jetstack.cert-manager-controller-v1.16.2.tar
-        https://cdn.w7.cc/w7panel/images/jetstack.cert-manager-webhook-v1.16.2.tar
-        https://cdn.w7.cc/w7panel/images/jetstack.cert-manager-startupapicheck-v1.16.2.tar
-        https://cdn.w7.cc/w7panel/manifests/cert-manager.yaml
-        https://cdn.w7.cc/w7panel/manifests/cilium.yaml
-        https://cdn.w7.cc/w7panel/manifests/higress.yaml
-        https://cdn.w7.cc/w7panel/manifests/w7panel-offline.yaml
+        https://w7panel.com/installer/images/cilium.cilium-v1.16.4.tar
+        https://w7panel.com/installer/images/cilium.operator-generic-v1.16.4.tar
+        https://w7panel.com/installer/images/jetstack.cert-manager-cainjector-v1.16.2.tar
+        https://w7panel.com/installer/images/jetstack.cert-manager-controller-v1.16.2.tar
+        https://w7panel.com/installer/images/jetstack.cert-manager-webhook-v1.16.2.tar
+        https://w7panel.com/installer/images/jetstack.cert-manager-startupapicheck-v1.16.2.tar
+        https://w7panel.com/installer/manifests/cert-manager.yaml
+        https://w7panel.com/installer/manifests/cilium.yaml
+        https://w7panel.com/installer/manifests/higress.yaml
+        https://w7panel.com/installer/manifests/w7panel-offline.yaml
     "
 
     for resource in $resources; do
@@ -187,7 +187,7 @@ internalIP() {
 # 处理sysctl配置
 etcSysctl() {
     # 下载资源文件
-    download_files "https://cdn.w7.cc/w7panel/etc/sysctl.d/k3s.conf"
+    download_files "https://w7panel.com/installer/etc/sysctl.d/k3s.conf"
     
     if command -v sysctl &> /dev/null; then
         local ETC_PATH="/etc/sysctl.d"
@@ -209,7 +209,7 @@ etcSysctl() {
 # 处理私有仓库配置
 etcPrivaterRegistry() {
     # 下载资源文件
-    download_files "https://cdn.w7.cc/w7panel/etc/registries.yaml"
+    download_files "https://w7panel.com/installer/etc/registries.yaml"
     
     local ETC_PATH="/etc/rancher/k3s/"
     sudo mkdir -p "$ETC_PATH" || {
@@ -225,7 +225,7 @@ etcPrivaterRegistry() {
 # 处理systemd配置
 etcSystemd() {
     # 下载资源文件
-    download_files "https://cdn.w7.cc/w7panel/etc/systemd/k3s.service.env"
+    download_files "https://w7panel.com/installer/etc/systemd/k3s.service.env"
     
     if systemctl is-active --quiet k3s; then
         local service_name="k3s"
