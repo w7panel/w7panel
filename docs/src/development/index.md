@@ -329,3 +329,5 @@ curl -H "Authorization: Bearer $TOKEN" \
 | API 路径检查 | 确认面板业务 API 使用 `/panel-api/v1/`，K8s 代理使用 `/k8s-proxy/` |
 | 接口文档 | 确认新增或变更 API 已更新到 `docs/src/development/api/` |
 | 版本日志 | 确认 `docs/src/user-guide/overview/changelog/{version}.md` 已记录 |
+
+- `skills/w7panel-installer-test/scripts/local-https.py` 提供本机 HTTPS 映射的 start/status/stop，直接发布当前仓库 installer；操作示例见项目 Skill。

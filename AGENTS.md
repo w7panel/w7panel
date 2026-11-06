@@ -1121,3 +1121,5 @@ helm upgrade --install w7panel ./charts/w7panel -n default \
 - 安装器按默认路由选择访问地址，支持 `INTERNAL_IP` 覆盖（不替代 K3s `--node-ip`）；面板初始化 Job 不覆盖其他 Helm 组件管理的 CRD。
 
 - 项目技能目录 `skills/w7panel-installer-test/`：入口 [SKILL.md](skills/w7panel-installer-test/SKILL.md)，包含 mkcert、本地 HTTPS、独立 systemd Docker 安装/卸载重装和故障处理。执行此类回归时读取该技能，结束后更新技能与测试报告。
+
+- 本机手动安装测试：`sudo python3 skills/w7panel-installer-test/scripts/local-https.py start|status|stop`，直读当前仓库 installer，具体命令见该 Skill；推荐使用 Bash；等待兼容性回归运行 `python3 tests/check-installer-wait.py`。

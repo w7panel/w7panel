@@ -217,8 +217,8 @@ etcPrivaterRegistry() {
 etcSystemd() {
     download_files "https://w7panel.com/installer/etc/k3s.service.d/override.conf"
     local service_name="k3s"
-    if [ -n "$K3S_URL" ] && [[ "$K3S_NODE_NAME" == agent* ]]; then
-        service_name="k3s-agent"
+    if [ -n "$K3S_URL" ]; then
+        case "$K3S_NODE_NAME" in agent*) service_name="k3s-agent" ;; esac
     fi
     local target="/etc/systemd/system/${service_name}.service.d"
     sudo mkdir -p "$target"
@@ -257,10 +257,10 @@ checkK3SInstalled() {
 # 检查微擎面板是否安装成功
 checkW7panelInstalled() {
     printf "${INFO_COLOR}[INFO]${NC} %s" "微擎面板正在初始化，预计需要3-5分钟，请耐心等待..."
-    local deadline=$((SECONDS + 600))
+    local deadline=$(($(date +%s) + 600))
     while true; do
         curl -fsS --max-time 2 -o /dev/null "http://$(internalIP):9090" 2>/dev/null && break
-        [ "$SECONDS" -lt "$deadline" ] || fatal "等待面板就绪超时，请检查 k3s kubectl get pods -A 和 journalctl -u k3s"
+        [ "$(date +%s)" -lt "$deadline" ] || fatal "等待面板就绪超时，请检查 k3s kubectl get pods -A 和 journalctl -u k3s"
         sleep 2
     done
     echo

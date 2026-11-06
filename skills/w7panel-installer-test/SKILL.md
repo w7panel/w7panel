@@ -16,3 +16,41 @@ description: 使用 mkcert 为 w7panel.com 启动本地 HTTPS，在独立 system
 - 验收同时覆盖脚本退出码、K3s Ready、网络组件、Helm 安装、面板响应与初始化 Job Complete。HTTP 200 单独不能判定通过。
 - 修复后更新本地 Chart 包及版本/路径引用，并重新同步 HTTPS 发布资产、核对哈希。执行官方卸载后，从全新工作目录再次获取安装器重装，避免复用旧 `w7panel/` 缓存；旧目录保留取证，区分在线安装与镜像缓存测试。
 - 测试结束更新报告与本 Skill 的已验证事实、故障处理和限制；未完成、超时、手动补救必须明确记录。
+
+## 自己运行本机安装测试
+
+用 [scripts/local-https.py](scripts/local-https.py) 将本机 `w7panel.com` 映射到当前仓库，
+只发布 `installer/`，修改仓库文件立即生效。适用于 Debian/Ubuntu + systemd，需 root、
+Python 3.9+、mkcert、curl、ca-certificates；脚本不安装或卸载 K3s。
+
+从仓库根目录执行：
+
+```bash
+sudo python3 skills/w7panel-installer-test/scripts/local-https.py start
+sudo python3 skills/w7panel-installer-test/scripts/local-https.py status
+
+# 在 root 的 Bash 终端执行；避免代理绕过本机 hosts。
+export NO_PROXY="${NO_PROXY:+$NO_PROXY,}w7panel.com,127.0.0.1,localhost"
+export no_proxy="$NO_PROXY"
+export LOCAL_MOCK=true
+set -o pipefail
+# 每轮全新目录，避免安装器复用旧资源。
+cd "$(mktemp -d /tmp/w7panel-manual.XXXXXX)"
+curl -sfL https://w7panel.com/installer/install.sh | bash -s --
+```
+
+推荐使用 Bash。已修复当前 Debian 13 sh 下的 SECONDS 空值和 [[ 判断问题；旧版 sh 可能不支持 pipefail，仍应使用 Bash。已有 K3s 会拒绝重复安装；
+需要重装时先自行确认并运行该测试集群的 `/usr/local/bin/k3s-uninstall.sh`，等待完成。
+本工具只准备下载服务，不会代替用户执行安装或卸载。`LOCAL_MOCK` 不会自动注入 Helm Pod。
+
+```bash
+# 回到仓库根目录，结束映射（不卸载 K3s）
+sudo python3 skills/w7panel-installer-test/scripts/local-https.py stop
+```
+
+服务仅监听 `127.0.0.1:443`，用 systemd transient unit `w7panel-local-https.service` 托管；
+重启宿主后需重新 start。证书和独立 CA 在 `/var/lib/w7panel-local-https/`，不入库。
+stop 仅删除本工具标记的 hosts 行和 CA 信任，刷新信任库；保留证书目录供再次启动。
+已有 443 服务或其他 w7panel.com hosts 行时拒绝覆盖，请先处理旧测试映射。
+代理环境必须在执行安装的终端设置 NO_PROXY/no_proxy，脚本无法修改父终端环境。
+status 会验证系统 TLS 信任，并比较 HTTPS 安装脚本与当前仓库内容。

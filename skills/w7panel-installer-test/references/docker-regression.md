@@ -142,3 +142,5 @@ hosts 标记行、CA 文件和临时资源，再刷新 CA 信任库；不能覆�
 Agent 启动后自动恢复。cert-manager webhook 未就绪导致前四次初始化尝试失败，
 第五次成功。检查实际 Job 状态，不能把脚本提前输出成功或短暂重试当作最终验收。
 最终全部长期 Pod Running/Ready（包括 CSI 3/3、Higress Gateway 1/1）；宿主服务保留运行，未执行宿主卸载。
+
+手动使用 `curl ... | sh -` 时，第 263 行曾报数字错误：`SECONDS` 是 Bash 变量，在 sh 中为空。现改用 `date +%s` 计算截止时间，并将 `[[ ... ]]` 改为 case。`tests/check-installer-wait.py` 隔离验证 Bash/sh 的等待成功与超时路径；旧版 sh 的 pipefail 支持仍有差异，推荐 Bash。此修复未重新执行完整安装。
