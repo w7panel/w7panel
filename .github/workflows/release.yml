@@ -80,6 +80,8 @@ jobs:
         run: |
           set -euo pipefail
 
+          cp -R installer "${DOCS_DIST_DIR}/"
+
           RELEASE_TAG="${{ steps.tag.outputs.value }}"
           IMAGE_NAME="${GITHUB_REPOSITORY,,}"
           DOCS_IMAGE_REPOSITORY="${IMAGE_PUSH_REGISTRY}/${IMAGE_NAME}-docs"

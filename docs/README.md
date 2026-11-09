@@ -27,7 +27,7 @@ pnpm run build
 发布流程：
 
 - `.github/workflows/release.yml` 会在发布时构建 `docs`。
-- 构建产物 `docs/.vitepress/dist` 会打包进 nginx 静态资源镜像，默认放在 `/usr/share/nginx/html`。
+- 构建产物 `docs/.vitepress/dist` 和仓库的 `installer/` 会打包进 nginx 静态资源镜像，分别放在 `/usr/share/nginx/html` 和 `/usr/share/nginx/html/installer`。
 - 文档镜像推送为 `${IMAGE_PUSH_REGISTRY}/${owner/repo}-docs:${tag}`，默认是 `ghcr.io/w7panel/w7panel-docs:${tag}`。
 - 文档服务固定按根路径 `/` 构建和部署。
 

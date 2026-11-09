@@ -1111,6 +1111,7 @@ helm upgrade --install w7panel ./charts/w7panel -n default \
 ### installer 本地回归
 
 - `installer/` 通过 HTTPS 的 `/installer/` 发布；mkcert 私钥不得入库，测试机须信任根证书。
+- 发布工作流将 `installer/` 复制进文档镜像的 `/usr/share/nginx/html/installer/`。
 - 安装依赖 systemd、curl、wget、sudo、iproute2；嵌套容器安装 fuse-overlayfs 后可设置 `K3S_SNAPSHOTTER=fuse-overlayfs`，或使用较慢的 `native`（默认 `overlayfs`），并准备 `/sys`、`/run/cilium` 的 shared 挂载传播。
 - 使用 `helm package charts/w7panel --version 1.1.102 --app-version 1.1.102 --destination installer/charts` 补齐面板 Chart，manifest 的版本和路径须保持一致。
 - Chart 下载到 K3s 静态目录后安装；镜像默认在线拉取，支持导入已有 tar。
