@@ -24,7 +24,7 @@
 在目标服务器中执行下面的安装命令：
 
 ```bash
-curl -sfL https://cdn.w7.cc/w7panel/install.sh | sh -
+curl -sfL https://w7panel.com/installer/install.sh | bash -s --
 ```
 
 安装过程中建议保持终端连接稳定，并等待脚本完整执行结束。

@@ -29,7 +29,7 @@ import {withBase} from 'vitepress'
         <code
           class="bash-composer text-gray-700 bg-transparent flex items-center"
         >
-          curl -sfL https://cdn.w7.cc/w7panel/install.sh | sh -
+          curl -sfL https://w7panel.com/installer/install.sh | bash -s --
         </code>
       </div>
       <a

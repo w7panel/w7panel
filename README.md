@@ -63,7 +63,7 @@ W7Panel 不是脱离 Kubernetes 的通用服务器面板，而是围绕云原生
 ### 一键安装
 
 ```bash
-curl -sfL https://cdn.w7.cc/w7panel/install.sh | sh -
+curl -sfL https://w7panel.com/installer/install.sh | bash -s --
 ```
 
 安装完成后，通过下面地址进入后台：
