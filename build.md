@@ -159,7 +159,7 @@ git push origin v1.0.0
 2. 使用 Node.js 20 构建 `w7panel-ui`
 3. 将 `w7panel-ui/dist/` 复制到 `w7panel-server/kodata/`
 4. 登录镜像仓库
-5. 执行 `make publish`
+5. 使用子模块的 `make ko-push` 构建并推送 `linux/amd64,linux/arm64` 镜像，再执行根目录的 `make package-chart`
 6. 将 `charts/*.tgz` 上传到 GitHub Release
 7. 使用 `zpk` 将 Helm 包推送到 ZPK 平台
 
@@ -170,6 +170,8 @@ git push origin v1.0.0
 | `IMAGE_PUSH_REGISTRY` | `ghcr.io` | 镜像实际推送仓库 |
 | `HELM_PACKAGE_IMAGE_REGISTRY` | `ghcr.registry.cdn.w7.cc` | 写入 Helm Chart 的镜像仓库域名 |
 
+自动发布使用 `w7panel-server/Makefile` 中的 `KO_DEFAULTBASEIMAGE` 作为运行时基础镜像；文档镜像仍通过 Docker Buildx 构建。
+
 ### GitHub Secrets
 
 | 名称 | 用途 |
@@ -178,9 +180,9 @@ git push origin v1.0.0
 | `ZPK_DOCKER_USERNAME` | 登录 ZPK 平台 |
 | `ZPK_DOCKER_PASSWORD` | 登录 ZPK 平台 |
 
-## Dockerfile 说明
+## 本地 Dockerfile 构建说明
 
-当前镜像使用多阶段构建：
+`make build-image` 和 `make build-image-test` 使用多阶段 Dockerfile 构建；自动发布的主镜像使用 `ko-push`：
 
 1. `golang:1.26-alpine` 阶段编译 `w7panel-server`
 2. `alpine:3.20` 阶段安装运行依赖

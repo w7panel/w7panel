@@ -105,11 +105,23 @@ jobs:
       - name: Copy frontend assets
         run: |
           cp -R w7panel-ui/dist/. w7panel-server/kodata/
+          mkdir -p w7panel-server/kodata/assets
+          cp w7panel-server/kodata/logo.png w7panel-server/kodata/assets/logo.png
+          cp w7panel-server/kodata/index.html w7panel-server/kodata/panel.html
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: w7panel-server/go.mod
+          cache-dependency-path: w7panel-server/go.sum
+
+      - name: Setup ko
+        uses: ko-build/setup-ko@v0.9
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
 
-      - name: Build and push main image, package chart
+      - name: Build and push main image with ko, package chart
         shell: bash
         run: |
           set -euo pipefail
@@ -121,9 +133,11 @@ jobs:
           HELM_PACKAGE_IMAGE_REPOSITORY="${HELM_PACKAGE_IMAGE_REGISTRY}/${IMAGE_NAME}"
 
           rm -f charts/*.tgz
-          make publish \
-            IMAGE_REPOSITORY="${IMAGE_REPOSITORY}" \
+          make -C w7panel-server ko-push \
+            PUSH_IMAGE="${IMAGE_REPOSITORY}" \
             IMAGE_TAG="${RELEASE_TAG}" \
+            PLATFORM=linux/amd64,linux/arm64
+          make package-chart \
             HELM_PACKAGE_IMAGE_REPOSITORY="${HELM_PACKAGE_IMAGE_REPOSITORY}" \
             HELM_PACKAGE_IMAGE_TAG="${RELEASE_TAG}" \
             HELM_CHART_VERSION="${RELEASE_VERSION}" \

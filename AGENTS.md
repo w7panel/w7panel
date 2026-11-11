@@ -444,6 +444,8 @@ cd $BASE_DIR/w7panel-server/dev-tools/scripts
 ./build.sh
 ```
 
+GitHub Actions 的 `release.yml` 在构建前端并复制到 `w7panel-server/kodata/` 后，使用子模块的 `make ko-push` 构建、推送 amd64 和 arm64 镜像，再用根目录的 `make package-chart` 打包 Helm Chart。文档镜像仍使用 Docker Buildx。
+
 #### 生产环境配置
 
 **K8s Deployment 配置示例**：
