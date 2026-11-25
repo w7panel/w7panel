@@ -66,6 +66,8 @@ W7Panel 不是脱离 Kubernetes 的通用服务器面板，而是围绕云原生
 curl -sfL https://w7panel.com/installer/install.sh | bash -s --
 ```
 
+安装脚本需要 Bash，请保留命令中的 `bash -s --`；在 Ubuntu 上使用 `sh -` 会报 `set: Illegal option -o pipefail`。
+
 安装完成后，通过下面地址进入后台：
 
 ```text

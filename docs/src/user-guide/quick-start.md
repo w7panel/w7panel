@@ -27,6 +27,8 @@
 curl -sfL https://w7panel.com/installer/install.sh | bash -s --
 ```
 
+安装脚本需要 Bash，请保留命令中的 `bash -s --`；在 Ubuntu 上使用 `sh -` 会报 `set: Illegal option -o pipefail`。
+
 安装过程中建议保持终端连接稳定，并等待脚本完整执行结束。
 
 ## 第三步：首次进入后台
