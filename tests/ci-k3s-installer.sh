@@ -10,6 +10,18 @@ prepare() {
   test ! -e /usr/local/bin/k3s
   test ! -e /var/lib/rancher/k3s
   mkdir -p "$state_dir/work/w7panel/images" "$state_dir/evidence"
+  # Hosted runners expose many CPUs to Vite, but its Less worker sync ports
+  # can fail during this build. Compile preprocessors in the main process.
+  python3 - "$repo_dir/w7panel-ui/config/vite.config.prod.ts" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+source = path.read_text()
+needle = "    mode: 'production',\n"
+assert source.count(needle) == 1
+path.write_text(source.replace(needle, needle + "    css: { preprocessorMaxWorkers: 0 },\n", 1))
+PY
   (cd "$repo_dir/w7panel-ui" && HUSKY=0 npm install --legacy-peer-deps && npm run build)
   cp -R "$repo_dir/w7panel-ui/dist/." "$repo_dir/w7panel-server/kodata/"
   mkdir -p "$repo_dir/w7panel-server/kodata/assets"

@@ -259,6 +259,8 @@ Ubuntu Runner 上运行安装器，指定 K3s `v1.37.2+k3s1`。它从检出源�
 Cilium 就绪、`helm-install-w7panel-offline` 和面板升级 Job 均 Complete，以及
 面板 HTTP 200。失败时上传安装日志、K3s 资源、事件和 journal。此验证覆盖当前
 源码与仓库内 Chart 的组合；发布镜像和线上资源仍须单独验收。
+CI 构建前端时在临时检出目录将 Vite 的 Less 预处理限制在主进程，避免
+GitHub Runner 上工作进程同步端口失败；前端仓库的正式构建配置不变。
 
 本地静态检查：
 
