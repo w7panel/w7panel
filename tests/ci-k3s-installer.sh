@@ -63,6 +63,20 @@ wait_job() {
   kubectl -n "$namespace" wait --for=condition=complete "job/$name" --timeout=900s
 }
 
+capture_upgrade_logs() {
+  while true; do
+    if command -v k3s >/dev/null 2>&1; then
+      local pod
+      while read -r pod; do
+        [ -n "$pod" ] || continue
+        kubectl -n default logs "$pod" --all-containers --prefix \
+          >"$state_dir/evidence/${pod#pod/}.log" 2>&1 || true
+      done < <(kubectl -n default get pods -o name 2>/dev/null | grep -E '^pod/w7panel-offline-[0-9]+-upgrade-' || true)
+    fi
+    sleep 5
+  done
+}
+
 run_install() {
   cd "$state_dir/work"
   # Use the installer itself to create K3s and submit all HelmCharts.
@@ -71,6 +85,9 @@ run_install() {
   export INTERNAL_IP
   INTERNAL_IP=$(ip -4 route get 1.1.1.1 | awk '{for (i=1;i<=NF;i++) if ($i=="src") {print $(i+1); exit}}')
   test -n "$INTERNAL_IP"
+  capture_upgrade_logs &
+  monitor_pid=$!
+  trap 'kill "$monitor_pid" 2>/dev/null || true' EXIT
   set +e
   bash ./install.sh >"$state_dir/evidence/install.log" 2>&1
   install_status=$?
@@ -101,6 +118,7 @@ evidence() {
   if command -v k3s >/dev/null 2>&1; then
     kubectl get nodes -o wide >"$state_dir/evidence/nodes.txt" 2>&1 || true
     kubectl get pods,jobs,helmcharts -A -o wide >"$state_dir/evidence/resources.txt" 2>&1 || true
+    kubectl get certificates,certificaterequests,clusterissuers -A -o wide >"$state_dir/evidence/certificates.txt" 2>&1 || true
     kubectl get events -A --sort-by=.metadata.creationTimestamp >"$state_dir/evidence/events.txt" 2>&1 || true
     sudo journalctl -u k3s --no-pager -n 400 >"$state_dir/evidence/k3s-journal.txt" 2>&1 || true
   fi
