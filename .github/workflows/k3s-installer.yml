@@ -1,0 +1,73 @@
+name: K3s installer
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/k3s-installer.yml'
+      - 'installer/**'
+      - 'w7panel-server'
+      - 'w7panel-ui'
+      - 'tests/ci-k3s-installer.sh'
+  push:
+    branches: [dev-v1]
+    paths:
+      - '.github/workflows/k3s-installer.yml'
+      - 'installer/**'
+      - 'w7panel-server'
+      - 'w7panel-ui'
+      - 'tests/ci-k3s-installer.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      LOCAL_MOCK: 'true'
+      NO_PROXY: w7panel.com,127.0.0.1,localhost
+      no_proxy: w7panel.com,127.0.0.1,localhost
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: w7panel-server/go.mod
+          cache-dependency-path: w7panel-server/go.sum
+
+      - uses: ko-build/setup-ko@v0.9
+
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y mkcert iproute2
+
+      - name: Check installer assets
+        run: |
+          bash -n installer/install.sh
+          python3 tests/check-installer-assets.py
+
+      - name: Build current panel image and prepare installer
+        run: bash tests/ci-k3s-installer.sh prepare
+
+      - name: Run installer on clean K3s and verify jobs
+        run: bash tests/ci-k3s-installer.sh run
+
+      - name: Collect K3s evidence
+        if: always()
+        run: bash tests/ci-k3s-installer.sh evidence
+
+      - name: Upload K3s evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k3s-installer-evidence
+          path: /tmp/w7panel-k3s-ci/evidence
+          if-no-files-found: ignore

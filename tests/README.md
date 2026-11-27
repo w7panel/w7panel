@@ -252,6 +252,16 @@ agent-browser close
 
 ## 安装脚本资源回归
 
+GitHub Actions 的 [K3s installer](../.github/workflows/k3s-installer.yml) 在全新
+Ubuntu Runner 上运行安装器，指定 K3s `v1.37.2+k3s1`。它从检出源码构建
+`w7panel-ci:install-test`，仅在 CI 的临时检出目录覆盖 HelmChart 的镜像地址，
+通过本地可信 HTTPS 提供原有安装资源。验收要求安装器退出码为 0、节点 Ready、
+Cilium 就绪、`helm-install-w7panel-offline` 和面板升级 Job 均 Complete，以及
+面板 HTTP 200。失败时上传安装日志、K3s 资源、事件和 journal。此验证覆盖当前
+源码与仓库内 Chart 的组合；发布镜像和线上资源仍须单独验收。
+
+本地静态检查：
+
 ```bash
 bash -n installer/install.sh
 python3 tests/check-installer-assets.py
