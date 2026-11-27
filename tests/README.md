@@ -252,6 +252,18 @@ agent-browser close
 
 ## 安装脚本资源回归
 
+GitHub Actions 的 [K3s installer](../.github/workflows/k3s-installer.yml) 在全新
+Ubuntu Runner 上运行安装器，指定 K3s `v1.37.2+k3s1`。它从检出源码构建
+`w7panel-ci:install-test`，仅在 CI 的临时检出目录覆盖 HelmChart 的镜像地址，
+通过本地可信 HTTPS 提供原有安装资源。验收要求安装器退出码为 0、节点 Ready、
+Cilium 就绪、`helm-install-w7panel-offline` 和面板升级 Job 均 Complete，以及
+面板 HTTP 200。失败时上传安装日志、K3s 资源、事件和 journal。此验证覆盖当前
+源码与仓库内 Chart 的组合；发布镜像和线上资源仍须单独验收。
+CI 构建前端时在临时检出目录将 Vite 的 Less 预处理限制在主进程，避免
+GitHub Runner 上工作进程同步端口失败；前端仓库的正式构建配置不变。
+
+本地静态检查：
+
 ```bash
 bash -n installer/install.sh
 python3 tests/check-installer-assets.py
@@ -263,6 +275,8 @@ URL 指向的归档版本是否一致。完整回归需要独立 systemd 测试�
 检查 `k3s kubectl get nodes`、`k3s kubectl get pods -A` 和面板 HTTP 就绪状态。
 
 完整操作与已遇故障见项目技能 [w7panel-installer-test](../skills/w7panel-installer-test/SKILL.md)。验收还须确认初始化 Job Complete，不能仅凭 HTTP 200 判定成功；测试完成后同步更新技能和 `tests/reports/` 中的实际结果。
+
+K3s 1.37 本地镜像重装与官方升级 Job 验收见 [2026-11-27 回归报告](reports/2026-11-27-installer-k3s-1.37-local-image.md)：安装器退出 0、升级 Job Complete；lego webhook 镜像拉取尚未完成，正式安装器镜像仍待更新。
 
 宿主安装结果见 [2026-11-06 宿主回归](reports/2026-11-06-installer-host.md)，包括默认 overlayfs、启动期重试及保留环境说明。
 

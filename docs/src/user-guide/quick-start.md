@@ -103,3 +103,10 @@ helm package charts/w7panel --version 1.1.102 --app-version 1.1.102 --destinatio
 多网卡环境可以显式设置 `INTERNAL_IP`（控制安装器访问地址和证书 SAN，不替代 K3s 的 `--node-ip`）。面板初始化 Job 会保留其他 Helm release
 管理的 CRD（含没有 release 注解、但由 Helm 创建的 CRD），其版本由对应组件
 Chart 维护，防止面板镜像捆绑的旧 Higress 定义造成 server-side apply 冲突。
+K3s 1.37 回归中，安装器引用的面板镜像 `1.1.106` 仍在升级 Job 对整个 CRD 目录执行
+server-side apply，遇到 Higress Chart 管理的 `.spec.versions` 字段冲突，Job 为 `Failed 0/1`。
+后端源码现只对面板自有 CRD 使用 `--force-conflicts`，并在 Gateway API CRD 由
+HelmChart 管理时跳过重复导入。使用本地修复镜像完整重装的安装器退出 0、官方升级 Job
+`Complete 1/1`；lego webhook 镜像仍在拉取，全部长期 Pod Ready 尚未通过。
+正式安装器仍引用旧镜像，发布后需再次验收。测试证据见
+`tests/reports/2026-11-27-installer-k3s-1.37-local-image.md`。
