@@ -1,3 +1,4 @@
+{{- if not .Values.childPanel.enabled }}
 {{- if and .Values.console.enabled .Values.register.username .Values.register.password -}}
 apiVersion: batch/v1
 kind: Job
@@ -37,4 +38,6 @@ spec:
               value: {{ .Release.Name }}    
       restartPolicy: Never
   backoffLimit: 4
+{{- end }}
+
 {{- end }}

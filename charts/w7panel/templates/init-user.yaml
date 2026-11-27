@@ -1,3 +1,4 @@
+{{- if not .Values.childPanel.enabled }}
 {{- if .Values.register.needInitUser -}}
 apiVersion: v1
 kind: ConfigMap
@@ -6,3 +7,5 @@ metadata:
 data:
     a: b
 {{- end }}    
+
+{{- end }}

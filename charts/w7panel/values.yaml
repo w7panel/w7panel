@@ -4,6 +4,19 @@
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
 replicaCount: 1
+childPanel:
+  enabled: false
+  k3kName: ""
+  k3kNamespace: ""
+  ckmName: ""
+  mainPanelURL: ""
+  oidcLoginEnabled: ""
+  oidcDiscoveryURL: ""
+  oidcClientID: ""
+  oidcScopes: ""
+  syncEndpoint: ""
+  syncToken: ""
+  upgradeEnabled: false
 apiServerUrl: ""
 tmpCdToken: ""
 
@@ -210,6 +223,8 @@ controller:
   appWatch: true
 static:
   downEnabled: true
+  # Host cache is local to each node; releases use separate subdirectories.
+  hostCachePath: /var/lib/w7panel/microapp
 gpustack:
   watch: true
 log:

@@ -19,6 +19,20 @@ spec:
       containers:
         - name: registerjob
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.childPanel.enabled }}
+          command: ["sh", "-c", "$KO_DATA_PATH/shell/k3k-agent-upgrade.sh"]
+          env:
+            - name: OIDC_PANEL_LOGIN_ENABLED
+              value: {{ .Values.childPanel.oidcLoginEnabled | quote }}
+            - name: OIDC_PANEL_LOGIN_DISCOVERY_URL
+              value: {{ .Values.childPanel.oidcDiscoveryURL | quote }}
+            - name: OIDC_PANEL_LOGIN_CLIENT_ID
+              value: {{ .Values.childPanel.oidcClientID | quote }}
+            - name: OIDC_PANEL_LOGIN_SCOPES
+              value: {{ .Values.childPanel.oidcScopes | quote }}
+            - name: DEPLOYMENT_NAME
+              value: {{ include "helm.fullname" . | quote }}
+          {{- else }}
           command: ["sh", "-c", "$KO_DATA_PATH/shell/upgrade.sh"]
           env:
             - name: RELEASE_NAME_SUFFIX
@@ -31,6 +45,7 @@ spec:
               value: {{ .Values.image.tag | default .Chart.AppVersion }}
             - name: SERVICE_ACCOUNT_NAME
               value: {{ .Release.Name }}     
+          {{- end }}
       restartPolicy: Never
   # Do not automatically replay a partially completed destructive migration.
   backoffLimit: 1

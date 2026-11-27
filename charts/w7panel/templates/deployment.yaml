@@ -43,6 +43,31 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}{{ if .Values.image.digest }}@{{ .Values.image.digest }}{{ end }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env: 
+          {{- if .Values.childPanel.enabled }}
+          - name: IS_CHILD
+            value: "true"
+          - name: K3K_NAME
+            value: {{ required "childPanel.k3kName is required" .Values.childPanel.k3kName | quote }}
+          - name: K3K_NAMESPACE
+            value: {{ required "childPanel.k3kNamespace is required" .Values.childPanel.k3kNamespace | quote }}
+          - name: K3K_MODE
+            value: "virtual"
+          - name: CKM_NAME
+            value: {{ required "childPanel.ckmName is required" .Values.childPanel.ckmName | quote }}
+          - name: MAIN_PANEL_URL
+            value: {{ .Values.childPanel.mainPanelURL | quote }}
+          - name: CKM_SYNC_ENDPOINT
+            value: {{ .Values.childPanel.syncEndpoint | quote }}
+          - name: CKM_SYNC_TOKEN
+            value: {{ .Values.childPanel.syncToken | quote }}
+          - name: CKM_SYNC_ENABLED
+            value: "true"
+          - name: UPGRADE_ENABLE
+            value: {{ .Values.childPanel.upgradeEnabled | quote }}
+          {{- else }}
+          - name: W7PANEL_AUTH_MODE
+            value: "panel"
+          {{- end }}
           - name: ARTIFACT_ALLOWED_HOSTS
             value: {{ join "," .Values.artifact.allowedHosts | quote }}
           # - name: GOGC
@@ -61,15 +86,8 @@ spec:
             value: {{ .Values.controller.appWatch | quote }}  
           - name: HIGRESS_WATCH
             value: "true"     
-          - name: W7PANEL_AUTH_MODE
-            value: "panel"  
           - name: MCP_K8S_WRITE_ENABLED
             value: {{ .Values.mcp.writeEnabled | quote }}
-          - name: PANEL_AUTH_SIGNING_KEY
-            valueFrom:
-              secretKeyRef:
-                name: {{ include "helm.panelAuthSecretName" . }}
-                key: signing-key
           - name: GPUSTACK_WATCH
             value: {{ .Values.gpustack.watch | quote }}      
           - name: MOCK_UPGRADE
@@ -78,8 +96,6 @@ spec:
             value: {{ .Values.longhorn.watch | quote }}     
           - name: DEPLOYMENT_NAME
             value: {{ include "helm.fullname" . }}   
-          - name: HELM_VERSION
-            value: {{ .Values.image.tag | default .Chart.AppVersion }}
           - name: MICROAPP_PATH
             value: /data/microapp
           - name: SITE_ENABLED
@@ -98,26 +114,37 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          - name: SVC_NAME
-            value: {{ include "helm.fullname" . }}
           - name: SVC_LB_CLASS
             value: {{ .Values.servicelb.loadBalancerClass | quote }}  
           - name: WEBHOOK_ENABLED
             value: {{ .Values.webhook.enabled | quote }} 
           - name: WEBHOOK_CERT_MANAGER_ENABLED
+            {{- if .Values.childPanel.enabled }}
+            value: "false"
+            {{- else }}
             value: {{ .Values.webhook.certManager.enabled | quote }}
+            {{- end }}
           - name: WEBHOOK_CERT_MANAGER_CERTIFICATE_NAME
             value: {{ default (printf "%s-webhook-tls" (include "helm.fullname" .)) .Values.webhook.certManager.certificate.name | quote }}
           - name: STATIC_DOWN_ENABLED
             value: {{ .Values.static.downEnabled | quote }} 
           - name: LOG_LEVEL
             value: {{ .Values.log.level | quote }}   
-          - name: IMAGE_REPO
-            value: {{ .Values.image.repository | quote }}    
           - name: TZ
             value: {{ .Values.timezone | quote }} 
           - name: PRIVATEDNS_ENABLED
             value: {{ .Values.privatedns.enabled | quote }} 
+          - name: HELM_VERSION
+            value: {{ .Values.image.tag | default .Chart.AppVersion | quote }}
+          - name: IMAGE_REPO
+            value: {{ .Values.image.repository | quote }}
+          - name: SVC_NAME
+            value: {{ include "helm.fullname" . | quote }}
+          - name: PANEL_AUTH_SIGNING_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "helm.panelAuthSecretName" . }}
+                key: signing-key
           args:
           - server:start
           ports:
@@ -133,33 +160,35 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- if or .Values.storage.enabled (and .Values.webhook.enabled .Values.webhook.certManager.enabled) }}
           volumeMounts:
           {{- if .Values.storage.enabled }}
           - name: data
             mountPath: /data
             subPath: data
           {{- end }}
-          {{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
+          - name: microapp-cache
+            mountPath: /data/microapp
+          {{- if and (not .Values.childPanel.enabled) .Values.webhook.enabled .Values.webhook.certManager.enabled }}
           - name: webhook-cert
             mountPath: /tmp/k8s-webhook-server/serving-certs
             readOnly: true
           {{- end }}
-          {{- end }}    
-      {{- if or .Values.storage.enabled (and .Values.webhook.enabled .Values.webhook.certManager.enabled) }}
       volumes:
+      - name: microapp-cache
+        hostPath:
+          path: {{ printf "%s/%s" (trimSuffix "/" .Values.static.hostCachePath) .Release.Name | quote }}
+          type: DirectoryOrCreate
       {{- if .Values.storage.enabled }}
       - name: data
         persistentVolumeClaim:
           claimName: {{ include "helm.fullname" . }}
       {{- end }}
-      {{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
+      {{- if and (not .Values.childPanel.enabled) .Values.webhook.enabled .Values.webhook.certManager.enabled }}
       - name: webhook-cert
         secret:
           secretName: {{ printf "%s-webhook-tls" (include "helm.fullname" .) | quote }}
           optional: false
       {{- end }}
-      {{- end }}    
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -1,3 +1,4 @@
+{{- if not .Values.childPanel.enabled }}
 {{- if and .Values.webhook.enabled .Values.webhook.certManager.enabled }}
 {{- $fullname := include "helm.fullname" . }}
 {{- $issuerName := default "webhook-ca-issuer" .Values.webhook.certManager.issuer.name }}
@@ -40,4 +41,6 @@ spec:
   privateKey:
     algorithm: {{ .Values.webhook.certManager.certificate.privateKey.algorithm | quote }}
     size: {{ .Values.webhook.certManager.certificate.privateKey.size }}
+{{- end }}
+
 {{- end }}

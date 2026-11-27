@@ -1,3 +1,4 @@
+{{- if not .Values.childPanel.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -13,3 +14,4 @@ spec:
       command: ['wget']
       args: ['{{ include "helm.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never
+{{- end }}

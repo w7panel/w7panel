@@ -28,6 +28,20 @@ spec:
       hostIPC: true
       serviceAccountName: {{ .Release.Name }}
       volumes:
+      {{- if .Values.childPanel.enabled }}
+      - name: k3s-config
+        hostPath:
+          path: /etc/rancher/k3s
+          type: Directory
+      - name: cd-socket
+        hostPath:
+          path: /run/k3s/containerd/containerd.sock
+          type: Socket
+      - name: cd-runtime
+        hostPath:
+          path: /run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io
+          type: Directory
+      {{- else }}
       - name: host-root
         hostPath:
           path: /
@@ -46,6 +60,7 @@ spec:
         hostPath:
           path: {{ .Values.k3s.runtimedir }}
           type: Directory         
+      {{- end }}
       tolerations:
       - 
         operator: Exists
@@ -62,16 +77,17 @@ spec:
             name: http
             # readOnly: true
           env: 
-          # - name: GOGC
-          #   value: "10"
+          {{- if .Values.childPanel.enabled }}
+          {{- include "helm.childAgentEnv" . | nindent 10 }}
+          {{- end }}
+          - name: IS_AGENT
+            value: "true"
           - name: K3S_SHELL_ENABLED
             value: "true"
           - name: K3S_REGISTRY_ENABLED
-            value: "true"     
-          - name: IS_AGENT
             value: "true"
           - name: SERVICE_ACCOUNT_NAME
-            value: {{ .Release.Name }}
+            value: {{ .Release.Name | quote }}
           - name: PANEL_SERVICE_URL
             value: {{ printf "http://%s.%s.svc:8000" (include "helm.fullname" .) .Release.Namespace | quote }}
           - name: PANEL_AUTH_SIGNING_KEY
@@ -80,7 +96,11 @@ spec:
                 name: {{ include "helm.panelAuthSecretName" . }}
                 key: signing-key
           - name: K3S_RUNTIME_DIR     
+            {{- if .Values.childPanel.enabled }}
+            value: "/run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io"
+            {{- else }}
             value: {{ .Values.k3s.runtimedir | quote }}
+            {{- end }}
           - name: NODE_IP
             valueFrom:
               fieldRef:
@@ -102,6 +122,15 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}  
           volumeMounts:
+            {{- if .Values.childPanel.enabled }}
+            - name: k3s-config
+              mountPath: /etc/rancher/k3s
+            - name: cd-socket
+              mountPath: /var/run/k3s/containerd/containerd.sock
+            - name: cd-runtime
+              mountPath: /run/k3s/containerd/io.containerd.runtime.v2.task/k8s.io
+              mountPropagation: HostToContainer
+            {{- else }}
             - name: cd-socket
               mountPath: /var/run/k3s/containerd
             # - name: cd-data
@@ -112,4 +141,5 @@ spec:
               mountPropagation: HostToContainer
             - name: host-root
               mountPath: /host  
+            {{- end }}
 {{- end }}
