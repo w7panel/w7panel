@@ -28,7 +28,6 @@ jobs:
     env:
       LOCAL_MOCK: 'true'
       NO_PROXY: w7panel.com,127.0.0.1,localhost
-      no_proxy: w7panel.com,127.0.0.1,localhost
     steps:
       - uses: actions/checkout@v4
         with:
