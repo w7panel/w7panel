@@ -7,6 +7,10 @@ description: 使用 mkcert 为 w7panel.com 启动本地 HTTPS，在独立 system
 
 按 [回归操作与故障处理](references/docker-regression.md) 准备环境、执行和取证；本轮历史证据在仓库 `tests/reports/2026-11-06-installer.md`。历史通过不能替代当前版本回归。
 
+2026-11-25 K3s `v1.37.2+k3s1` 回归见 `tests/reports/2026-11-25-installer-k3s-1.37.md`：安装器当前引用的面板镜像 `1.1.106` 中，升级 Job 因旧 Higress CRD 与 Helm 的 `.spec.versions` 字段冲突而 `Failed 0/1`。2026-11-27 本地镜像回归见 `tests/reports/2026-11-27-installer-k3s-1.37-local-image.md`：面板自有 CRD 加 `--force-conflicts` 且跳过 HelmChart 管理的 Gateway API CRD 后，完整重装的安装器退出 0、官方升级 Job Complete 1/1、面板 HTTP 200；lego webhook 镜像拉取仍未完成。修复镜像未发布，正式安装器仍引用 `1.1.106`。
+
+同日报告的全新容器回归补充了资源限制：原样 installer 因并行测试容器的 I/O 负载和磁盘压力超时，镜像 GC 删除了预导入的本地镜像；隔离负载、调整该测试容器的 GC 阈值并重导入镜像后，Chart Helm Job Complete。首次升级 Job 因 cert-manager webhook 尚未就绪失败；同一 Chart 再次 Helm 升级产生的官方 Job Complete，面板 HTTP 200。此轮不算零干预的 installer 安装通过。
+
 - 优先独立、可丢弃的 privileged systemd Docker，不挂载宿主根目录，不使用宿主网络。镜像先确认 `/sbin/init` 存在。
 - 默认优先 Docker；用户明确要求宿主测试，或 Docker 确实受环境限制且用户已授权时，可转宿主。先确认宿主无业务集群，已有授权不重复询问；无法确认现有集群用途时，不覆盖安装或卸载。宿主准备见参考文档的“宿主测试”一节。
 - 安装器会修改防火墙、网络、systemd 与 K3s 状态；卸载仅作用于本轮专用环境。`mount --make-rshared /` 仅在测试容器的独立挂载命名空间执行。

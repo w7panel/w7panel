@@ -144,3 +144,13 @@ Agent 启动后自动恢复。cert-manager webhook 未就绪导致前四次初�
 最终全部长期 Pod Running/Ready（包括 CSI 3/3、Higress Gateway 1/1）；宿主服务保留运行，未执行宿主卸载。
 
 手动使用 `curl ... | sh -` 时，第 263 行曾报数字错误：`SECONDS` 是 Bash 变量，在 sh 中为空。现改用 `date +%s` 计算截止时间，并将 `[[ ... ]]` 改为 case。`tests/check-installer-wait.py` 隔离验证 Bash/sh 的等待成功与超时路径；旧版 sh 的 pipefail 支持仍有差异，推荐 Bash。此修复未重新执行完整安装。
+
+## 8. K3s 1.37 当前回归
+
+2026-11-25 使用 `v1.37.2-k3s1` stable 通道，在独立 Docker 容器中从仓库 HTTPS 资产执行完整安装。根分区磁盘空间较少时，K3s kubelet 可能标记 `DiskPressure`，而容器内 tmpfs 存储 K3s 数据可能使面板镜像解包报 `no space left on device`；应使用容量足够的容器磁盘，并记录任何仅用于测试的 kubelet 阈值调整。具体证据见 `tests/reports/2026-11-25-installer-k3s-1.37.md`。
+
+当前 installer Chart 仍引用面板镜像 `1.1.106`。其升级 Job 对整个 `/var/run/ko/crds` 使用 server-side apply，旧 `higress2.0.4.yaml` 中两处 CRD 的 `.spec.versions` 与 Helm 管理字段冲突。不要对整个目录直接加 `--force-conflicts`；面板自有 CRD 可强制应用，Higress CRD 留给其 Chart。只修改后端源码不会改变已发布镜像中的脚本；必须发布新镜像并重新做官方安装与 Job Complete 验收。
+
+2026-11-27 本地镜像完整重装已验证官方 Job Complete：除面板 CRD 范围限定外，升级脚本在存在 `gateway-api-crd` HelmChart 时跳过重复应用 `experimental-install.yaml`，否则会在 `.spec.versions` 和 Gateway API 注解处再次与 Helm 冲突。安装器退出 0、K3s Ready、面板 HTTP 200；lego webhook 镜像持续拉取，全部长期 Pod Ready 尚未通过。详细日志和镜像标签见 `tests/reports/2026-11-27-installer-k3s-1.37-local-image.md`。该结果仅针对本地测试镜像，不代表正式安装器已更新。
+
+同日在全新 Docker 容器中发现：并行运行上一轮 K3s 容器会造成磁盘和 I/O 压力；测试容器根文件系统使用率较高时，安装器设置的 kubelet 镜像 GC 阈值 70/60 会清掉尚未被 Pod 使用的本地预导入镜像。测试前应保证足够磁盘空间并暂停旧专用集群；预导入镜像后，核对 Helm Pod 创建时 `k3s ctr -n k8s.io images list -q` 仍有目标标签。若手动调整测试集群阈值或重导入镜像，报告须明确区分原样 installer 结果和补救后的 Chart 结果。cert-manager webhook 不可用可导致首次升级 Job 失败；待 webhook Ready 后通过同一 Chart 的 Helm 升级重新验收新 Job，不能把此结果写成首次安装通过。

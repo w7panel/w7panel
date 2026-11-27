@@ -276,6 +276,8 @@ URL 指向的归档版本是否一致。完整回归需要独立 systemd 测试�
 
 完整操作与已遇故障见项目技能 [w7panel-installer-test](../skills/w7panel-installer-test/SKILL.md)。验收还须确认初始化 Job Complete，不能仅凭 HTTP 200 判定成功；测试完成后同步更新技能和 `tests/reports/` 中的实际结果。
 
+K3s 1.37 本地镜像重装与官方升级 Job 验收见 [2026-11-27 回归报告](reports/2026-11-27-installer-k3s-1.37-local-image.md)：安装器退出 0、升级 Job Complete；lego webhook 镜像拉取尚未完成，正式安装器镜像仍待更新。
+
 宿主安装结果见 [2026-11-06 宿主回归](reports/2026-11-06-installer-host.md)，包括默认 overlayfs、启动期重试及保留环境说明。
 
 本机映射工具 `skills/w7panel-installer-test/scripts/local-https.py` 已实际验证可信 HTTPS 内容一致性、仓库外路径 404、stop 恢复及重复 start；使用方式见对应 Skill。此工具不执行安装。
